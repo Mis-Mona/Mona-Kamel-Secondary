@@ -103,6 +103,47 @@
         </div>
     </div>
 
+
+    <!-- PWA Install & Notification Prompt Modal -->
+    <div id="pwaPromptModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:30px; max-width:420px; width:100%; padding:35px; text-align:center; position:relative; animation:slideUp 0.4s ease;">
+            <div style="width:80px; height:80px; background:linear-gradient(135deg,#6c5ce7,#4834d4); border-radius:25px; margin:0 auto 20px; display:flex; align-items:center; justify-content:center;">
+                <i class="fas fa-mobile-alt" style="font-size:2.5rem; color:white;"></i>
+            </div>
+            <h2 style="color:#2d3436; font-size:1.5rem; margin-bottom:10px; font-weight:900;">حمّل التطبيق!</h2>
+            <p style="color:#636e72; margin-bottom:5px; line-height:1.7;">استمتع بتجربة أفضل مع التطبيق:</p>
+            <ul style="color:#636e72; text-align:right; margin:10px 0 20px; padding-right:20px; line-height:2;">
+                <li>⚡ تشغيل أسرع وأداء أفضل</li>
+                <li>🔔 إشعارات فورية للكورسات والواجبات</li>
+                <li>📴 مشاهدة المحتوى بدون إنترنت</li>
+            </ul>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button id="pwaInstallBtn" onclick="triggerPwaInstall()" style="background:linear-gradient(135deg,#6c5ce7,#4834d4); color:white; border:none; padding:15px; border-radius:15px; font-size:1.05rem; font-weight:900; cursor:pointer; font-family:'Cairo';">
+                    <i class="fas fa-download" style="margin-left:8px;"></i> تثبيت التطبيق
+                </button>
+                <button id="pwaNotifBtn" onclick="enableNotifications()" style="background:#00b894; color:white; border:none; padding:15px; border-radius:15px; font-size:1rem; font-weight:bold; cursor:pointer; font-family:'Cairo';">
+                    <i class="fas fa-bell" style="margin-left:8px;"></i> تفعيل الإشعارات
+                </button>
+                <button onclick="closePwaPrompt(true)" style="background:transparent; color:#b2bec3; border:none; padding:10px; cursor:pointer; font-family:'Cairo'; font-size:0.9rem;">
+                    لاحقاً
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        body.dark-mode #pwaPromptModal > div {
+            background: #2c2d30;
+            color: #e9e9e9;
+        }
+        body.dark-mode #pwaPromptModal h2 { color: #e9e9e9; }
+        body.dark-mode #pwaPromptModal p,
+        body.dark-mode #pwaPromptModal li { color: #b0b0b0; }
+    </style>
     <!-- HOME PAGE -->
     <div id="homePage">
         <section class="hero">
@@ -856,4 +897,112 @@
         });
     })();
     </script>
+
+    <!-- PWA Prompt Logic -->
+    <script>
+        (function() {
+            var PROMPT_KEY = 'pwa_prompt_dismissed';
+            var NOTIF_KEY = 'notif_prompt_done';
+            
+            function shouldShowPrompt() {
+                // لو المستخدم ألغى من أقل من 3 أيام، لا تعرض
+                var dismissed = localStorage.getItem(PROMPT_KEY);
+                if (dismissed) {
+                    var diff = Date.now() - parseInt(dismissed);
+                    if (diff < 3 * 24 * 60 * 60 * 1000) return false;
+                }
+                // لو التطبيق مثبت فعلاً
+                if (window.matchMedia('(display-mode: standalone)').matches) return false;
+                return true;
+            }
+
+            window.closePwaPrompt = function(later) {
+                var modal = document.getElementById('pwaPromptModal');
+                if (modal) modal.style.display = 'none';
+                if (later) {
+                    localStorage.setItem(PROMPT_KEY, Date.now().toString());
+                }
+            };
+
+            window.triggerPwaInstall = async function() {
+                if (window._deferredInstallPrompt) {
+                    window._deferredInstallPrompt.prompt();
+                    var result = await window._deferredInstallPrompt.userChoice;
+                    window._deferredInstallPrompt = null;
+                    if (result.outcome === 'accepted') {
+                        window.closePwaPrompt(false);
+                        if (window.showToast) window.showToast('🎉 تم تثبيت التطبيق بنجاح!', 'success', 4000);
+                    }
+                } else {
+                    // iOS أو متصفح لا يدعم الـ prompt
+                    window.showToast && window.showToast('📱 لتثبيت التطبيق: افتح قائمة المتصفح واختر "إضافة إلى الشاشة الرئيسية"', 'success', 6000);
+                    window.closePwaPrompt(true);
+                }
+            };
+
+            window.enableNotifications = async function() {
+                try {
+                    if (!('Notification' in window)) {
+                        window.showToast && window.showToast('❌ المتصفح لا يدعم الإشعارات', 'error');
+                        return;
+                    }
+                    var permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        window.showToast && window.showToast('✅ تم تفعيل الإشعارات بنجاح!', 'success');
+                        localStorage.setItem(NOTIF_KEY, '1');
+                        // إخفاء زر الإشعارات من المودال
+                        var notifBtn = document.getElementById('pwaNotifBtn');
+                        if (notifBtn) notifBtn.style.display = 'none';
+                    } else {
+                        window.showToast && window.showToast('❌ تم رفض الإشعارات. يمكنك تفعيلها من إعدادات المتصفح', 'error', 5000);
+                    }
+                } catch (err) {
+                    console.error('Notification error:', err);
+                }
+            };
+
+            // استقبال حدث beforeinstallprompt
+            window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                window._deferredInstallPrompt = e;
+                // لو لم يتم إلغاء الـ prompt من قبل، اعرضه بعد 3 ثواني
+                if (shouldShowPrompt()) {
+                    setTimeout(function() {
+                        var modal = document.getElementById('pwaPromptModal');
+                        if (modal) modal.style.display = 'flex';
+                        // أخفِ زر الإشعارات لو مفعّل بالفعل
+                        if (localStorage.getItem(NOTIF_KEY) || (typeof Notification !== 'undefined' && Notification.permission === 'granted')) {
+                            var nb = document.getElementById('pwaNotifBtn');
+                            if (nb) nb.style.display = 'none';
+                        }
+                    }, 3000);
+                }
+            });
+
+            // لو التطبيق مش مثبت وما جاش حدث الـ install (iOS أو Firefox) ولم يُلغَ من قبل
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    if (!window._deferredInstallPrompt && shouldShowPrompt()) {
+                        var modal = document.getElementById('pwaPromptModal');
+                        if (modal) {
+                            // أخفِ زر التثبيت إن لم يكن هناك دعم
+                            var installBtn = document.getElementById('pwaInstallBtn');
+                            if (installBtn) installBtn.style.display = 'none';
+                            // اعرض فقط زر الإشعارات إن لم يُفعَّل
+                            if (typeof Notification !== 'undefined' && Notification.permission !== 'granted' && !localStorage.getItem(NOTIF_KEY)) {
+                                modal.style.display = 'flex';
+                            }
+                        }
+                    }
+                }, 5000);
+            });
+
+            window.addEventListener('appinstalled', function() {
+                window._deferredInstallPrompt = null;
+                window.closePwaPrompt(false);
+                if (window.showToast) window.showToast('🎉 تم تثبيت التطبيق بنجاح', 'success');
+            });
+        })();
+    </script>
+
 </html>
