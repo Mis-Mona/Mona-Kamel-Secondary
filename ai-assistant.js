@@ -55,16 +55,17 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "${AI_CONFIG.teacherN
     // ---- جلب الـ API Key من Firebase ----
     async function getApiKey() {
     try {
-        // جلب البيانات مباشرة باستخدام النسخة المتوافقة
-        const snapshot = await window.db.ref(AI_CONFIG.apiKeyFirebasePath).once('value');
-        const key = snapshot.val();
-        if (key) return key;
-        throw new Error('Key not found');
+        // استخدام fetch المباشر هو أسرع وسيلة على الإطلاق لتجاوز بطء المكتبات
+        const response = await fetch('https://monaacademy-cd983-default-rtdb.firebaseio.com/settings/anthropicApiKey.json');
+        if (!response.ok) throw new Error('Network error');
+        const key = await response.json();
+        return key;
     } catch (error) {
         console.error("خطأ في جلب المفتاح:", error);
         return null;
     }
 }
+
 
 
     // ---- إرسال رسالة للـ API ----
