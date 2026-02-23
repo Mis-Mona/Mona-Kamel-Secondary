@@ -54,18 +54,18 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي لمنصة "${AI_CONFIG.teacherN
 
     // ---- جلب الـ API Key من Firebase ----
     async function getApiKey() {
-        if (apiKey) return apiKey;
-        try {
-            if (window.db && window.ref && window.get) {
-                const snap = await window.get(window.ref(window.db, AI_CONFIG.apiKeyFirebasePath));
-                if (snap.exists() && snap.val()) {
-                    apiKey = snap.val();
-                    return apiKey;
-                }
-            }
-        } catch (e) { console.error('AI: Error getting API key', e); }
+    try {
+        // جلب البيانات مباشرة باستخدام النسخة المتوافقة
+        const snapshot = await window.db.ref(AI_CONFIG.apiKeyFirebasePath).once('value');
+        const key = snapshot.val();
+        if (key) return key;
+        throw new Error('Key not found');
+    } catch (error) {
+        console.error("خطأ في جلب المفتاح:", error);
         return null;
     }
+}
+
 
     // ---- إرسال رسالة للـ API ----
     async function sendToAI(userMessage) {
