@@ -16,8 +16,8 @@ function updateMenuItems(isLoggedIn) {
             homeItem.style.display = 'block';
             homeItem.onclick = function(e) {
                 e.preventDefault();
-                window.location.href = 'index.html';
                 if (window.closeMenu) window.closeMenu();
+                window.location.href = 'index.html';
             };
         }
         if (divider) divider.style.display = 'block';

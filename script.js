@@ -2501,13 +2501,13 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     
-    // عرض زر التثبيت
+    // عرض زر التثبيت لأي زائر (مسجل أو غير مسجل)
     showInstallButton();
 });
 
 function showInstallButton() {
-    // لو المستخدم مسجل دخوله ومفيش زر تثبيت
-    if (currentUser && !document.getElementById('installPwaBtn')) {
+    // عرض الزر لأي مستخدم بدون شرط تسجيل الدخول
+    if (!document.getElementById('installPwaBtn')) {
         const installBtn = document.createElement('button');
         installBtn.id = 'installPwaBtn';
         installBtn.className = 'install-pwa-btn';
@@ -2517,7 +2517,7 @@ function showInstallButton() {
         // حط الزر في الهيدر
         const headerControls = document.querySelector('.header-controls');
         if (headerControls) {
-            headerControls.appendChild(installBtn);
+            headerControls.insertBefore(installBtn, headerControls.firstChild);
         }
     }
 }
