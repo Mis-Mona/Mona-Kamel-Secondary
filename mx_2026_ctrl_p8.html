@@ -1523,6 +1523,9 @@
          <div class="nav-link touch-feedback" onclick="showSection('parentReportsSection', this)">
              <i class="fas fa-paper-plane"></i> تقارير أولياء الأمور
          </div>
+         <div class="nav-link touch-feedback" onclick="window.location.href='ramadan-admin.html'" style="background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1)); border: 1px solid rgba(255,215,0,0.3);">
+             <i class="fas fa-moon" style="color: #ffd700;"></i> <span style="color: #ffd700;">إدارة رمضان</span>
+         </div>
          <div class="nav-link touch-feedback" onclick="showSection('importExamSection', this)" style="border: 1px solid rgba(108,92,231,0.4);">
              <i class="fas fa-file-import"></i> استيراد الامتحانات
              <span style="background: #ffd700; color: #1a1a1a; font-size: 0.6rem; padding: 2px 6px; border-radius: 50px; font-weight: 900; margin-right: auto;">تجريبي</span>
@@ -4344,11 +4347,12 @@ document.addEventListener('DOMContentLoaded', function() {
          studentsSnap.forEach(student => {
              const data = student.val();
              if (data.telegramChatId) {
+                 const safeKey = student.key.replace(/'/g, '').replace(/"/g, '').replace(/</g, '').replace(/>/g, '');
                  html += `<tr>
                      <td>${escapeHTML(data.name)}</td>
                      <td><span class="badge-grade">${escapeHTML(data.telegramChatId)}</span></td>
                      <td>
-                         <button class="btn btn-secondary btn-sm" onclick="sendReportToParent('${student.key}')">
+                         <button class="btn btn-secondary btn-sm" onclick="window.sendReportToParent('${safeKey}')">
                              <i class="fas fa-paper-plane"></i> إرسال التقرير
                          </button>
                      </td>

@@ -858,6 +858,7 @@ onAuthStateChanged(auth, async user => {
             
             if (isAdminUser) {
                 statusDiv.innerHTML += `<button type="button" class="auth-btn" onclick="window.location.href='mx_2026_ctrl_p8.html'" style="margin-right:10px; background:var(--dark); color:white; border:none; padding:8px 16px; border-radius:10px; font-weight:bold; cursor:pointer;">الإدارة</button>`;
+                statusDiv.innerHTML += `<button type="button" class="auth-btn" onclick="window.location.href='ramadan-admin.html'" style="margin-right:6px; background:linear-gradient(135deg,#ffd700,#ffa500); color:#1a2639; border:none; padding:8px 14px; border-radius:10px; font-weight:bold; cursor:pointer;"><i class='fas fa-moon' style='margin-left:4px;'></i>رمضان</button>`;
             }
             
             if (reviewContainer) {

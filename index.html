@@ -705,6 +705,13 @@
                 window.get(window.ref(window.db, `ramadan_questions/${questionId}`)).then(snap => {
                     if (!snap.exists()) return;
                     const q = snap.val();
+                    // ❌ منع فتح الأسئلة المغلقة
+                    if (q.isActive === false) {
+                        const msg = document.getElementById('ramadanSubmitMsg');
+                        // اعرض رسالة مؤقتة بدون فتح المودال
+                        alert('🔒 هذا السؤال مغلق حالياً');
+                        return;
+                    }
                     currentQuestionId = questionId;
                     document.getElementById('ramadanQuestionTitle').textContent = `سؤال اليوم ${q.day || ''}`;
                     document.getElementById('ramadanQuestionText').textContent = q.text || '';
@@ -714,6 +721,9 @@
                     document.getElementById('ramadanAyaInput').value = '';
                     const msg = document.getElementById('ramadanSubmitMsg');
                     if (msg) msg.style.display = 'none';
+                    // إخفاء زر الإرسال بشكل مبدئي ريثما يتحقق من التكرار
+                    const submitBtn = document.getElementById('ramadanSubmitAnswerBtn');
+                    if (submitBtn) submitBtn.style.display = 'inline-flex';
                     loadQuestionAnswers(questionId);
                     document.getElementById('ramadanAnswerModal').style.display = 'flex';
                 });
@@ -777,6 +787,24 @@
                     submitBtn.textContent = 'جاري الإرسال...';
 
                     try {
+                        // ✅ التحقق من عدم تكرار الإجابة لنفس الطالب على نفس السؤال
+                        const existingAnswersSnap = await window.get(window.ref(window.db, 'ramadan_answers'));
+                        if (existingAnswersSnap.exists()) {
+                            let alreadyAnswered = false;
+                            existingAnswersSnap.forEach(child => {
+                                const d = child.val();
+                                if (d.questionId === currentQuestionId && d.studentId === studentId) {
+                                    alreadyAnswered = true;
+                                }
+                            });
+                            if (alreadyAnswered) {
+                                showMsg('⚠️ لقد أجبت على هذا السؤال من قبل', false);
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الإجابة';
+                                return;
+                            }
+                        }
+
                         // جلب السؤال للتحقق من الإجابة
                         const qSnap = await window.get(window.ref(window.db, `ramadan_questions/${currentQuestionId}`));
                         const q = qSnap.exists() ? qSnap.val() : {};

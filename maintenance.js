@@ -4,7 +4,18 @@ window.checkMaintenanceMode = async function() {
         const settingsRef = window.ref(window.db, 'settings/maintenanceMode');
         const snap = await window.get(settingsRef);
         if (snap.exists() && snap.val().enabled) {
-            if (window.currentUser && window.isAdminUser) return false;
+            // انتظر قليلاً حتى تنتهي Firebase Auth من التحقق
+            // isAdminUser يُحدَّث بشكل async بعد onAuthStateChanged
+            const adminCheck = () => window.currentUser && window.isAdminUser;
+            if (adminCheck()) return false;
+            // انتظر لحد 3 ثواني لو الـ auth لسه بيتحمل
+            for (let i = 0; i < 30; i++) {
+                await new Promise(r => setTimeout(r, 100));
+                if (adminCheck()) return false;
+                if (window.currentUser !== null && window.isAdminUser === false) break; // تم التحقق ومش ادمن
+                if (window.currentUser !== null) break; // تم التحقق
+            }
+            if (adminCheck()) return false;
             showMaintenancePage(snap.val().message || 'الموقع تحت الصيانة');
             return true;
         }
