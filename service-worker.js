@@ -1,5 +1,5 @@
 // ⚠️ مهم: غيّر هذا الرقم عند كل نشر جديد لتحديث الكاش للمستخدمين
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE_NAME = `mona-academy-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
