@@ -1983,69 +1983,35 @@
                      </button>
                  </div>
 
+                 <!-- إعداد توكن التليجرام -->
+                 <div style="background:#f0f4ff; border:1px solid #d0d8ff; border-radius:12px; padding:15px; margin-bottom:20px;">
+                     <label style="font-weight:bold; display:block; margin-bottom:8px;"><i class="fas fa-key" style="margin-left:5px; color:#0088cc;"></i>توكن بوت التليجرام</label>
+                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                         <input type="text" id="telegramBotTokenInput" class="reg-input" style="flex:1; min-width:200px;" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ">
+                         <button class="btn btn-main touch-feedback" onclick="saveTelegramToken()">
+                             <i class="fas fa-save"></i> حفظ التوكن
+                         </button>
+                     </div>
+                     <small style="color:#666; display:block; margin-top:5px;">احصل على التوكن من @BotFather في تليجرام</small>
+                 </div>
+
                  <div class="table-container">
                      <table>
                          <thead>
                              <tr>
                                  <th>الطالب</th>
+                                 <th>كود الطالب</th>
                                  <th>معرف تليجرام</th>
                                  <th>الإجراء</th>
                              </tr>
                          </thead>
                          <tbody id="parentReportsList">
-                             <tr><td colspan="3" class="empty-state">جاري التحميل...</td></tr>
+                             <tr><td colspan="4" class="empty-state">جاري التحميل...</td></tr>
                          </tbody>
                      </table>
                  </div>
              </div>
          </section>
-                     <!-- Assignments Section -->
-            <section id="assignmentsSection" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-book"></i> إدارة الواجبات</h3>
-                    
-                    <div class="form-group">
-                        <label>اختر الكورس</label>
-                        <select id="assignmentCourseSelect" class="reg-input"></select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>عنوان الواجب</label>
-                        <input type="text" id="assignmentTitle" class="reg-input" placeholder="مثلاً: الواجب الأول">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>وصف الواجب</label>
-                        <textarea id="assignmentDesc" rows="3" class="reg-input" placeholder="شرح الواجب..."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>تاريخ التسليم</label>
-                        <input type="date" id="assignmentDueDate" class="reg-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>إجمالي الدرجات</label>
-                        <input type="number" id="assignmentTotalPoints" class="reg-input" value="100">
-                    </div>
-                    
-                    <hr>
-                    <h4>الأسئلة</h4>
-                    <div id="assignmentQuestionsArea"></div>
-                    
-                    <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
-                        <button class="btn btn-secondary" onclick="addAssignmentQuestion('mcq')">+ سؤال اختيارات</button>
-                        <button class="btn btn-warning" onclick="addAssignmentQuestion('tf')">+ True/False</button>
-                        <button class="btn btn-info" onclick="addAssignmentQuestion('essay')">+ سؤال مقالي</button>
-                        <button class="btn btn-info" onclick="addAssignmentQuestion('file')">+ رفع ملف</button>
-                    </div>
-                    
-                    <button class="btn btn-main" style="margin-top: 20px;" onclick="saveAssignment()">
-                        <i class="fas fa-save"></i> حفظ الواجب
-                    </button>
-                </div>
-            </section>
-            <!-- Import Exam Section -->
             <section id="importExamSection" class="admin-section">
                 <div class="card">
                     <div class="section-header">
@@ -2484,7 +2450,27 @@
             }
             
             if (sectionId === 'analyticsSection') {
-                setTimeout(loadAnalytics, 100);
+                setTimeout(() => {
+                    loadAnalytics();
+                    loadLeaderboard();
+                }, 100);
+            }
+            if (sectionId === 'maintenanceSection') {
+                setTimeout(() => {
+                    if (typeof window.loadMaintenanceSettings === 'function') {
+                        window.loadMaintenanceSettings();
+                    }
+                }, 200);
+            }
+            if (sectionId === 'parentReportsSection') {
+                setTimeout(() => {
+                    if (typeof window.loadParentReportsList === 'function') {
+                        window.loadParentReportsList();
+                    }
+                    if (typeof window.loadTelegramToken === 'function') {
+                        window.loadTelegramToken();
+                    }
+                }, 200);
             }
         };
 
@@ -4310,14 +4296,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 2000);
 }); 
 
-                // وظائف الصيانة
+                // وظائف الصيانة - ✅ إصلاح: تعريف مباشر بدلاً من الاعتماد على ملف خارجي
         window.loadMaintenanceSettings = async function() {
-            const status = await window.getMaintenanceStatus();
-            document.getElementById('maintenanceEnabled').checked = status.enabled;
-            document.getElementById('maintenanceMessage').value = status.message || '';
-            if (status.updatedAt) {
-                document.getElementById('maintenanceStatus').style.display = 'block';
-                document.getElementById('maintenanceUpdatedAt').textContent = new Date(status.updatedAt).toLocaleString('ar-EG');
+            try {
+                const snap = await get(ref(db, 'settings/maintenanceMode'));
+                const status = snap.exists() ? snap.val() : { enabled: false, message: '' };
+                document.getElementById('maintenanceEnabled').checked = status.enabled || false;
+                document.getElementById('maintenanceMessage').value = status.message || '';
+                const statusDiv = document.getElementById('maintenanceStatus');
+                const updatedAtEl = document.getElementById('maintenanceUpdatedAt');
+                if (status.updatedAt && statusDiv && updatedAtEl) {
+                    statusDiv.style.display = 'block';
+                    updatedAtEl.textContent = new Date(status.updatedAt).toLocaleString('ar-EG');
+                }
+            } catch (err) {
+                console.error('Error loading maintenance settings:', err);
+                showToast('❌ خطأ في تحميل إعدادات الصيانة', 'error');
             }
         };
 
@@ -4329,47 +4323,103 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             startProgress();
-            await window.updateMaintenanceMode(enabled, message);
-            stopProgress();
-            showToast('✅ تم الحفظ', 'success');
-            loadMaintenanceSettings();
+            try {
+                await set(ref(db, 'settings/maintenanceMode'), {
+                    enabled: Boolean(enabled),
+                    message: String(message || ''),
+                    updatedAt: new Date().toISOString()
+                });
+                showToast('✅ تم الحفظ', 'success');
+                window.loadMaintenanceSettings();
+            } catch (err) {
+                console.error('Error saving maintenance:', err);
+                showToast('❌ فشل حفظ إعدادات الصيانة: ' + err.message, 'error');
+            } finally {
+                stopProgress();
+            }
+        };
+        
+        // حفظ توكن التليجرام
+        window.saveTelegramToken = async function() {
+            const tokenInput = document.getElementById('telegramBotTokenInput');
+            if (!tokenInput) return;
+            const token = tokenInput.value.trim();
+            if (!token || !/^\d+:[A-Za-z0-9_-]{35,}$/.test(token)) {
+                showToast('❌ التوكن غير صالح. تأكد من نسخه بشكل صحيح من @BotFather', 'error');
+                return;
+            }
+            try {
+                startProgress();
+                await set(ref(db, 'settings/telegramBotToken'), token);
+                showToast('✅ تم حفظ توكن التليجرام بنجاح', 'success');
+            } catch (err) {
+                console.error('Error saving telegram token:', err);
+                showToast('❌ فشل حفظ التوكن: ' + err.message, 'error');
+            } finally {
+                stopProgress();
+            }
+        };
+        
+        // تحميل توكن التليجرام المحفوظ
+        window.loadTelegramToken = async function() {
+            try {
+                const snap = await get(ref(db, 'settings/telegramBotToken'));
+                const tokenInput = document.getElementById('telegramBotTokenInput');
+                if (tokenInput && snap.exists()) {
+                    const token = snap.val();
+                    // عرض مخفي جزئياً للأمان
+                    tokenInput.value = token ? token.substring(0, 10) + '...' + token.slice(-5) : '';
+                    tokenInput.dataset.loaded = 'true';
+                    tokenInput.addEventListener('focus', function() {
+                        if (this.dataset.loaded === 'true') {
+                            this.value = '';
+                            this.dataset.loaded = 'false';
+                        }
+                    }, { once: true });
+                }
+            } catch (err) {
+                console.error('Error loading telegram token:', err);
+            }
         };
         
              // تحميل قائمة الطلاب مع معرف تليجرام
-     async function loadParentReportsList() {
-         const studentsSnap = await get(child(dbRef, 'students'));
-         if (!studentsSnap.exists()) {
-             document.getElementById('parentReportsList').innerHTML = '<tr><td colspan="3" class="empty-state">لا يوجد طلاب</td></tr>';
-             return;
-         }
-
-         let html = '';
-         studentsSnap.forEach(student => {
-             const data = student.val();
-             if (data.telegramChatId) {
-                 const safeKey = student.key.replace(/'/g, '').replace(/"/g, '').replace(/</g, '').replace(/>/g, '');
-                 html += `<tr>
-                     <td>${escapeHTML(data.name)}</td>
-                     <td><span class="badge-grade">${escapeHTML(data.telegramChatId)}</span></td>
-                     <td>
-                         <button class="btn btn-secondary btn-sm" onclick="window.sendReportToParent('${safeKey}')">
-                             <i class="fas fa-paper-plane"></i> إرسال التقرير
-                         </button>
-                     </td>
-                 </tr>`;
+     window.loadParentReportsList = async function loadParentReportsList() {
+         try {
+             const studentsSnap = await get(child(dbRef, 'students'));
+             if (!studentsSnap.exists()) {
+                 document.getElementById('parentReportsList').innerHTML = '<tr><td colspan="4" class="empty-state">لا يوجد طلاب</td></tr>';
+                 return;
              }
-         });
 
-         if (html === '') {
-             html = '<tr><td colspan="3" class="empty-state">لا يوجد أولياء أمور مسجلين</td></tr>';
+             let html = '';
+             studentsSnap.forEach(student => {
+                 const data = student.val();
+                 const uid = student.key;
+                 if (data.telegramChatId) {
+                     // ✅ إصلاح: استخدام uid بدلاً من safeKey لضمان صحة البيانات
+                     html += `<tr>
+                         <td>${escapeHTML(data.name || '')}</td>
+                         <td><span class="student-id-display">${escapeHTML(data.shortId || '—')}</span></td>
+                         <td><span class="badge-grade">${escapeHTML(data.telegramChatId)}</span></td>
+                         <td>
+                             <button class="btn btn-secondary btn-sm" data-uid="${escapeHTML(uid)}" onclick="window.sendReportToParent(this.dataset.uid)">
+                                 <i class="fas fa-paper-plane"></i> إرسال التقرير
+                             </button>
+                         </td>
+                     </tr>`;
+                 }
+             });
+
+             if (html === '') {
+                 html = '<tr><td colspan="4" class="empty-state">لا يوجد أولياء أمور مسجلين بمعرف تليجرام</td></tr>';
+             }
+             document.getElementById('parentReportsList').innerHTML = html;
+         } catch (err) {
+             console.error('Error loading parent reports list:', err);
+             document.getElementById('parentReportsList').innerHTML = '<tr><td colspan="4" class="empty-state" style="color:red;">حدث خطأ في التحميل</td></tr>';
          }
-         document.getElementById('parentReportsList').innerHTML = html;
      }
 
-     // استدعاء التحميل عند فتح القسم
-     document.querySelector('[onclick="showSection(\'parentReportsSection\', this)"]').addEventListener('click', function() {
-         setTimeout(loadParentReportsList, 200);
-     });
      
     // تحميل قائمة الكورسات في اختيار الواجبات
 async function loadAssignmentCourses() {
@@ -4685,5 +4735,7 @@ onValue(ref(db, 'folders'), (snapshot) => {
         
     </script>
     <script src="parent-reporter.js?v=1.0"></script>
+    <!-- ✅ إصلاح: إضافة maintenance.js لتوفير getMaintenanceStatus و updateMaintenanceMode -->
+    <script src="maintenance.js?v=1.0"></script>
 </body>
 </html>

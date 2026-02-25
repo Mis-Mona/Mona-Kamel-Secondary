@@ -596,8 +596,14 @@
             }
             if (backToHomeBtn) {
                 backToHomeBtn.addEventListener('click', function() {
-                    document.getElementById('homePage').style.display = 'block';
-                    document.getElementById('contentArea').style.display = 'none';
+                    if (typeof window.goHome === 'function') {
+                        window.goHome();
+                    } else {
+                        const hp = document.getElementById('homePage');
+                        const ca = document.getElementById('contentArea');
+                        if (hp) hp.style.display = 'block';
+                        if (ca) ca.style.display = 'none';
+                    }
                 });
             }
 
@@ -854,9 +860,9 @@
                         // الـ surah في قاعدة البيانات قد يكون اسمًا نصيًا أو رقمًا
                         // surahVal هو رقم السورة (index+1) من الـ select
                         let isCorrect = false;
+                        const selectedSurahName = SURAHS[parseInt(surahVal) - 1] || '';
                         if (q.surah !== undefined && q.aya !== undefined) {
                             const storedSurah = String(q.surah).trim();
-                            const selectedSurahName = SURAHS[parseInt(surahVal) - 1] || '';
                             const selectedSurahNum = String(surahVal);
                             // مقارنة مرنة: رقم أو اسم
                             const surahMatch = storedSurah === selectedSurahNum || 
@@ -864,15 +870,23 @@
                                                String(parseInt(storedSurah)) === selectedSurahNum;
                             const ayaMatch = String(q.aya) === String(ayaVal);
                             isCorrect = surahMatch && ayaMatch;
+                        } else if (q.correctAnswer) {
+                            // ✅ fallback: مقارنة بـ correctAnswer المخزون مباشرة
+                            const expected = String(q.correctAnswer).trim();
+                            const userAnswer = `${selectedSurahName} - ${ayaVal}`;
+                            isCorrect = expected === userAnswer;
                         }
 
+                        const selectedSurahNameFinal = SURAHS[parseInt(surahVal) - 1] || '';
                         await window.push(window.ref(window.db, 'ramadan_answers'), {
                             questionId: currentQuestionId,
                             day: q.day || null,
                             name,
                             studentId,
                             surah: parseInt(surahVal),
-                            surahName: SURAHS[parseInt(surahVal) - 1] || '',
+                            surahName: selectedSurahNameFinal,
+                            // ✅ إضافة answer field لعرضه في لوحة الإدارة
+                            answer: `${selectedSurahNameFinal} - ${ayaVal}`,
                             aya: parseInt(ayaVal),
                             isCorrect,
                             date: new Date().toLocaleDateString('ar-EG'),

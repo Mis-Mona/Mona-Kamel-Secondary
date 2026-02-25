@@ -110,6 +110,10 @@ function createReportMessage(data) {
 }
 
 // ✅ مُصدَّرة على window للاستخدام من ملفات أخرى
+const _showToast = (msg, type, dur) => {
+    if (typeof window.showToast === 'function') window.showToast(msg, type, dur);
+    else console.log('[Toast]', msg);
+};
 window.sendReportToParentSilent = async function(userId) {
     try {
         const data = await getStudentReportData(userId);
@@ -125,27 +129,31 @@ window.sendReportToParentSilent = async function(userId) {
 // إرسال تقرير لولي أمر طالب محدد (مع إشعار للمستخدم)
 window.sendReportToParent = async function(userId) {
     try {
-        const data = await getStudentReportData(userId);
+        if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+            _showToast('❌ معرف الطالب غير صالح', 'error');
+            return false;
+        }
+        const data = await getStudentReportData(userId.trim());
         if (!data) {
-            if (window.showToast) window.showToast('❌ لم يتم العثور على بيانات الطالب', 'error');
+            _showToast('❌ لم يتم العثور على بيانات الطالب', 'error');
             return false;
         }
         if (!data.telegramChatId) {
-            if (window.showToast) window.showToast('❌ لا يوجد معرف تليجرام لولي الأمر', 'error');
+            _showToast('❌ لا يوجد معرف تليجرام لولي الأمر', 'error');
             return false;
         }
         const message = createReportMessage(data);
         const success = await sendTelegramMessage(data.telegramChatId, message);
         if (success) {
-            if (window.showToast) window.showToast(`✅ تم إرسال التقرير إلى ولي أمر ${data.studentName}`, 'success');
+            _showToast(`✅ تم إرسال التقرير إلى ولي أمر ${data.studentName}`, 'success');
             return true;
         } else {
-            if (window.showToast) window.showToast('❌ فشل إرسال التقرير - تحقق من توكن التيليجرام وصحة الـ chatId', 'error');
+            _showToast('❌ فشل إرسال التقرير - تحقق من توكن التيليجرام وصحة الـ chatId', 'error');
             return false;
         }
     } catch (err) {
         console.error('Error in sendReportToParent:', err);
-        if (window.showToast) window.showToast('❌ حدث خطأ غير متوقع أثناء إرسال التقرير', 'error');
+        _showToast('❌ حدث خطأ غير متوقع أثناء إرسال التقرير', 'error');
         return false;
     }
 };
@@ -155,14 +163,14 @@ window.sendReportToParent = async function(userId) {
 window.sendBulkReports = async function() {
     try {
         if (!window.db || !window.ref || !window.get || !window.child || !window.dbRef) {
-            if (window.showToast) window.showToast('❌ Firebase غير مهيأ، حاول مرة أخرى', 'error');
+            if (true) _showToast('❌ Firebase غير مهيأ، حاول مرة أخرى', 'error');
             return;
         }
 
         // جلب التوكن مرة واحدة
         const tokenSnap = await window.get(window.ref(window.db, 'settings/telegramBotToken'));
         if (!tokenSnap.exists() || !tokenSnap.val()) {
-            if (window.showToast) window.showToast('❌ توكن التيليجرام غير موجود', 'error');
+            if (true) _showToast('❌ توكن التيليجرام غير موجود', 'error');
             return;
         }
         const telegramToken = tokenSnap.val();
@@ -170,7 +178,7 @@ window.sendBulkReports = async function() {
         // جلب كل الطلاب مرة واحدة
         const studentsSnap = await window.get(window.child(window.dbRef, 'students'));
         if (!studentsSnap.exists()) {
-            if (window.showToast) window.showToast('❌ لا يوجد طلاب', 'error');
+            if (true) _showToast('❌ لا يوجد طلاب', 'error');
             return;
         }
 
@@ -197,12 +205,12 @@ window.sendBulkReports = async function() {
             }
         }
 
-        if (window.showToast) {
+        if (_showToast) {
             const msg = `✅ تم إرسال ${sentCount} تقرير من أصل ${totalWithTelegram}${failedCount > 0 ? ` (فشل ${failedCount})` : ''}`;
-            window.showToast(msg, sentCount > 0 ? 'success' : 'error', 6000);
+            _showToast(msg, sentCount > 0 ? 'success' : 'error', 6000);
         }
     } catch (err) {
         console.error('Error in sendBulkReports:', err);
-        if (window.showToast) window.showToast('❌ حدث خطأ أثناء إرسال التقارير', 'error');
+        if (true) _showToast('❌ حدث خطأ أثناء إرسال التقارير', 'error');
     }
 };

@@ -1070,24 +1070,31 @@ window.loadPerfectScores = async function() {
         }
 
         const students = studentsSnap.val();
-        const gradeMap = {};
-        Object.values(students).forEach(student => {
+        const gradeMap = {}; // shortId → grade
+        const gradeMapByUid = {}; // uid → grade
+        Object.entries(students).forEach(([uid, student]) => {
             if (student.shortId) {
                 gradeMap[student.shortId] = student.grade || 'غير محدد';
             }
+            gradeMapByUid[uid] = student.grade || 'غير محدد';
         });
 
         const perfectScores = [];
         resultsSnap.forEach(result => {
             const res = result.val();
-            if (res.score === res.total && res.score > 0) {
+            // ✅ إصلاح: مقارنة رقمية بدلاً من ===  لمنع خطأ نوع البيانات
+            const scoreNum = Number(res.score);
+            const totalNum = Number(res.total);
+            if (!isNaN(scoreNum) && !isNaN(totalNum) && totalNum > 0 && scoreNum === totalNum) {
+                // ✅ إصلاح: البحث عن الصف أولاً بالـ uid ثم بـ shortId
+                const grade = gradeMapByUid[res.uid] || gradeMap[res.studentId] || 'غير محدد';
                 perfectScores.push({
                     studentName: res.student || 'طالب',
-                    studentId: res.studentId || '',
+                    studentId: res.studentId || res.uid || '',
                     examName: res.quiz || 'امتحان',
-                    grade: gradeMap[res.studentId] || 'غير محدد',
-                    score: res.score,
-                    total: res.total,
+                    grade: grade,
+                    score: scoreNum,
+                    total: totalNum,
                     time: res.time || ''
                 });
             }
@@ -1803,9 +1810,22 @@ window.submitQuiz = async function(folderId, quizId) {
             )
         });
 
+        // ✅ إصلاح race condition: إذا كان myShortId فارغاً نجلبه من قاعدة البيانات
+        let finalShortId = myShortId;
+        let finalStudentName = currentUser.displayName || '';
+        if (!finalShortId) {
+            try {
+                const studentSnap = await get(child(dbRef, `students/${currentUser.uid}`));
+                if (studentSnap.exists()) {
+                    finalShortId = studentSnap.val().shortId || '';
+                    finalStudentName = studentSnap.val().name || finalStudentName;
+                }
+            } catch(e) { console.warn('Could not fetch shortId:', e); }
+        }
+
         await push(ref(db, 'quiz_results'), {
-            student: currentUser.displayName || '',
-            studentId: myShortId,
+            student: finalStudentName,
+            studentId: finalShortId,
             uid: currentUser.uid,
             quizId: quizId,
             quiz: quizData.name || '',
@@ -1867,7 +1887,10 @@ window.viewQuizResult = async function(folderId, quizId) {
         const quizContainer = document.getElementById('quizContainer');
         
         if (quizTitle) {
-            quizTitle.innerHTML = `📝 مراجعة الامتحان: ${escapeHTML(quizData.name || '')} <span style="font-size:0.9rem; color:var(--success); margin-right:15px;">النتيجة: ${resultData.score}/${resultData.total} (${resultData.percentage}%)</span>`;
+            const displayPercentage = resultData.percentage !== undefined 
+                ? resultData.percentage 
+                : (resultData.total > 0 ? Math.round((resultData.score / resultData.total) * 100) : 0);
+            quizTitle.innerHTML = `📝 مراجعة الامتحان: ${escapeHTML(quizData.name || '')} <span style="font-size:0.9rem; color:var(--success); margin-right:15px;">النتيجة: ${resultData.score}/${resultData.total} (${displayPercentage}%)</span>`;
         }
         if (quizOverlay) quizOverlay.style.display = 'block';
         
