@@ -1996,6 +1996,7 @@ window.loadCourseRatingUI = async function(courseId) {
             window.submitCourseRating(this.dataset.courseId);
         });
     }
+}; // ✅ إغلاق دالة loadCourseRatingUI
 
 window.setRating = function(val) { 
     selectedRating = val; 

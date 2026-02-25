@@ -295,11 +295,10 @@
         <div id="courseRatingSection" class="rating-box" style="display: none;"></div>
         
         <div id="combinedGrid" class="content-grid"></div>
-    </div>
-    
-    
-           <!-- حاوية الواجبات -->
+        
+        <!-- حاوية الواجبات -->
         <div id="assignmentsContainer" style="margin-top: 30px;"></div>
+    </div>
 
     <!-- QUIZ / VIDEO OVERLAY -->
     <div id="quizOverlay">
@@ -538,6 +537,8 @@
     <script src="badges.js?v=1.0"></script>
     <script src="maintenance.js?v=1.0"></script>
     <script src="whatsapp-group.js?v=1.0"></script>
+    <script src="parent-reporter.js?v=1.0"></script>
+    <script src="ai-assistant.js?v=1.0"></script>
 
     <script>
         // التحقق من وضع الصيانة بعد تحميل الملفات
@@ -1005,22 +1006,4 @@
         })();
     </script>
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
-<script>
-  // 2. إعدادات الربط الخاصة بقاعدة بياناتك
-  const firebaseConfig = {
-    databaseURL: "https://monaacademy-cd983-default-rtdb.firebaseio.com"
-  };
-  
-  // 3. تشغيل الاتصال وتعريفه للمساعد
-  const app = firebase.initializeApp(firebaseConfig);
-  window.db = firebase.database(); 
-</script>
-
-<script src="ai-assistant.js"></script>
-
-    
-
 </html>
