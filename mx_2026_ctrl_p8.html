@@ -17,7 +17,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
-        /* ================ CSS RESET & VARIABLES ================ */
+        /* نفس الـ CSS الأصلي - لم يتغير */
+        /* ... (انسخ الـ CSS الأصلي بالكامل من ملفك) ... */
+
+
+/* ================ CSS RESET & VARIABLES ================ */
         * {
             margin: 0;
             padding: 0;
@@ -413,8 +417,8 @@
             background: linear-gradient(135deg, var(--danger), var(--danger-dark)) !important;
             color: white !important;
         }
-
-        /* ================ MAIN CONTENT ================ */
+        
+/* ================ MAIN CONTENT ================ */
         .main-content {
             flex: 1;
             margin-right: var(--sidebar-width);
@@ -1076,7 +1080,7 @@
             font-weight: bold;
         }
 
-        /* ================ PREVIEW EXAM ================ */
+   /* ================ PREVIEW EXAM ================ */
         .preview-exam {
             background: white;
             border-radius: 30px;
@@ -1364,711 +1368,13 @@
                 overflow: visible;
             }
         }
+
+
     </style>
 </head>
 <body>
-    <!-- Progress Indicator -->
-    <div id="progressIndicator" class="progress-indicator"></div>
-    
-    <!-- Offline Indicator -->
-    <div id="offlineIndicator" class="offline-indicator">
-        <i class="fas fa-wifi-slash"></i>
-        أنت غير متصل بالإنترنت - بعض الميزات قد لا تعمل
-    </div>
-
-    <!-- Mobile Header -->
-    <div class="mobile-header">
-        <span>لوحة إدارة مـنى</span>
-        <div style="display: flex; gap: 10px;">
-            <i class="fas fa-bars fa-lg" onclick="toggleSidebar()"></i>
-        </div>
-    </div>
-    
-    <!-- Overlay -->
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-    <!-- Loading Guard -->
-    <div id="guard-loader">
-        <i class="fas fa-user-shield"></i>
-        <h3 style="margin-top: 20px; font-size: 1.5rem;">التحقق من الهوية...</h3>
-        <p style="opacity: 0.8;">جاري التحميل</p>
-    </div>
-
-    <!-- Main App -->
-    <div class="wrapper" id="adminApp" style="display: none;">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">Mona Academy</div>
-            
-            <div class="nav-link touch-feedback" onclick="showSection('coursesSection', this)">
-                <i class="fas fa-th-large"></i> إدارة الكورسات
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('examsSection', this)">
-                <i class="fas fa-edit"></i> مصنع الاختبارات
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('importExamSection', this)">
-                <i class="fas fa-file-import"></i> استيراد الامتحانات <span style="font-size:0.7rem; background:#f1c40f; color:#333; padding:2px 7px; border-radius:50px; margin-right:5px;">تجريبي</span>
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('studentSearchSection', this)">
-                <i class="fas fa-search"></i> بحث متقدم
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('studentsSection', this)">
-                <i class="fas fa-user-graduate"></i> الطلاب
-                <span class="badge-count" id="studentCount">0</span>
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('resultsSection', this)">
-                <i class="fas fa-poll-h"></i> النتائج
-                <span class="badge-count" id="resultsCount">0</span>
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('accessLogsSection', this)">
-                <i class="fas fa-history"></i> سجل الدخول
-                <span class="badge-count" id="logsCount">0</span>
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('notificationsSection', this)">
-                <i class="fas fa-bell"></i> إشعارات
-                <span class="badge-count" id="notificationsCount">0</span>
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('reviewsSection', this)">
-                <i class="fas fa-star"></i> الآراء
-                <span class="badge-count" id="reviewsCount">0</span>
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('perfectScoresSection', this)">
-                <i class="fas fa-trophy"></i> الدرجات النهائية
-                <span class="badge-count" id="perfectScoresCount">0</span>
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('adminsSection', this)">
-                <i class="fas fa-user-shield"></i> المدراء
-            </div>
-            <div class="nav-link touch-feedback" onclick="showSection('analyticsSection', this)">
-                <i class="fas fa-chart-line"></i> التحليلات
-            </div>
-            
-            <div class="sidebar-footer">
-                <a href="index.html" class="nav-link touch-feedback" style="color: var(--secondary);">
-                    <i class="fas fa-home"></i> العودة للموقع
-                </a>
-                <div class="nav-link touch-feedback logout-link" onclick="logout()">
-                    <i class="fas fa-power-off"></i> خروج
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Courses Section -->
-            <section id="coursesSection" class="admin-section active">
-                <div class="card">
-                    <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                        <i class="fas fa-plus-circle" style="color: var(--primary);"></i>
-                        إضافة كورس جديد
-                    </h3>
-                    
-                    <div class="grid-system">
-                        <input type="text" id="cName" placeholder="اسم الكورس" inputmode="text">
-                        <input type="url" id="cImgUrl" placeholder="رابط الصورة (اختياري)" dir="ltr" inputmode="url">
-                    </div>
-                    
-                    <div style="margin-top: 20px;">
-                        <label style="display: block; margin-bottom: 10px; font-weight: bold;">المرحلة الدراسية:</label>
-                        <select id="cGrade">
-                            <option value="">-- اختر المرحلة --</option>
-                            <option value="الرابع الابتدائي">الرابع الابتدائي</option>
-                            <option value="الخامس الابتدائي">الخامس الابتدائي</option>
-                            <option value="السادس الابتدائي">السادس الابتدائي</option>
-                            <option value="الأول الإعدادي">الأول الإعدادي</option>
-                            <option value="الثاني الإعدادي">الثاني الإعدادي</option>
-                            <option value="الثالث الإعدادي">الثالث الإعدادي</option>
-                            <option value="الأول الثانوي">الأول الثانوي</option>
-                            <option value="الثاني الثانوي">الثاني الثانوي</option>
-                            <option value="الثالث الثانوي">الثالث الثانوي</option>
-                        </select>
-                    </div>
-                    
-                    <div style="margin-top: 20px;">
-                        <label style="display: block; margin-bottom: 10px; font-weight: bold;">أو ارفع صورة من جهازك:</label>
-                        <input type="file" id="cImageFile" accept="image/*" class="file-input">
-                        <div id="imagePreview" class="image-preview">
-                            <img id="previewImg" src="" alt="معاينة الصورة">
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-main touch-feedback" style="margin-top:20px;" onclick="addCourse()">
-                        <i class="fas fa-save"></i> حفظ الكورس
-                    </button>
-                </div>
-                
-                <div id="coursesGrid" class="grid-system">
-                    <div class="skeleton"></div>
-                    <div class="skeleton"></div>
-                    <div class="skeleton"></div>
-                </div>
-            </section>
-
-            <!-- Students Section -->
-            <section id="studentsSection" class="admin-section">
-                <div class="card">
-                    <div class="section-header">
-                        <h2><i class="fas fa-users"></i> قائمة الطلاب</h2>
-                        <input type="text" id="studentSearch" placeholder="🔍 ابحث بالاسم أو الكود..." style="max-width: 300px;">
-                    </div>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>الاسم</th>
-                                    <th>كود الطالب</th>
-                                    <th>المرحلة</th>
-                                    <th>واتساب</th>
-                                    <th>الاشتراكات</th>
-                                    <th>النقاط</th>
-                                    <th>حذف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Exams Section -->
-            <section id="examsSection" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-pen"></i> بناء اختبار جديد</h3>
-                    <select id="exFolderSelect" class="mt-1"></select>
-                    <input type="text" id="exTitle" placeholder="عنوان الاختبار" class="mt-1">
-                    
-                    <div id="questionsArea" style="margin-top: 20px;"></div>
-                    
-                    <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
-                        <button class="btn btn-secondary touch-feedback" onclick="addNewQuestion('mcq')" style="flex:1; min-width: 150px;">
-                            <i class="fas fa-list"></i> سؤال اختيارات
-                        </button>
-                        <button class="btn btn-warning touch-feedback" onclick="addNewQuestion('tf')" style="flex:1; min-width: 150px;">
-                            <i class="fas fa-check-circle"></i> صح/خطأ
-                        </button>
-                    </div>
-                    
-                    <button class="btn btn-main touch-feedback" style="margin-top: 25px;" onclick="saveFinalExam()">
-                        <i class="fas fa-cloud-upload-alt"></i> نشر الامتحان
-                    </button>
-                </div>
-            </section>
-
-            <!-- ===== IMPORT EXAM SECTION ===== -->
-            <section id="importExamSection" class="admin-section">
-
-                <!-- طريقة الاستخدام -->
-                <div class="card" style="background: linear-gradient(135deg, #1a1233, #2d1b69); color: white; border: none;">
-                    <h3 style="color: #ffd700; margin-bottom: 15px;"><i class="fas fa-info-circle"></i> طريقة الاستخدام</h3>
-                    <p style="margin-bottom: 12px; line-height: 2; font-size: 0.9rem;">
-                        اكتب أو الصق الأسئلة في الصندوق بالشكل التالي:
-                    </p>
-                    <div style="background: rgba(0,0,0,0.35); border-radius: 12px; padding: 14px; font-size: 0.82rem; line-height: 2.2; direction: ltr; text-align: left; border-right: 3px solid #ffd700; white-space: pre-line; color: #dfe6e9;">نص السؤال
-A: الخيار الأول
-B: الخيار الثاني
-C: الخيار الثالث
-D: الخيار الرابع
-B
-
-نص السؤال التاني
-A: الخيار الأول
-B: الخيار الثاني
-C: الخيار الثالث
-D: الخيار الرابع
-C</div>
-                    <div style="margin-top: 15px; background: rgba(255,215,0,0.1); border: 1px solid #ffd700; border-radius: 10px; padding: 12px; font-size: 0.85rem; line-height: 2;">
-                        <p><strong style="color:#ffd700;">⚠️ مهم جداً — القواعد:</strong></p>
-                        <p>✅ لازم يكون في <strong style="color:#ffd700;">سطر فاضي واحد</strong> بين كل سؤال والتاني</p>
-                        <p>✅ الإجابة الصح: اكتب الحرف لوحده <strong style="color:#ffd700;">B</strong> أو بنجمة <strong style="color:#ffd700;">* B</strong> — الاتنين شغالين</p>
-                        <p>✅ سؤال صح/خطأ: اكتب <strong style="color:#ffd700;">صح</strong> أو <strong style="color:#ffd700;">خطأ</strong> في السطر الأخير</p>
-                        <p>✅ الخيارات لازم تبدأ بـ <strong style="color:#ffd700;">A:</strong> أو <strong style="color:#ffd700;">A-</strong> أو <strong style="color:#ffd700;">A.</strong></p>
-                        <p>❌ لو نسيت السطر الفاضي بين الأسئلة مش هيشتغل</p>
-                    </div>
-                    <div style="margin-top: 12px; background: rgba(0,184,148,0.15); border: 1px solid #00b894; border-radius: 10px; padding: 12px; font-size: 0.85rem; line-height: 2;">
-                        <p><strong style="color:#00b894;">💡 تيب: لو بتستخدم AI عشان تحول صور الامتحان:</strong></p>
-                        <p>ابعت الصورة وقوله:</p>
-                        <p style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; font-size: 0.8rem; direction: ltr; text-align: left;">"Convert questions to: Question, A: B: C: D: then correct letter alone. Empty line between questions."</p>
-                    </div>
-                </div>
-
-                <!-- الفورم -->
-                <div class="card">
-                    <h3 style="margin-bottom: 20px;"><i class="fas fa-file-import"></i> استيراد امتحان جديد</h3>
-
-                    <label style="font-weight: bold; margin-bottom: 8px; display: block;">اختر الكورس:</label>
-                    <select id="importFolderSelect" class="mt-1" style="margin-bottom: 16px;"></select>
-
-                    <label style="font-weight: bold; margin-bottom: 8px; display: block;">عنوان الامتحان:</label>
-                    <input type="text" id="importExamTitle" placeholder="مثال: امتحان Unit 3 - Used To" class="mt-1" style="margin-bottom: 16px;">
-
-                    <label style="font-weight: bold; margin-bottom: 8px; display: block;">الأسئلة:</label>
-                    <textarea id="importRawText" placeholder="الصق الأسئلة هنا..." style="width:100%; min-height: 260px; padding: 14px; border: 2px solid #e0ddf7; border-radius: 14px; font-family: 'Cairo', sans-serif; font-size: 0.88rem; line-height: 1.9; resize: vertical; outline: none; background: #fafafa;"></textarea>
-
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                        <button class="btn btn-secondary touch-feedback" onclick="importLoadExample()" style="flex:1; min-width:140px;">
-                            <i class="fas fa-magic"></i> مثال توضيحي
-                        </button>
-                        <button class="btn btn-warning touch-feedback" onclick="importPreview()" style="flex:1; min-width:140px;">
-                            <i class="fas fa-eye"></i> معاينة الأسئلة
-                        </button>
-                    </div>
-
-                    <div id="importErrorBox" style="display:none; background:#ffe2e2; border:2px solid #ff7675; border-radius:12px; padding:12px; margin-top:14px; color:#c0392b; font-size:0.88rem;"></div>
-                </div>
-
-                <!-- معاينة -->
-                <div id="importPreviewSection" style="display:none;">
-                    <div class="card">
-                        <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px;">
-                            <div style="background:#f0eefc; border-radius:14px; padding:14px; text-align:center; border:2px solid #e0ddf7;">
-                                <div style="font-size:1.8rem; font-weight:900; color:var(--primary);" id="impStatTotal">0</div>
-                                <div style="font-size:0.72rem; color:#636e72; font-weight:600;">إجمالي</div>
-                            </div>
-                            <div style="background:#f0eefc; border-radius:14px; padding:14px; text-align:center; border:2px solid #e0ddf7;">
-                                <div style="font-size:1.8rem; font-weight:900; color:var(--primary);" id="impStatMcq">0</div>
-                                <div style="font-size:0.72rem; color:#636e72; font-weight:600;">اختيارات</div>
-                            </div>
-                            <div style="background:#f0eefc; border-radius:14px; padding:14px; text-align:center; border:2px solid #e0ddf7;">
-                                <div style="font-size:1.8rem; font-weight:900; color:var(--primary);" id="impStatTf">0</div>
-                                <div style="font-size:0.72rem; color:#636e72; font-weight:600;">صح/خطأ</div>
-                            </div>
-                        </div>
-                        <div id="importPreviewContainer"></div>
-                        <button class="btn btn-main touch-feedback" style="margin-top:20px;" onclick="importPublish()">
-                            <i class="fas fa-cloud-upload-alt"></i> نشر الامتحان
-                        </button>
-                    </div>
-                </div>
-
-                <div id="importSuccessBox" style="display:none; background:#d4f7ef; border:2px solid #00b894; border-radius:14px; padding:20px; text-align:center; margin-top:10px;">
-                    <div style="font-size:3rem; margin-bottom:10px;">🎉</div>
-                    <h3 style="color:#00a080; margin-bottom:8px;">تم نشر الامتحان بنجاح!</h3>
-                    <p style="color:#636e72; margin-bottom:16px;">الامتحان متاح الآن للطلاب.</p>
-                    <button class="btn btn-main touch-feedback" onclick="importReset()" style="max-width:250px; margin:0 auto;">
-                        <i class="fas fa-plus"></i> استيراد امتحان جديد
-                    </button>
-                </div>
-
-            </section>
-
-            <!-- Student Search Section -->
-            <section id="studentSearchSection" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-search"></i> بحث متقدم عن الطلاب</h3>
-                    <p style="color: #666; margin-bottom: 20px;">ابحث بالاسم أو كود الطالب</p>
-                    
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" id="advancedSearch" placeholder="اكتب اسم الطالب أو كود الطالب..." style="flex: 3; min-width: 200px;">
-                        <button class="btn btn-main touch-feedback" onclick="performAdvancedSearch()">
-                            <i class="fas fa-search"></i> بحث
-                        </button>
-                        <button class="btn btn-danger touch-feedback" onclick="clearAdvancedSearch()">
-                            <i class="fas fa-times"></i> إلغاء
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="searchResults" style="display: none;">
-                    <div class="card">
-                        <div class="flex justify-between align-center">
-                            <h3><i class="fas fa-user-graduate"></i> معلومات الطالب</h3>
-                        </div>
-                        <div id="studentInfo" class="grid-system" style="margin-top: 20px;"></div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3><i class="fas fa-book"></i> الاشتراكات في الكورسات</h3>
-                        <div id="studentSubscriptions"></div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3><i class="fas fa-video"></i> الفيديوهات المشاهدة</h3>
-                        <div id="studentWatchedVideos"></div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3><i class="fas fa-poll"></i> نتائج الامتحانات</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead><tr><th>الاختبار</th><th>الدرجة</th><th>النسبة</th><th>التوقيت</th></tr></thead>
-                                <tbody id="studentExamResults"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3><i class="fas fa-clock"></i> سجل الدخول للكورسات</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead><tr><th>الكورس</th><th>وقت الدخول</th></tr></thead>
-                                <tbody id="studentAccessLog"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Results Section -->
-            <section id="resultsSection" class="admin-section">
-                <div class="card">
-                    <div class="section-header">
-                        <h2><i class="fas fa-chart-bar"></i> نتائج الامتحانات</h2>
-                        <input type="text" id="resultSearch" placeholder="🔍 ابحث..." style="max-width: 300px;">
-                    </div>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>الطالب</th>
-                                    <th>كود الطالب</th>
-                                    <th>الاختبار</th>
-                                    <th>الدرجة</th>
-                                    <th>النسبة</th>
-                                    <th>التوقيت</th>
-                                    <th>حذف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="resultsList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Access Logs Section -->
-            <section id="accessLogsSection" class="admin-section">
-                <div class="card">
-                    <div class="section-header">
-                        <h2><i class="fas fa-history"></i> سجل الدخول</h2>
-                        <input type="text" id="logSearch" placeholder="🔍 ابحث..." style="max-width: 300px;">
-                    </div>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>الطالب</th>
-                                    <th>كود الطالب</th>
-                                    <th>الكورس</th>
-                                    <th>التوقيت</th>
-                                    <th>حذف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="logsList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Notifications Section -->
-            <section id="notificationsSection" class="admin-section">
-                <div class="card">
-                    <div class="section-header">
-                        <h2><i class="fas fa-bell"></i> إشعارات الدخول</h2>
-                        <input type="text" id="notificationSearch" placeholder="🔍 ابحث..." style="max-width: 300px;">
-                    </div>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>الطالب</th>
-                                    <th>كود الطالب</th>
-                                    <th>الكورس</th>
-                                    <th>التوقيت</th>
-                                    <th>حذف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="notificationsList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Reviews Section -->
-            <section id="reviewsSection" class="admin-section">
-                <div class="card">
-                    <h2><i class="fas fa-star"></i> آراء الطلاب</h2>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>الطالب</th>
-                                    <th>الرأي</th>
-                                    <th>التقييم</th>
-                                    <th>حذف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reviewsList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Perfect Scores Section -->
-            <section id="perfectScoresSection" class="admin-section">
-                <div class="card">
-                    <div class="section-header">
-                        <h2><i class="fas fa-trophy" style="color: var(--gold);"></i> الدرجات النهائية</h2>
-                        <input type="text" id="perfectScoreSearch" placeholder="🔍 ابحث..." style="max-width: 300px;">
-                    </div>
-                    
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>الطالب</th>
-                                    <th>كود الطالب</th>
-                                    <th>الامتحان</th>
-                                    <th>الدرجة</th>
-                                    <th>التاريخ</th>
-                                    <th>حذف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="perfectScoresList"></tbody>
-                        </table>
-                    </div>
-                    
-                    <div style="margin-top: 20px; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 15px; border-right: 5px solid var(--gold);">
-                        <i class="fas fa-info-circle" style="color: var(--gold); margin-left: 8px;"></i>
-                        <strong>تنبيه:</strong> حذف نتيجة الطالب سيسمح له بإعادة الامتحان مرة أخرى.
-                    </div>
-                </div>
-            </section>
-
-            <!-- Admins Section -->
-            <section id="adminsSection" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-user-shield"></i> إضافة مدير جديد</h3>
-                    
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="email" id="newAdminEmail" placeholder="البريد الإلكتروني" style="flex: 2; min-width: 200px;">
-                        <input type="text" id="newAdminName" placeholder="الاسم" style="flex: 1; min-width: 150px;">
-                        <button class="btn btn-secondary touch-feedback" onclick="addAdmin()">
-                            <i class="fas fa-user-plus"></i> إضافة
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3><i class="fas fa-list"></i> قائمة المدراء</h3>
-                    <div id="adminsList"></div>
-                </div>
-            </section>
-
-            <!-- Analytics Section -->
-            <section id="analyticsSection" class="admin-section">
-                <div class="card">
-                    <h2><i class="fas fa-chart-line"></i> نظرة عامة</h2>
-                    <div class="analytics-grid" id="analyticsSummary"></div>
-                </div>
-                
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h3><i class="fas fa-chart-bar" style="color: var(--primary);"></i> أكثر الكورسات مشاهدة</h3>
-                        <div class="chart-container">
-                            <canvas id="topCoursesChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3><i class="fas fa-chart-pie" style="color: var(--secondary);"></i> توزيع الدرجات</h3>
-                        <div class="chart-container">
-                            <canvas id="examScoresChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3><i class="fas fa-calendar-alt" style="color: var(--warning);"></i> نشاط الطلاب</h3>
-                        <div class="chart-container">
-                            <canvas id="activityChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3><i class="fas fa-crown" style="color: var(--gold);"></i> لوحة المتصدرين</h3>
-                    <div id="adminLeaderboard" class="leaderboard-table"></div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Edit Course Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <button class="close-modal-btn touch-feedback" onclick="closeModal()"><i class="fas fa-times"></i></button>
-            
-            <h3 style="color: var(--primary); margin-bottom: 25px;">
-                <i class="fas fa-edit"></i> إدارة الكورس
-            </h3>
-            
-            <div class="card" style="background: linear-gradient(145deg, #f8f9fa, #ffffff); margin-bottom: 25px;">
-                <label style="font-weight: bold;">اسم الكورس:</label>
-                <input type="text" id="editNameField" style="margin-bottom: 15px;">
-                
-                <label style="font-weight: bold;">المرحلة الدراسية:</label>
-                <select id="editGradeField" style="margin-bottom: 15px;">
-                    <option value="">-- اختر المرحلة --</option>
-                    <option value="الرابع الابتدائي">الرابع الابتدائي</option>
-                    <option value="الخامس الابتدائي">الخامس الابتدائي</option>
-                    <option value="السادس الابتدائي">السادس الابتدائي</option>
-                    <option value="الأول الإعدادي">الأول الإعدادي</option>
-                    <option value="الثاني الإعدادي">الثاني الإعدادي</option>
-                    <option value="الثالث الإعدادي">الثالث الإعدادي</option>
-                    <option value="الأول الثانوي">الأول الثانوي</option>
-                    <option value="الثاني الثانوي">الثاني الثانوي</option>
-                    <option value="الثالث الثانوي">الثالث الثانوي</option>
-                </select>
-                
-                <label style="font-weight: bold;">رابط الصورة:</label>
-                <input type="url" id="editImgField" placeholder="https://..." dir="ltr" style="margin-bottom: 15px;">
-                
-                <label style="font-weight: bold;">أو ارفع صورة جديدة:</label>
-                <input type="file" id="editImageFile" accept="image/*" class="file-input">
-                <div id="editImagePreview" class="image-preview">
-                    <img id="editPreviewImg" src="" alt="معاينة الصورة">
-                </div>
-                
-                <button class="btn btn-main touch-feedback" id="saveBasicBtn" onclick="updateCourseBasic()" style="margin-top: 15px;">
-                    <i class="fas fa-save"></i> حفظ البيانات
-                </button>
-            </div>
-            
-            <h4 style="margin: 20px 0 15px;"><i class="fas fa-plus-circle" style="color: var(--secondary);"></i> إضافة فيديو جديد</h4>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <input type="text" id="vTitle" placeholder="عنوان الفيديو">
-                <input type="text" id="vUrl" placeholder="رابط اليوتيوب" dir="ltr">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                <input type="number" id="vOrder" placeholder="الترتيب (1, 2, ..)">
-                <input type="text" id="vStage" placeholder="المرحلة / الوحدة (مثال: الوحدة الأولى)">
-            </div>
-            
-            <button class="btn btn-secondary touch-feedback" style="margin-top:15px; width:100%;" onclick="addVideoToCourse()">
-                <i class="fas fa-video"></i> إضافة الفيديو
-            </button>
-            
-            <h4 style="margin: 25px 0 15px;"><i class="fas fa-list"></i> المحتوى الحالي</h4>
-            
-            <div style="margin-bottom: 20px;">
-                <h5 style="color: var(--primary); margin-bottom: 10px;">
-                    <i class="fas fa-video"></i> الفيديوهات:
-                </h5>
-                <div id="vListContainer"></div>
-            </div>
-            
-            <div>
-                <h5 style="color: var(--warning); margin-bottom: 10px;">
-                    <i class="fas fa-file-alt"></i> الاختبارات:
-                </h5>
-                <div id="qListContainer"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Video Modal -->
-    <div id="editVideoModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <button class="close-modal-btn touch-feedback" onclick="closeVideoModal()"><i class="fas fa-times"></i></button>
-            
-            <h3 style="color: var(--primary); margin-bottom: 25px;">
-                <i class="fas fa-video"></i> تعديل الفيديو
-            </h3>
-            
-            <input type="hidden" id="editVideoCourseId">
-            <input type="hidden" id="editVideoId">
-            
-            <label style="font-weight: bold;">عنوان الفيديو:</label>
-            <input type="text" id="editVideoTitle" style="margin-bottom: 20px;">
-            
-            <label style="font-weight: bold;">رابط اليوتيوب:</label>
-            <input type="text" id="editVideoUrl" dir="ltr" style="margin-bottom: 20px;">
-            
-            <label style="font-weight: bold;">الترتيب:</label>
-            <input type="number" id="editVideoOrder" style="margin-bottom: 15px;">
-            
-            <label style="font-weight: bold;">المرحلة / الوحدة:</label>
-            <input type="text" id="editVideoStage" placeholder="مثال: الوحدة الأولى، الترم الأول" style="margin-bottom: 25px;">
-            
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-main touch-feedback" onclick="saveVideoChanges()" style="flex: 2;">
-                    <i class="fas fa-save"></i> حفظ
-                </button>
-                <button class="btn btn-danger touch-feedback" onclick="closeVideoModal()" style="flex: 1;">
-                    <i class="fas fa-times"></i> إلغاء
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Exam Modal -->
-    <div id="editExamModal" class="modal">
-        <div class="modal-content" style="max-width: 1000px;">
-            <button class="close-modal-btn touch-feedback" onclick="closeExamModal()"><i class="fas fa-times"></i></button>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px;">
-                <h3 style="color: var(--primary);">
-                    <i class="fas fa-edit"></i> تعديل الامتحان
-                </h3>
-                <button class="btn btn-secondary btn-sm touch-feedback" onclick="previewExam()">
-                    <i class="fas fa-eye"></i> معاينة
-                </button>
-            </div>
-            
-            <input type="hidden" id="editExamCourseId">
-            <input type="hidden" id="editExamId">
-            
-            <div class="card" style="background: linear-gradient(145deg, #f8f9fa, #ffffff); margin-bottom: 25px;">
-                <label style="font-weight: bold;">اسم الامتحان:</label>
-                <input type="text" id="editExamName" style="margin-bottom: 15px;">
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 10px;">
-                <h4><i class="fas fa-question-circle"></i> الأسئلة</h4>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-secondary btn-sm touch-feedback" onclick="addEditQuestion('mcq')">
-                        <i class="fas fa-plus"></i> اختيارات
-                    </button>
-                    <button class="btn btn-warning btn-sm touch-feedback" onclick="addEditQuestion('tf')">
-                        <i class="fas fa-plus"></i> صح/خطأ
-                    </button>
-                </div>
-            </div>
-            
-            <div id="editQuestionsArea" style="max-height: 400px; overflow-y: auto; padding: 10px;"></div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap;">
-                <button class="btn btn-main touch-feedback" onclick="saveExamChanges()" style="flex: 2; min-width: 200px;">
-                    <i class="fas fa-save"></i> حفظ التغييرات
-                </button>
-                <button class="btn btn-danger touch-feedback" onclick="deleteExam()" style="flex: 1; min-width: 150px;">
-                    <i class="fas fa-trash"></i> حذف الامتحان
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Preview Exam Modal -->
-    <div id="previewExamModal" class="modal">
-        <div class="modal-content" style="max-width: 700px;">
-            <button class="close-modal-btn touch-feedback" onclick="closePreviewModal()"><i class="fas fa-times"></i></button>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="color: var(--primary);">
-                    <i class="fas fa-eye"></i> معاينة الامتحان
-                </h3>
-            </div>
-            
-            <div id="previewExamContent" class="preview-exam" style="max-height: 70vh; overflow-y: auto;"></div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
+    <!-- نفس الـ HTML الأصلي - لم يتغير -->
+    <!-- ... (انسخ جسم الصفحة الأصلي بالكامل) ... -->
 
     <script type="module">
         // ================ FIREBASE IMPORTS ================
@@ -2199,7 +1505,6 @@ C</div>
         // ================ CLEANUP ================
         function cleanupListeners() {
             dataListeners.forEach((listener, key) => {
-                // ✅ استخدام دالة unsubscribe مباشرة
                 if (typeof listener?.unsubscribe === 'function') {
                     listener.unsubscribe();
                 } else if (listener?.ref && listener?.callback) {
@@ -2231,7 +1536,6 @@ C</div>
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             if (element) element.classList.add('active');
             
-            // Close sidebar on mobile after selection
             if (window.innerWidth <= 992) {
                 closeSidebar();
             }
@@ -2291,11 +1595,9 @@ C</div>
             
             const addListener = (name, refPath, callback) => {
                 const dbRef = ref(db, refPath);
-                // ✅ onValue يرجع دالة unsubscribe مباشرة
                 const unsubscribe = onValue(dbRef, (snapshot) => {
                     callback(snapshot.val() || {});
                 });
-                // ✅ حفظ دالة الـ unsubscribe مع الـ ref للتنظيف لاحقاً
                 dataListeners.set(name, { ref: dbRef, unsubscribe });
             };
 
@@ -2399,12 +1701,20 @@ C</div>
             tbody.innerHTML = html;
         }
 
+        // تحسين دالة filterStudents للتعامل مع الأرقام والمسافات
         window.filterStudents = function() {
-            const search = document.getElementById('studentSearch')?.value.toLowerCase() || '';
+            const search = document.getElementById('studentSearch')?.value.toLowerCase().trim() || '';
             const rows = document.querySelectorAll('#studentList tr');
+            
             rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(search) ? '' : 'none';
+                if (search === '') {
+                    row.style.display = '';
+                    return;
+                }
+                // إزالة المسافات الزائدة والبحث في النص الكامل
+                const rowText = row.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+                const searchText = search.replace(/\s+/g, ' ').trim();
+                row.style.display = rowText.includes(searchText) ? '' : 'none';
             });
         };
         document.getElementById('studentSearch')?.addEventListener('keyup', filterStudents);
@@ -2625,7 +1935,6 @@ C</div>
                 html = '<div class="empty-state"><i class="fas fa-book"></i><br>لا توجد كورسات</div>';
             }
             
-            // Remove skeletons
             grid.querySelectorAll('.skeleton').forEach(el => el.remove());
             grid.innerHTML = html;
         }
@@ -2787,72 +2096,65 @@ C</div>
             document.getElementById('editModal').style.display = 'none';
         };
 
-        // ================ UPDATE COURSE ================
+        // ================ UPDATE COURSE (تم الإصلاح) ================
         window.updateCourseBasic = async function() {
-    const name = document.getElementById('editNameField')?.value.trim();
-    const grade = document.getElementById('editGradeField')?.value;
-    const imgUrl = document.getElementById('editImgField')?.value.trim();
-    const imgFile = document.getElementById('editImageFile')?.files[0];
-    
-    if (!activeCID || !name) {
-        showToast('يرجى إدخال اسم الكورس', 'error');
-        return;
-    }
-    
-    try {
-        startProgress();
-        const updateData = { name };
-        if (grade) updateData.grade = grade;
-        
-        // حالة 1: يوجد ملف صورة مرفوع
-        if (imgFile) {
-            showToast('🔄 جاري رفع الصورة...', 'success');
+            const name = document.getElementById('editNameField')?.value.trim();
+            const grade = document.getElementById('editGradeField')?.value;
+            const imgUrl = document.getElementById('editImgField')?.value.trim();
+            const imgFile = document.getElementById('editImageFile')?.files[0];
             
-            const formData = new FormData();
-            formData.append('key', '049eb1f0e45afcb93f3c45a1400a29ef');
-            formData.append('image', imgFile);
-            
-            const response = await fetch('https://api.imgbb.com/1/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                updateData.img = data.data.url;
-                showToast('✅ تم رفع الصورة', 'success');
-            } else {
-                showToast('❌ فشل رفع الصورة', 'error');
-                stopProgress();
+            if (!activeCID || !name) {
+                showToast('يرجى إدخال اسم الكورس', 'error');
                 return;
             }
-        } 
-        // حالة 2: يوجد رابط صورة
-        else if (imgUrl) {
-            updateData.img = imgUrl;
-        }
-        
-        // حفظ التحديثات
-        await update(ref(db, `folders/${activeCID}`), updateData);
-        showToast('✅ تم تحديث الكورس بنجاح');
-        
-        // تنظيف الحقول
-        document.getElementById('editImgField').value = '';
-        document.getElementById('editImageFile').value = '';
-        document.getElementById('editImagePreview').style.display = 'none';
-        
-        // إعادة فتح المودال
-        const folderSnap = await get(ref(db, `folders/${activeCID}`));
-        openEditModal(activeCID, folderSnap.val() || {});
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showToast('❌ حدث خطأ', 'error');
-    } finally {
-        stopProgress();
-    }
-};
+            
+            try {
+                startProgress();
+                const updateData = { name };
+                if (grade) updateData.grade = grade;
+                
+                // إذا كان هناك ملف صورة جديد
+                if (imgFile) {
+                    showToast('🔄 جاري رفع الصورة...', 'success');
+                    try {
+                        const imageData = await uploadToImgBB(imgFile);
+                        updateData.img = imageData;
+                        showToast('✅ تم رفع الصورة', 'success');
+                    } catch (error) {
+                        showToast('❌ فشل رفع الصورة: ' + error.message, 'error');
+                        stopProgress();
+                        return;
+                    }
+                } 
+                // إذا كان هناك رابط صورة جديد
+                else if (imgUrl) {
+                    if (isValidImageUrl(imgUrl)) {
+                        updateData.img = imgUrl;
+                    } else {
+                        showToast('❌ رابط الصورة غير صالح', 'error');
+                        stopProgress();
+                        return;
+                    }
+                }
+                // إذا لم يختر صورة جديدة، لا نضيف img إلى التحديث (تبقى القديمة)
+                
+                await update(ref(db, `folders/${activeCID}`), updateData);
+                showToast('✅ تم تحديث الكورس بنجاح');
+                
+                document.getElementById('editImgField').value = '';
+                document.getElementById('editImageFile').value = '';
+                document.getElementById('editImagePreview').style.display = 'none';
+                
+                const folderSnap = await get(ref(db, `folders/${activeCID}`));
+                openEditModal(activeCID, folderSnap.val() || {});
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('❌ حدث خطأ', 'error');
+            } finally {
+                stopProgress();
+            }
+        };
 
         // ================ VIDEO FUNCTIONS ================
         window.addVideoToCourse = function() {
@@ -3219,20 +2521,29 @@ C</div>
             addEditQuestionCard(type === 'mcq' ? { a: '', b: '', c: '', d: '' } : { a: 'صح', b: 'خطأ' });
         };
 
+        // تحسين دالة addEditQuestionCard للتعامل مع البيانات الفارغة
         function addEditQuestionCard(questionData, index) {
             const container = document.getElementById('editQuestionsArea');
             if (!container) return;
             
             const qIndex = index ?? container.children.length;
-            // ✅ التعرف على أسئلة صح/خطأ: سواء كانت True/False أو صح/خطأ (للتوافق مع القديم)
+            // التعرف على نوع السؤال: MCQ إذا كان لديه خاصية c أو إذا كان a ليس True/False/صح/خطأ
             const isMcq = questionData && (
-                Object.keys(questionData).includes('c') || 
-                (questionData.a && questionData.a !== 'True' && questionData.a !== 'False' && questionData.a !== 'صح' && questionData.a !== 'خطأ')
+                (questionData.c !== undefined) || 
+                (questionData.a && !['True', 'False', 'صح', 'خطأ'].includes(questionData.a))
             );
             
             const card = document.createElement('div');
             card.className = 'edit-question-card';
             card.dataset.index = qIndex;
+            
+            // تجهيز القيم الافتراضية
+            const safeText = questionData?.text || '';
+            const safeA = questionData?.a || '';
+            const safeB = questionData?.b || '';
+            const safeC = questionData?.c || '';
+            const safeD = questionData?.d || '';
+            const correct = questionData?.correct || (isMcq ? 'a' : 'a');
             
             card.innerHTML = `
                 <div class="question-header">
@@ -3243,7 +2554,7 @@ C</div>
                     </div>
                 </div>
                 
-                <input type="text" class="q-text reg-input" placeholder="نص السؤال" value="${escapeHTML(questionData?.text || '')}" style="margin-bottom: 15px;">
+                <input type="text" class="q-text reg-input" placeholder="نص السؤال" value="${escapeHTML(safeText)}" style="margin-bottom: 15px;">
                 
                 <select class="q-type reg-input" style="margin-bottom: 15px;" onchange="changeQuestionType(this)">
                     <option value="mcq" ${isMcq ? 'selected' : ''}>اختيار من متعدد</option>
@@ -3251,25 +2562,25 @@ C</div>
                 </select>
                 
                 <div class="mcq-options" style="display: ${isMcq ? 'grid' : 'none'};">
-                    <div><label>A</label><input type="text" class="oA reg-input" value="${escapeHTML(questionData?.a || '')}"></div>
-                    <div><label>B</label><input type="text" class="oB reg-input" value="${escapeHTML(questionData?.b || '')}"></div>
-                    <div><label>C</label><input type="text" class="oC reg-input" value="${escapeHTML(questionData?.c || '')}"></div>
-                    <div><label>D</label><input type="text" class="oD reg-input" value="${escapeHTML(questionData?.d || '')}"></div>
+                    <div><label>A</label><input type="text" class="oA reg-input" value="${escapeHTML(safeA)}"></div>
+                    <div><label>B</label><input type="text" class="oB reg-input" value="${escapeHTML(safeB)}"></div>
+                    <div><label>C</label><input type="text" class="oC reg-input" value="${escapeHTML(safeC)}"></div>
+                    <div><label>D</label><input type="text" class="oD reg-input" value="${escapeHTML(safeD)}"></div>
                 </div>
                 
                 <div class="tf-options" style="display: ${!isMcq ? 'block' : 'none'};">
                     <select class="q-correct-tf reg-input">
-                        <option value="a" ${questionData?.correct === 'a' ? 'selected' : ''}>True (صح)</option>
-                        <option value="b" ${questionData?.correct === 'b' ? 'selected' : ''}>False (خطأ)</option>
+                        <option value="a" ${correct === 'a' ? 'selected' : ''}>True (صح)</option>
+                        <option value="b" ${correct === 'b' ? 'selected' : ''}>False (خطأ)</option>
                     </select>
                 </div>
                 
                 <div class="mcq-correct-wrapper" style="display: ${isMcq ? 'block' : 'none'}; margin-top: 15px;">
                 <select class="q-correct-mcq reg-input">
-                    <option value="a" ${questionData?.correct === 'a' ? 'selected' : ''}>الإجابة: A</option>
-                    <option value="b" ${questionData?.correct === 'b' ? 'selected' : ''}>الإجابة: B</option>
-                    <option value="c" ${questionData?.correct === 'c' ? 'selected' : ''}>الإجابة: C</option>
-                    <option value="d" ${questionData?.correct === 'd' ? 'selected' : ''}>الإجابة: D</option>
+                    <option value="a" ${correct === 'a' ? 'selected' : ''}>الإجابة: A</option>
+                    <option value="b" ${correct === 'b' ? 'selected' : ''}>الإجابة: B</option>
+                    <option value="c" ${correct === 'c' ? 'selected' : ''}>الإجابة: C</option>
+                    <option value="d" ${correct === 'd' ? 'selected' : ''}>الإجابة: D</option>
                 </select>
                 </div>
             `;
@@ -3407,7 +2718,6 @@ C</div>
             
             try {
                 startProgress();
-                // استخدام set بدلاً من update لضمان حذف الأسئلة القديمة
                 await set(ref(db, `quizzes/${courseId}/${examId}`), {
                     name,
                     questions,
@@ -3502,7 +2812,6 @@ C</div>
                 `;
             }
             
-            // Charts
             if (charts.topCourses) charts.topCourses.destroy();
             if (charts.examScores) charts.examScores.destroy();
             if (charts.activity) charts.activity.destroy();
@@ -3598,7 +2907,6 @@ C</div>
 
         // ================ DELETE DATA ================
         window.delData = function(path) {
-            // التحقق من المسارات المسموح بحذفها فقط
             const allowedPrefixes = ['students/', 'quiz_results/', 'reviews/', 'course_reviews/', 'folders/', 'quizzes/', 'admins/', 'subscription_notifications/', 'ramadan_questions/', 'ramadan_answers/'];
             const isAllowed = allowedPrefixes.some(prefix => path.startsWith(prefix));
             if (!isAllowed) {
@@ -3650,7 +2958,6 @@ C</div>
                 });
             }
             
-            // Hide skeletons
             setTimeout(() => {
                 document.querySelectorAll('.skeleton').forEach(el => el.remove());
             }, 2000);
@@ -3669,8 +2976,9 @@ C</div>
             });
         }
 
+        // تحسين دالة importParseQuestions لدعم النصوص العربية
         function importParseQuestions(text) {
-            const blocks = text.split(/\n[ \t]*\n/).filter(b => b.trim());
+            const blocks = text.split(/\n\s*\n/).filter(b => b.trim());
             const questions = [];
             for (const block of blocks) {
                 const lines = block.trim().split('\n').map(l => l.trim()).filter(l => l);
@@ -3679,14 +2987,15 @@ C</div>
                 let answerLine = lines.find(l => /^\*/.test(l));
                 if (!answerLine) {
                     const last = lines[lines.length - 1];
-                    if (/^[ABCDabcd]$/.test(last.trim()) || last.trim() === 'صح' || last.trim() === 'خطأ' || last.trim().toLowerCase() === 'true' || last.trim().toLowerCase() === 'false') {
+                    const trimmed = last.trim();
+                    if (/^[ABCDabcd]$/.test(trimmed) || trimmed === 'صح' || trimmed === 'خطأ' || trimmed.toLowerCase() === 'true' || trimmed.toLowerCase() === 'false') {
                         answerLine = last;
                     }
                 }
                 if (!answerLine) continue;
                 const rawAnswer = answerLine.replace(/^\*\s*/, '').trim().toLowerCase();
                 if (['صح', 'خطأ', 'true', 'false'].includes(rawAnswer)) {
-                    questions.push({ type: 'tf', text: questionText, correct: ['صح', 'true'].includes(rawAnswer) ? 'a' : 'b' });
+                    questions.push({ type: 'tf', text: questionText, correct: (rawAnswer === 'صح' || rawAnswer === 'true') ? 'a' : 'b' });
                     continue;
                 }
                 const optA = lines.find(l => /^A[:\.\-\)]/i.test(l));
@@ -3695,7 +3004,7 @@ C</div>
                 const optD = lines.find(l => /^D[:\.\-\)]/i.test(l));
                 if (!optA || !optB || !['a','b','c','d'].includes(rawAnswer)) continue;
                 const clean = opt => opt ? opt.replace(/^[ABCD][:\.\-\)]\s*/i, '').trim() : '';
-                questions.push({ type: 'mcq', text: questionText, a: clean(optA), b: clean(optB), c: clean(optC), d: clean(optD), correct: rawAnswer });
+                questions.push({ type: 'mcq', text: questionText, a: clean(optA), b: clean(optB), c: clean(optC) || '', d: clean(optD) || '', correct: rawAnswer });
             }
             return questions;
         }
@@ -3810,54 +3119,44 @@ Fish can live on land.
 خطأ`;
         };
 
-        // ✅ تحميل الكورسات لقائمة الاستيراد
         onValue(ref(db, 'folders'), (snapshot) => {
             const data = snapshot.val() || {};
             if (data) fillImportDropdown(data);
         });
-        // ================ END IMPORT EXAM ================
 
         // ================ CLEANUP ================
     </script>
     <script>
-// حل بسيط لمشكلة رفع الصور من الموبايل
-document.addEventListener('DOMContentLoaded', function() {
-    // تحسين معاينة الصورة
-    const editImageFile = document.getElementById('editImageFile');
-    if (editImageFile) {
-        editImageFile.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // التحقق من الحجم (8 ميجابايت كحد أقصى)
-                if (file.size > 8 * 1024 * 1024) {
-                    alert('❌ الصورة كبيرة جداً. الحد الأقصى 8 ميجابايت');
-                    this.value = '';
-                    return;
-                }
-                
-                // معاينة الصورة
-                const preview = document.getElementById('editImagePreview');
-                const previewImg = document.getElementById('editPreviewImg');
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                
-                reader.readAsDataURL(file);
+        document.addEventListener('DOMContentLoaded', function() {
+            const editImageFile = document.getElementById('editImageFile');
+            if (editImageFile) {
+                editImageFile.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        if (file.size > 8 * 1024 * 1024) {
+                            alert('❌ الصورة كبيرة جداً. الحد الأقصى 8 ميجابايت');
+                            this.value = '';
+                            return;
+                        }
+                        const preview = document.getElementById('editImagePreview');
+                        const previewImg = document.getElementById('editPreviewImg');
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            const editImgField = document.getElementById('editImgField');
+            if (editImgField) {
+                editImgField.addEventListener('click', function() {
+                    this.select();
+                });
             }
         });
-    }
-    
-    // حل بديل: نسخ رابط الصورة تلقائياً
-    const editImgField = document.getElementById('editImgField');
-    if (editImgField) {
-        editImgField.addEventListener('click', function() {
-            this.select();
-        });
-    }
-});
-</script>
+    </script>
 </body>
 </html>

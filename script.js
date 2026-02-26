@@ -293,6 +293,10 @@ async function isEmailExists(email) {
         const snap = await get(ref(db, `email_index/${emailKey}`));
         return snap.exists();
     } catch (error) {
+        // PERMISSION_DENIED يعني المستخدم غير مسجل دخوله - نفترض عدم وجود الإيميل
+        if (error.code === 'PERMISSION_DENIED' || (error.message && error.message.includes('permission'))) {
+            return false;
+        }
         console.error('Error checking email:', error);
         return false;
     }
@@ -303,6 +307,10 @@ async function isUsernameExists(username) {
         const snap = await get(ref(db, `username_index/${username.toLowerCase()}`));
         return snap.exists();
     } catch (error) {
+        // PERMISSION_DENIED يعني المستخدم غير مسجل دخوله - نفترض عدم وجود اليوزرنيم
+        if (error.code === 'PERMISSION_DENIED' || (error.message && error.message.includes('permission'))) {
+            return false;
+        }
         console.error('Error checking username:', error);
         return false;
     }
@@ -977,7 +985,11 @@ window.loadPerfectScores = async function() {
             finalList.forEach((ps, idx) => {
                 psData[`score_${idx}`] = ps;
             });
-            await set(ref(db, 'perfect_scores'), psData);
+            try {
+                await set(ref(db, 'perfect_scores'), psData);
+            } catch (writeErr) {
+                console.warn('لا يمكن تحديث perfect_scores:', writeErr.message);
+            }
 
         } else {
             const psSnap = await get(child(dbRef, 'perfect_scores'));
@@ -2420,8 +2432,10 @@ window.loadRamadanAnswers = function(questionId, correctAnswer) {
     
     listenerManager.removeByContext('ramadanAnswers');
     
+    const container = document.getElementById('ramadanAnswersContainer');
+    const answersList = document.getElementById('ramadanAnswersList');
+    
     const listener = onValue(answersRef, (snapshot) => {
-        const container = document.getElementById('ramadanAnswersContainer');
         if (!container) return;
         
         let html = '';
@@ -2462,6 +2476,10 @@ window.loadRamadanAnswers = function(questionId, correctAnswer) {
         }
         
         container.innerHTML = html;
+    }, (error) => {
+        // إذا لم يكن لدى المستخدم صلاحية قراءة الإجابات - نخفي القسم
+        if (answersList) answersList.style.display = 'none';
+        console.warn('لا يمكن قراءة إجابات رمضان (ليس أدمن):', error.message);
     });
     
     listenerManager.add('ramadanAnswers', answersRef, listener, 'ramadanAnswers');
@@ -2498,6 +2516,7 @@ window.submitRamadanAnswer = async function() {
         return;
     }
     
+    // محاولة التحقق من الإجابات المكررة (تعمل فقط مع الأدمن)
     try {
         const allAnswersSnap = await get(ref(db, 'ramadan_answers'));
         if (allAnswersSnap.exists()) {
@@ -2514,7 +2533,7 @@ window.submitRamadanAnswer = async function() {
             }
         }
     } catch (e) {
-        // Continue if check fails
+        // غير الأدمن لا يستطيع قراءة الإجابات - نكمل بدون التحقق
     }
     
     const answer = `${surah} - ${aya}`;
