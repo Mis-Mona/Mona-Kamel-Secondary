@@ -1000,12 +1000,24 @@
                     if (!window._deferredInstallPrompt && shouldShowPrompt()) {
                         var modal = document.getElementById('pwaPromptModal');
                         if (modal) {
-                            // أخفِ زر التثبيت إن لم يكن هناك دعم
                             var installBtn = document.getElementById('pwaInstallBtn');
-                            if (installBtn) installBtn.style.display = 'none';
-                            // اعرض فقط زر الإشعارات إن لم يُفعَّل
-                            if (typeof Notification !== 'undefined' && Notification.permission !== 'granted' && !localStorage.getItem(NOTIF_KEY)) {
+                            var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+                            if (isIOS && installBtn) {
+                                // ✅ إصلاح iOS: عرض تعليمات يدوية بدل إخفاء الزر
+                                installBtn.innerHTML = '<i class="fas fa-share" style="margin-left:8px;"></i> إضافة للشاشة الرئيسية';
+                                installBtn.onclick = function() {
+                                    window.showToast && window.showToast('📱 اضغط زر المشاركة ثم "إضافة إلى الشاشة الرئيسية"', 'success', 6000);
+                                    window.closePwaPrompt(false);
+                                };
                                 modal.style.display = 'flex';
+                            } else if (!isIOS && installBtn) {
+                                // مش iOS ومفيش deferredPrompt - أخفِ زر التثبيت
+                                installBtn.style.display = 'none';
+                                // اعرض فقط زر الإشعارات إن لم يُفعَّل
+                                if (typeof Notification !== 'undefined' && Notification.permission !== 'granted' && !localStorage.getItem(NOTIF_KEY)) {
+                                    modal.style.display = 'flex';
+                                }
                             }
                         }
                     }

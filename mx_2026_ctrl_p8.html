@@ -1183,9 +1183,18 @@
         }
 
         /* ================ LEADERBOARD ================ */
+        .leaderboard-table {
+            max-height: 600px;
+            overflow-y: auto;
+            border-radius: 15px;
+            border: 1px solid rgba(108,92,231,0.1);
+            margin-top: 10px;
+        }
+
         .leaderboard-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 15px 25px;
             border-bottom: 1px solid rgba(108,92,231,0.1);
             transition: 0.3s;
@@ -1202,12 +1211,20 @@
             color: #2d3436;
             border-radius: 15px 15px 0 0;
             font-weight: 900;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
         
         .leaderboard-rank {
             font-weight: 900;
             color: var(--primary);
             margin-left: 15px;
+            min-width: 40px;
+        }
+        
+        .leaderboard-row:first-child .leaderboard-rank {
+            color: #2d3436;
         }
 
         /* ================ EMPTY STATE ================ */
@@ -1618,7 +1635,9 @@
                                     <th>المرحلة</th>
                                     <th>واتساب</th>
                                     <th>الاشتراكات</th>
+                                    <th>الامتحانات</th>
                                     <th>النقاط</th>
+                                    <th>تيليجرام</th>
                                     <th>حذف</th>
                                 </tr>
                             </thead>
@@ -1978,7 +1997,7 @@
              <div class="card">
                  <div class="section-header">
                      <h2><i class="fas fa-telegram" style="color: #0088cc;"></i> تقارير أولياء الأمور عبر تليجرام</h2>
-                     <button class="btn btn-main touch-feedback" onclick="sendBulkReports()">
+                     <button class="btn btn-main touch-feedback" onclick="window.sendBulkReports && window.sendBulkReports() || alert('جاري التحميل، انتظر لحظة...')">
                          <i class="fas fa-paper-plane"></i> إرسال تقارير لجميع الطلاب
                      </button>
                  </div>
@@ -2609,23 +2628,29 @@
             if (!tbody) return;
             
             let html = '';
-            if (students && Object.keys(students).length > 0) {
-                Object.entries(students)
-                    .sort((a, b) => (a[1].name || '').localeCompare(b[1].name || ''))
+            const entries = students ? Object.entries(students) : [];
+            if (entries.length > 0) {
+                entries
+                    .sort((a, b) => (a[1].name || '').localeCompare(b[1].name || '', 'ar'))
                     .forEach(([uid, s]) => {
                         const subCount = s.subscriptions ? Object.keys(s.subscriptions).length : 0;
+                        const examCount = s.examResults ? Object.keys(s.examResults).length : 0;
+                        const points = s.points || 0;
+                        const hasTelegram = s.telegramChatId ? '✅' : '—';
                         html += `<tr>
                             <td><strong>${escapeHTML(s.name || '')}</strong></td>
                             <td><span class="student-id-display">${escapeHTML(s.shortId || '')}</span></td>
                             <td><span class="badge-grade">${escapeHTML(s.grade || 'غير محدد')}</span></td>
                             <td>${escapeHTML(s.whatsapp || '—')}</td>
-                            <td>${subCount}</td>
-                            <td>${s.points || 0}</td>
+                            <td style="text-align:center;">${subCount}</td>
+                            <td style="text-align:center;">${examCount}</td>
+                            <td style="text-align:center; font-weight:bold; color:var(--primary);">${points}</td>
+                            <td style="text-align:center;">${hasTelegram}</td>
                             <td><button class="btn-delete btn-icon" onclick="delData('students/${uid}')"><i class="fas fa-trash"></i></button></td>
                         </tr>`;
                     });
             } else {
-                html = '<tr><td colspan="7" class="empty-state">لا يوجد طلاب</td></tr>';
+                html = '<tr><td colspan="9" class="empty-state">لا يوجد طلاب</td></tr>';
             }
             tbody.innerHTML = html;
         }
@@ -2633,10 +2658,25 @@
         window.filterStudents = function() {
             const search = document.getElementById('studentSearch')?.value.toLowerCase() || '';
             const rows = document.querySelectorAll('#studentList tr');
+            let visible = 0;
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(search) ? '' : 'none';
+                const show = !search || text.includes(search);
+                row.style.display = show ? '' : 'none';
+                if (show && row.cells.length > 1) visible++;
             });
+            // عرض رسالة لو مفيش نتائج
+            const existing = document.getElementById('studentsNoResult');
+            if (visible === 0 && search) {
+                if (!existing) {
+                    const tr = document.createElement('tr');
+                    tr.id = 'studentsNoResult';
+                    tr.innerHTML = `<td colspan="9" class="empty-state">لا توجد نتائج للبحث عن "${escapeHTML(search)}"</td>`;
+                    document.getElementById('studentList')?.appendChild(tr);
+                }
+            } else if (existing) {
+                existing.remove();
+            }
         };
         document.getElementById('studentSearch')?.addEventListener('keyup', filterStudents);
 
@@ -3794,23 +3834,33 @@
             const leaderboard = document.getElementById('adminLeaderboard');
             if (!leaderboard) return;
             
-            let html = '<div class="leaderboard-row"><span class="leaderboard-rank">#</span><span>الطالب</span><span>النقاط</span></div>';
+            const medals = ['🥇', '🥈', '🥉'];
+            let html = '<div class="leaderboard-row" style="font-weight:900; background:linear-gradient(135deg,var(--primary),#4834d4); color:white; border-radius:15px 15px 0 0; position:sticky; top:0;">'
+                + '<span class="leaderboard-rank" style="color:white;">#</span>'
+                + '<span>الطالب</span>'
+                + '<span>النقاط</span>'
+                + '</div>';
             
-            const topStudents = Object.values(allStudents)
-                .filter(s => s.points > 0)
+            const studentsArr = Object.values(allStudents);
+            const topStudents = studentsArr
+                .filter(s => (s.points || 0) > 0)
                 .sort((a, b) => (b.points || 0) - (a.points || 0))
-                .slice(0, 20);
+                .slice(0, 50);
             
             if (topStudents.length > 0) {
                 topStudents.forEach((s, i) => {
-                    html += `<div class="leaderboard-row">
-                        <span class="leaderboard-rank">#${i+1}</span>
-                        <span>${escapeHTML(s.name || '')}</span>
-                        <span>${s.points || 0} <i class="fas fa-star" style="color: var(--gold);"></i></span>
+                    const medal = medals[i] || '';
+                    const bgStyle = i === 0 ? 'background:rgba(255,215,0,0.15);' : i === 1 ? 'background:rgba(192,192,192,0.15);' : i === 2 ? 'background:rgba(205,127,50,0.15);' : '';
+                    html += `<div class="leaderboard-row" style="${bgStyle}">
+                        <span class="leaderboard-rank">${medal || ('#' + (i+1))}</span>
+                        <span>${escapeHTML(s.name || 'طالب')} <small style="color:#999; font-size:0.8rem;">${escapeHTML(s.grade || '')}</small></span>
+                        <span style="font-weight:900; color:var(--primary);">${s.points || 0} <i class="fas fa-star" style="color:var(--gold);"></i></span>
                     </div>`;
                 });
+            } else if (studentsArr.length === 0) {
+                html += '<div class="leaderboard-row" style="justify-content:center; color:#999;">⏳ جاري تحميل البيانات...</div>';
             } else {
-                html += '<div class="leaderboard-row"><span colspan="3">لا توجد بيانات</span></div>';
+                html += '<div class="leaderboard-row" style="justify-content:center; color:#999;">لا يوجد طلاب بنقاط بعد</div>';
             }
             
             leaderboard.innerHTML = html;
@@ -4385,25 +4435,32 @@ document.addEventListener('DOMContentLoaded', function() {
              // تحميل قائمة الطلاب مع معرف تليجرام
      window.loadParentReportsList = async function loadParentReportsList() {
          try {
-             const studentsSnap = await get(child(dbRef, 'students'));
-             if (!studentsSnap.exists()) {
-                 document.getElementById('parentReportsList').innerHTML = '<tr><td colspan="4" class="empty-state">لا يوجد طلاب</td></tr>';
-                 return;
+             const listEl = document.getElementById('parentReportsList');
+             if (!listEl) return;
+             listEl.innerHTML = '<tr><td colspan="4" class="empty-state">⏳ جاري التحميل...</td></tr>';
+             
+             // استخدام allStudents المحمّل مسبقاً أولاً، وإلا fetch من Firebase
+             let studentsData = allStudents && Object.keys(allStudents).length > 0 ? allStudents : null;
+             
+             if (!studentsData) {
+                 const studentsSnap = await get(ref(db, 'students'));
+                 if (!studentsSnap.exists()) {
+                     listEl.innerHTML = '<tr><td colspan="4" class="empty-state">لا يوجد طلاب</td></tr>';
+                     return;
+                 }
+                 studentsData = studentsSnap.val() || {};
              }
 
              let html = '';
-             studentsSnap.forEach(student => {
-                 const data = student.val();
-                 const uid = student.key;
-                 if (data.telegramChatId) {
-                     // ✅ إصلاح: استخدام uid بدلاً من safeKey لضمان صحة البيانات
+             Object.entries(studentsData).forEach(([uid, data]) => {
+                 if (data && data.telegramChatId) {
                      html += `<tr>
                          <td>${escapeHTML(data.name || '')}</td>
                          <td><span class="student-id-display">${escapeHTML(data.shortId || '—')}</span></td>
-                         <td><span class="badge-grade">${escapeHTML(data.telegramChatId)}</span></td>
+                         <td><span class="badge-grade">${escapeHTML(String(data.telegramChatId))}</span></td>
                          <td>
-                             <button class="btn btn-secondary btn-sm" data-uid="${escapeHTML(uid)}" onclick="window.sendReportToParent(this.dataset.uid)">
-                                 <i class="fas fa-paper-plane"></i> إرسال التقرير
+                             <button class="btn btn-secondary btn-sm" data-uid="${escapeHTML(uid)}" onclick="(window.sendReportToParent || function(){alert('جاري التحميل...')})(this.dataset.uid)">
+                                 <i class="fas fa-paper-plane"></i> إرسال
                              </button>
                          </td>
                      </tr>`;
@@ -4413,12 +4470,13 @@ document.addEventListener('DOMContentLoaded', function() {
              if (html === '') {
                  html = '<tr><td colspan="4" class="empty-state">لا يوجد أولياء أمور مسجلين بمعرف تليجرام</td></tr>';
              }
-             document.getElementById('parentReportsList').innerHTML = html;
+             listEl.innerHTML = html;
          } catch (err) {
              console.error('Error loading parent reports list:', err);
-             document.getElementById('parentReportsList').innerHTML = '<tr><td colspan="4" class="empty-state" style="color:red;">حدث خطأ في التحميل</td></tr>';
+             const listEl = document.getElementById('parentReportsList');
+             if (listEl) listEl.innerHTML = '<tr><td colspan="4" class="empty-state" style="color:red;">❌ حدث خطأ في التحميل: ' + escapeHTML(err.message) + '</td></tr>';
          }
-     }
+     };
 
      
     // تحميل قائمة الكورسات في اختيار الواجبات

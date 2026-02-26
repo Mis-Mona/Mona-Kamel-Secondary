@@ -579,6 +579,9 @@ window.handleRegisterUsername = async function() {
             createdAt: new Date().toLocaleString('ar-EG')
         });
         
+        // ✅ حفظ username_index لتسريع تسجيل الدخول
+        await set(ref(db, `username_index/${username}`), res.user.uid);
+        
         console.log('✅ تم التسجيل بنجاح!');
         window.showToast(`✅ تم التسجيل بنجاح! كود الطالب: ${sid}`, 'success', 5000);
         window.closeLogin();
@@ -764,24 +767,34 @@ window.loginUsernameSubmit = async function(e) {
     window.startProgress();
     
     try {
-        const studentsRef = ref(db, 'students');
-        const studentsSnap = await get(studentsRef);
-        
-        if (!studentsSnap.exists()) {
-            window.showToast('❌ اسم المستخدم غير موجود', 'error');
-            return;
-        }
-        
+        // ✅ إصلاح: البحث أولاً في username_index لتجنب جلب كل الطلاب
         let foundUser = null;
         let foundUid = null;
-        
-        studentsSnap.forEach((studentSnapshot) => {
-            const studentData = studentSnapshot.val();
-            if (studentData.username && studentData.username.toLowerCase() === username) {
-                foundUser = studentData;
-                foundUid = studentSnapshot.key;
+
+        const indexSnap = await get(ref(db, `username_index/${username}`));
+        if (indexSnap.exists()) {
+            foundUid = indexSnap.val();
+            const userSnap = await get(child(dbRef, `students/${foundUid}`));
+            if (userSnap.exists()) foundUser = userSnap.val();
+        }
+
+        // fallback: لو مفيش index، ابحث في كل الطلاب (للحسابات القديمة)
+        if (!foundUser) {
+            const studentsSnap = await get(ref(db, 'students'));
+            if (studentsSnap.exists()) {
+                studentsSnap.forEach((studentSnapshot) => {
+                    const studentData = studentSnapshot.val();
+                    if (studentData.username && studentData.username.toLowerCase() === username) {
+                        foundUser = studentData;
+                        foundUid = studentSnapshot.key;
+                    }
+                });
+                // ✅ إنشاء الـ index للمرة القادمة
+                if (foundUser && foundUid) {
+                    set(ref(db, `username_index/${username}`), foundUid).catch(() => {});
+                }
             }
-        });
+        }
         
         if (!foundUser || !foundUid) {
             window.showToast('❌ اسم المستخدم غير موجود', 'error');
@@ -1030,8 +1043,8 @@ function updateMenuItems(isLoggedIn) {
             homeItem.style.display = 'block';
             homeItem.onclick = function(e) {
                 e.preventDefault();
-                window.goHome();
-                window.closeMenu();
+                if (typeof window.goHome === 'function') window.goHome();
+                if (typeof window.closeMenu === 'function') window.closeMenu();
             };
         }
         if (divider) divider.style.display = 'block';
@@ -1039,8 +1052,8 @@ function updateMenuItems(isLoggedIn) {
             logoutItem.style.display = 'block';
             logoutItem.onclick = function(e) {
                 e.preventDefault();
-                window.logout();
-                window.closeMenu();
+                if (typeof window.logout === 'function') window.logout();
+                if (typeof window.closeMenu === 'function') window.closeMenu();
             };
         }
     } else {
@@ -1054,6 +1067,14 @@ function updateMenuItems(isLoggedIn) {
 // ================ PERFECT SCORES ================
 window.loadPerfectScores = async function() {
     try {
+        // ✅ إصلاح: انتظار Firebase قبل الاستدعاء
+        let wait = 0;
+        while ((!window.db || !window.ref || !window.get) && wait < 30) {
+            await new Promise(r => setTimeout(r, 200));
+            wait++;
+        }
+        if (!window.db || !window.ref || !window.get) return;
+
         const resultsSnap = await get(child(dbRef, 'quiz_results'));
         const studentsSnap = await get(child(dbRef, 'students'));
         
@@ -1940,8 +1961,11 @@ window.viewQuizResult = async function(folderId, quizId) {
             html += `</div>`;
         });
 
-        html += `<button type="button" onclick="window.closeQuiz()" style="background:var(--dark); color:white; border:none; padding:15px; border-radius:15px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1rem; font-family:'Cairo';">إغلاق</button>`;
+        html += `<button type="button" id="closeQuizResultBtn" style="background:var(--dark); color:white; border:none; padding:15px; border-radius:15px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1rem; font-family:'Cairo';">إغلاق</button>`;
         quizContainer.innerHTML = html;
+        // ✅ إصلاح: addEventListener بدلاً من onclick inline
+        const closeQuizResultBtn = document.getElementById('closeQuizResultBtn');
+        if (closeQuizResultBtn) closeQuizResultBtn.addEventListener('click', window.closeQuiz);
     } catch (error) {
         console.error('View quiz result error:', error);
         window.showToast('❌ حدث خطأ في عرض النتيجة', 'error');
@@ -2000,11 +2024,11 @@ window.loadCourseRatingUI = async function(courseId) {
     
     if (!userReviewed) {
         html += `<div class="star-rating">
-            <input type="radio" id="star5" name="rating" value="5"><label for="star5" onclick="window.setRating(5)">★</label>
-            <input type="radio" id="star4" name="rating" value="4"><label for="star4" onclick="window.setRating(4)">★</label>
-            <input type="radio" id="star3" name="rating" value="3"><label for="star3" onclick="window.setRating(3)">★</label>
-            <input type="radio" id="star2" name="rating" value="2"><label for="star2" onclick="window.setRating(2)">★</label>
-            <input type="radio" id="star1" name="rating" value="1"><label for="star1" onclick="window.setRating(1)">★</label>
+            <input type="radio" id="star5" name="rating" value="5"><label for="star5" data-val="5">★</label>
+            <input type="radio" id="star4" name="rating" value="4"><label for="star4" data-val="4">★</label>
+            <input type="radio" id="star3" name="rating" value="3"><label for="star3" data-val="3">★</label>
+            <input type="radio" id="star2" name="rating" value="2"><label for="star2" data-val="2">★</label>
+            <input type="radio" id="star1" name="rating" value="1"><label for="star1" data-val="1">★</label>
         </div>
         <textarea id="reviewText" rows="3" placeholder="اكتب رأيك هنا..." style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd; margin:10px 0;"></textarea>
         <button type="button" id="submitRatingBtn" data-course-id="${escapeHTML(courseId)}" class="btn" style="background:var(--main); color:white;">إرسال التقييم</button>`;
@@ -2012,7 +2036,12 @@ window.loadCourseRatingUI = async function(courseId) {
     
     ratingDiv.innerHTML = html;
     ratingDiv.style.display = 'block';
-    // ✅ إصلاح: استخدام addEventListener بعد الحقن
+    // ✅ إصلاح: addEventListener بعد الحقن - نجوم التقييم + زر الإرسال
+    ratingDiv.querySelectorAll('.star-rating label').forEach(label => {
+        label.addEventListener('click', function() {
+            window.setRating(parseInt(this.dataset.val));
+        });
+    });
     const submitRatingBtn = document.getElementById('submitRatingBtn');
     if (submitRatingBtn) {
         submitRatingBtn.addEventListener('click', function() {
@@ -2161,8 +2190,9 @@ window.goHome = function() {
     if (homePage) homePage.style.display = "block";
     if (contentArea) contentArea.style.display = "none";
     
-    window.loadFolders();
-    window.loadPerfectScores();
+    // ✅ إصلاح: التحقق من وجود الدوال قبل استدعائها
+    if (typeof window.loadFolders === 'function') window.loadFolders();
+    if (typeof window.loadPerfectScores === 'function') window.loadPerfectScores();
 };
 
 window.showAuthForm = function(type) {
@@ -2386,10 +2416,14 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReviews();
     window.loadPerfectScores();
     
-    // ✅ تم التصحيح - استخدام الدالة الصحيحة
+    // ✅ إصلاح: debounce لمنع استدعاء loadPerfectScores عند كل تغيير صغير
+    let _perfectScoresTimer = null;
     const quizResultsRef = ref(db, 'quiz_results');
     onValue(quizResultsRef, () => {
-        window.loadPerfectScores();
+        if (_perfectScoresTimer) clearTimeout(_perfectScoresTimer);
+        _perfectScoresTimer = setTimeout(() => {
+            window.loadPerfectScores();
+        }, 2000);
     });
 });
 
@@ -2432,11 +2466,7 @@ window.saveWatchingProgress = async function(videoId, folderId, videoTitle, curr
         
         await set(ref(db, `students/${currentUser.uid}/watchingProgress/${folderId}_${videoId}`), progressData);
         
-        // كمان سجل في history للطالب
-        await push(ref(db, `students/${currentUser.uid}/watchingHistory`), {
-            ...progressData,
-            watchedAt: new Date().toLocaleString('ar-EG')
-        });
+        // ✅ إصلاح: تم حذف push لـ watchingHistory لأنه كان يضيف record كل 10 ثواني بلا حد أقصى
         
     } catch (error) {
         console.error('Error saving progress:', error);
@@ -2619,63 +2649,5 @@ document.addEventListener('DOMContentLoaded', function() {
     initDarkMode();
 });
 
-// ================ PWA INSTALL PROMPT ================
-let deferredPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    // منع المتصفح من عرض الـ prompt تلقائياً
-    e.preventDefault();
-    deferredPrompt = e;
-    
-    // عرض زر التثبيت لأي زائر (مسجل أو غير مسجل)
-    showInstallButton();
-});
-
-function showInstallButton() {
-    // عرض الزر لأي مستخدم بدون شرط تسجيل الدخول
-    if (!document.getElementById('installPwaBtn')) {
-        const installBtn = document.createElement('button');
-        installBtn.id = 'installPwaBtn';
-        installBtn.className = 'install-pwa-btn';
-        installBtn.innerHTML = '<i class="fas fa-download"></i> تثبيت التطبيق';
-        installBtn.onclick = installPWA;
-        
-        // حط الزر في الهيدر
-        const headerControls = document.querySelector('.header-controls');
-        if (headerControls) {
-            headerControls.insertBefore(installBtn, headerControls.firstChild);
-        }
-    }
-}
-
-async function installPWA() {
-    if (!deferredPrompt) return;
-    
-    // عرض الـ prompt
-    deferredPrompt.prompt();
-    
-    // انتظر رد المستخدم
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`✅ User response to install prompt: ${outcome}`);
-    
-    // مفيش حاجة فاضلة
-    deferredPrompt = null;
-    
-    // أخفي الزر
-    const installBtn = document.getElementById('installPwaBtn');
-    if (installBtn) installBtn.remove();
-}
-
-// لو التطبيق اتثبت، اعرف
-window.addEventListener('appinstalled', (e) => {
-    console.log('✅ PWA was installed');
-    window.showToast('🎉 تم تثبيت التطبيق بنجاح', 'success');
-    
-    // أرسل إحصائية
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'install', {
-            'event_category': 'PWA',
-            'event_label': 'Install'
-        });
-    }
-});
+// ================ PWA INSTALL - handled in index.html ================
+// تم نقل منطق PWA بالكامل إلى index.html لتجنب التعارض بين نظامين

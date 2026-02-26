@@ -1,5 +1,5 @@
 // ⚠️ مهم: غيّر هذا الرقم عند كل نشر جديد لتحديث الكاش للمستخدمين
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v4';
 const CACHE_NAME = `mona-academy-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
@@ -67,33 +67,42 @@ self.addEventListener('fetch', event => {
   
   // لو الملف من نفس الدومين
   if (url.origin === self.location.origin) {
-    // للملفات الأساسية (HTML, CSS, JS)
-    if (event.request.url.includes('.html') || 
-        event.request.url.includes('.css') || 
-        event.request.url.includes('.js')) {
+    // للملفات الأساسية:
+    // HTML → Network First (عشان التحديثات توصل فوراً)
+    // CSS/JS → Stale While Revalidate (يعرض الكاش وبيحدث في الخلفية)
+    if (event.request.url.includes('.html')) {
       event.respondWith(
-        caches.match(event.request)
-          .then(cachedResponse => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            return fetch(event.request)
-              .then(networkResponse => {
-                // خزن النسخة الجديدة في الكاش (بدون await لعدم تأخير الاستجابة)
-                if (networkResponse && networkResponse.status === 200) {
-                  caches.open(STATIC_CACHE).then(cache => {
-                    cache.put(event.request, networkResponse.clone()).catch(e => console.warn('Cache put failed:', e));
-                  });
-                }
-                return networkResponse;
-              })
-              .catch(() => {
-                // لو في error ومفيش نت، اعرض صفحة offline
-                if (event.request.url.includes('.html')) {
-                  return caches.match('/offline.html');
-                }
+        fetch(event.request)
+          .then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              caches.open(STATIC_CACHE).then(cache => {
+                cache.put(event.request, networkResponse.clone()).catch(e => console.warn('Cache put failed:', e));
               });
+            }
+            return networkResponse;
           })
+          .catch(() => {
+            // fallback للكاش لو مفيش نت
+            return caches.match(event.request).then(cached => cached || caches.match('/offline.html'));
+          })
+      );
+      return;
+    }
+
+    if (event.request.url.includes('.css') || event.request.url.includes('.js')) {
+      event.respondWith(
+        caches.match(event.request).then(cachedResponse => {
+          // ✅ Stale While Revalidate: عرض الكاش فوراً + تحديث في الخلفية
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              caches.open(STATIC_CACHE).then(cache => {
+                cache.put(event.request, networkResponse.clone()).catch(e => console.warn('Cache put failed:', e));
+              });
+            }
+            return networkResponse;
+          });
+          return cachedResponse || fetchPromise;
+        }).catch(() => caches.match(event.request))
       );
       return;
     }

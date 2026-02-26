@@ -48,14 +48,21 @@ function updateStatsNumbers(studentData) {
     }
     if (el('statAvgScore')) el('statAvgScore').textContent = avgScore + '%';
     
-    // ✅ إصلاح race condition: انتظار ظهور الشارات بدلاً من timeout ثابت
-    function updateBadgeCount() {
-        const badgesCount = document.querySelectorAll('#userBadges .badge-card').length;
-        if (el('profileBadgesCount')) el('profileBadgesCount').textContent = badgesCount;
+    // ✅ إصلاح race condition: استخدام MutationObserver بدل setTimeout ثابت
+    const badgesEl = document.getElementById('userBadges');
+    const badgesCountEl = el('profileBadgesCount');
+    if (badgesEl && badgesCountEl) {
+        const updateCount = () => {
+            badgesCountEl.textContent = badgesEl.querySelectorAll('.badge-card').length;
+        };
+        // تحديث فوري
+        updateCount();
+        // مراقبة التغييرات
+        const observer = new MutationObserver(updateCount);
+        observer.observe(badgesEl, { childList: true, subtree: true });
+        // إيقاف المراقبة بعد 5 ثواني لتوفير الذاكرة
+        setTimeout(() => observer.disconnect(), 5000);
     }
-    // محاولة أولى بعد 600ms، وأخرى بعد 1500ms كـ fallback
-    setTimeout(updateBadgeCount, 600);
-    setTimeout(updateBadgeCount, 1500);
 }
 
 function drawBadgesChart() {
@@ -160,11 +167,43 @@ function drawLevelsDistribution() {
     const colors = { bronze: '#cd7f32', silver: '#c0c0c0', gold: '#ffd700', platinum: '#e5e4e2' };
     const names = { bronze: 'برونزي', silver: 'فضي', gold: 'ذهبي', platinum: 'بلاتيني' };
     
-    let html = '<h4>توزيع الشارات حسب المستوى</h4><div style="display: flex; gap: 20px; flex-wrap: wrap;">';
-    for (let level in levels) {
+    // ✅ استخدام DOM API بدل innerHTML مع template literals
+    container.innerHTML = '';
+    const title = document.createElement('h4');
+    title.textContent = 'توزيع الشارات حسب المستوى';
+    container.appendChild(title);
+
+    const flex = document.createElement('div');
+    flex.style.cssText = 'display: flex; gap: 20px; flex-wrap: wrap;';
+
+    for (const level in levels) {
         const percent = Math.round((levels[level] / total) * 100);
-        html += `<div style="flex: 1; min-width: 120px;"><div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 12px; height: 12px; background: ${colors[level]}; border-radius: 3px;"></span><span>${names[level]}</span><span style="font-weight: bold;">${levels[level]}</span><span style="color: #666;">(${percent}%)</span></div></div>`;
+        const div = document.createElement('div');
+        div.style.cssText = 'flex: 1; min-width: 120px;';
+
+        const inner = document.createElement('div');
+        inner.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+
+        const dot = document.createElement('span');
+        dot.style.cssText = `display: inline-block; width: 12px; height: 12px; background: ${colors[level]}; border-radius: 3px;`;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = names[level];
+
+        const countSpan = document.createElement('span');
+        countSpan.style.fontWeight = 'bold';
+        countSpan.textContent = levels[level];
+
+        const pctSpan = document.createElement('span');
+        pctSpan.style.color = '#666';
+        pctSpan.textContent = `(${percent}%)`;
+
+        inner.appendChild(dot);
+        inner.appendChild(nameSpan);
+        inner.appendChild(countSpan);
+        inner.appendChild(pctSpan);
+        div.appendChild(inner);
+        flex.appendChild(div);
     }
-    html += '</div>';
-    container.innerHTML = html;
+    container.appendChild(flex);
 }

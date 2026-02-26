@@ -61,8 +61,12 @@ window.loadAssignments = async function(courseId, hasAccess) {
         html += '</div></div>';
         container.innerHTML = html;
 
-        // ✅ إصلاح: استخدام event delegation بدلاً من onclick مدمج
-        container.addEventListener('click', function(e) {
+        // ✅ إصلاح: cloneNode لإزالة listeners القديمة قبل إضافة الجديد
+        const newContainer = container.cloneNode(false);
+        newContainer.innerHTML = container.innerHTML;
+        container.parentNode.replaceChild(newContainer, container);
+
+        newContainer.addEventListener('click', function(e) {
             const submitBtn = e.target.closest('.assign-submit-btn');
             const viewBtn = e.target.closest('.assign-view-btn');
             if (submitBtn) {
