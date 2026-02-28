@@ -1,367 +1,524 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>تحت الصيانة</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --bg: #0a0f1e;
-      --accent: #00d4ff;
-      --accent2: #ff6b35;
-      --text: #e8f4fd;
-      --muted: #5a7a9a;
-      --glow: rgba(0, 212, 255, 0.15);
-    }
-
-    body {
-      background: var(--bg);
-      font-family: 'Cairo', sans-serif;
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Animated grid background */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
-      animation: gridMove 20s linear infinite;
-      pointer-events: none;
-    }
-
-    @keyframes gridMove {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(60px); }
-    }
-
-    /* Glowing orbs */
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      pointer-events: none;
-      animation: drift 8s ease-in-out infinite alternate;
-    }
-    .orb1 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(0,212,255,0.12), transparent);
-      top: -10%; left: -10%;
-    }
-    .orb2 {
-      width: 350px; height: 350px;
-      background: radial-gradient(circle, rgba(255,107,53,0.1), transparent);
-      bottom: -10%; right: -5%;
-      animation-delay: -4s;
-    }
-    @keyframes drift {
-      from { transform: translate(0, 0); }
-      to { transform: translate(30px, 30px); }
-    }
-
-    .container {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      padding: 3rem 2rem;
-      max-width: 700px;
-      width: 100%;
-    }
-
-    /* Gear icon */
-    .gear-wrapper {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 2.5rem;
-    }
-    .gear-outer {
-      width: 110px; height: 110px;
-      border: 3px solid var(--accent);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-      animation: spin 12s linear infinite;
-      box-shadow: 0 0 30px rgba(0,212,255,0.3), inset 0 0 20px rgba(0,212,255,0.05);
-    }
-    .gear-inner {
-      width: 70px; height: 70px;
-      border: 2px dashed rgba(0,212,255,0.4);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      animation: spin 6s linear infinite reverse;
-    }
-    .gear-icon {
-      font-size: 2.2rem;
-      animation: spin 4s linear infinite;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* Teeth around gear */
-    .gear-outer::before {
-      content: '';
-      position: absolute;
-      inset: -10px;
-      border-radius: 50%;
-      border: 3px dotted rgba(0,212,255,0.25);
-    }
-
-    /* Status badge */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0,212,255,0.08);
-      border: 1px solid rgba(0,212,255,0.3);
-      border-radius: 50px;
-      padding: 6px 20px;
-      font-size: 0.82rem;
-      color: var(--accent);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 1.8rem;
-    }
-    .pulse-dot {
-      width: 8px; height: 8px;
-      background: var(--accent);
-      border-radius: 50%;
-      animation: pulse 1.5s ease-in-out infinite;
-      box-shadow: 0 0 8px var(--accent);
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.4); opacity: 0.5; }
-    }
-
-    h1 {
-      font-size: clamp(2.4rem, 6vw, 4rem);
-      font-weight: 900;
-      line-height: 1.2;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .subtitle {
-      font-size: 1.2rem;
-      color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      font-size: 1rem;
-      color: var(--muted);
-      line-height: 1.9;
-      margin-bottom: 2.5rem;
-    }
-
-    /* Divider */
-    .divider {
-      display: flex; align-items: center; gap: 1rem;
-      margin-bottom: 2.5rem;
-    }
-    .divider-line {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(to right, transparent, rgba(0,212,255,0.3), transparent);
-    }
-    .divider-text {
-      color: var(--accent);
-      font-size: 0.8rem;
-      letter-spacing: 3px;
-    }
-
-    /* Progress bar */
-    .progress-section {
-      margin-bottom: 2.5rem;
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-bottom: 0.6rem;
-    }
-    .progress-bar {
-      height: 6px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0;
-      border-radius: 10px;
-      background: linear-gradient(90deg, var(--accent), #007aff);
-      box-shadow: 0 0 12px rgba(0,212,255,0.5);
-      animation: fillBar 3s ease-out forwards 0.5s;
-    }
-    @keyframes fillBar {
-      to { width: 72%; }
-    }
-
-    /* Cards */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-bottom: 2.5rem;
-    }
-    .card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(0,212,255,0.12);
-      border-radius: 12px;
-      padding: 1.2rem 0.8rem;
-      transition: border-color 0.3s, background 0.3s;
-    }
-    .card:hover {
-      border-color: rgba(0,212,255,0.35);
-      background: rgba(0,212,255,0.05);
-    }
-    .card-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
-    .card-label { font-size: 0.78rem; color: var(--muted); }
-
-    /* CTA */
-    .notify-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, var(--accent), #007aff);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 14px 36px;
-      font-family: 'Cairo', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(0,212,255,0.25);
-      text-decoration: none;
-    }
-    .notify-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0,212,255,0.4);
-    }
-
-    /* Footer */
-    .footer {
-      margin-top: 3rem;
-      font-size: 0.78rem;
-      color: rgba(90,122,154,0.6);
-    }
-
-    /* Entry animation */
-    .container > * {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp 0.6s ease forwards;
-    }
-    .container > *:nth-child(1) { animation-delay: 0.1s; }
-    .container > *:nth-child(2) { animation-delay: 0.2s; }
-    .container > *:nth-child(3) { animation-delay: 0.3s; }
-    .container > *:nth-child(4) { animation-delay: 0.4s; }
-    .container > *:nth-child(5) { animation-delay: 0.45s; }
-    .container > *:nth-child(6) { animation-delay: 0.5s; }
-    .container > *:nth-child(7) { animation-delay: 0.55s; }
-    .container > *:nth-child(8) { animation-delay: 0.6s; }
-    .container > *:nth-child(9) { animation-delay: 0.65s; }
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 500px) {
-      .cards { grid-template-columns: 1fr; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="منصة تعليمية متكاملة مع الأستاذة منى كمال - شرح مبسط، اختبارات، متابعة مستمرة">
+    <meta name="theme-color" content="#6c5ce7">
+    <title>Ms. Mona Kamel | English Academy</title>
+    
+    <!-- Preload fonts and css -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css?v=2.0">
+    
+    <!-- Preload hero image -->
+    <link rel="preload" as="image" href="mona.jpg">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://monaacademy-cd983.web.app/">
+    <meta property="og:title" content="Ms. Mona Kamel | English Academy">
+    <meta property="og:description" content="منصة تعليمية متكاملة مع الأستاذة منى كمال - شرح مبسط، اختبارات تفاعلية، متابعة مستمرة">
+    <meta property="og:image" content="https://monaacademy-cd983.web.app/mona.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://monaacademy-cd983.web.app/">
+    <meta property="twitter:title" content="Ms. Mona Kamel | English Academy">
+    <meta property="twitter:description" content="منصة تعليمية متكاملة مع الأستاذة منى كمال">
+    <meta property="twitter:image" content="https://monaacademy-cd983.web.app/mona.jpg">
+    
+ 
+    
+    <style>
+        /* الأنماط الحرجة فقط */
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 10px; min-height: 200px; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .offline-indicator { position: fixed; top: 0; left: 0; right: 0; background: #ff7675; color: white; text-align: center; padding: 8px; font-size: 0.9rem; z-index: 10000; transform: translateY(-100%); transition: transform 0.3s ease; }
+        .offline-indicator.show { transform: translateY(0); }
+        .progress-indicator { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #6c5ce7, #8b7cf0); z-index: 10001; transform: scaleX(0); transform-origin: 0 0; transition: transform 0.3s ease; }
+        .progress-indicator.loading { transform: scaleX(1); }
+        .toast-container { position: fixed; top: 20px; left: 20px; z-index: 10000; pointer-events: none; }
+    </style>
 </head>
 <body>
+    <!-- Progress Indicator -->
+    <div id="progressIndicator" class="progress-indicator"></div>
+    
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator">
+        <i class="fas fa-wifi-slash"></i>
+        أنت غير متصل بالإنترنت - بعض الميزات قد لا تعمل
+    </div>
 
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
+    <header>
+        <div class="logo-text" id="logoText">MS. MONA KAMEL</div>
+        <div class="header-controls">
+    <div class="dark-mode-toggle" onclick="window.toggleDarkMode()">
+        <i class="fas fa-moon" id="darkModeIcon"></i>
+    </div>
+    <div id="authStatus"></div>
+</div>
+    </header>
 
-  <div class="container">
+    <!-- HAMBURGER DROPDOWN -->
+    <div id="menuDropdown" class="dropdown-menu">
+        <a id="homeMenuItem" style="display: none;" class="touch-feedback"><i class="fas fa-home" style="margin-left: 10px;"></i> الرئيسية</a>
+        <hr id="menuDivider" style="display: none;">
+        <a id="logoutMenuItem" style="display: none; color: var(--danger);" class="touch-feedback"><i class="fas fa-sign-out-alt" style="margin-left: 10px;"></i> تسجيل الخروج</a>
+    </div>
 
-    <div class="gear-wrapper">
-      <div class="gear-outer">
-        <div class="gear-inner">
-          <span class="gear-icon">⚙️</span>
+    <!-- SUBSCRIPTION MODAL -->
+    <div id="subscriptionModal" class="subscription-modal">
+        <div class="subscription-content">
+            <i class="fas fa-times-circle" style="position: absolute; left: 20px; top: 20px; font-size: 1.5rem; color: #ccc; cursor: pointer;" id="closeSubscriptionBtn"></i>
+            <h2 style="color: var(--main); margin-bottom: 20px;">🎯 اشترك في الكورس</h2>
+            <div id="subCourseInfo" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 20px;"></div>
+            <div class="sub-option">
+                <button type="button" id="previewBtn" class="sub-btn">👁️ مشاهدة المحتوى</button>
+                <button type="button" id="subscribeBtn" class="sub-btn primary">✅ اشتراك</button>
+            </div>
+            <div id="subscriptionIdSection" style="display: none;">
+                <p style="color: #666; margin-bottom: 10px;">أدخل كود الطالب الخاص بك (ID) لتأكيد الاشتراك:</p>
+                <input type="text" id="subscriptionIdInput" class="id-input" placeholder="1234567890" maxlength="10" inputmode="numeric" pattern="[0-9]*">
+                <button type="button" id="confirmSubscribeBtn" class="auth-btn" style="width: 100%; margin-top: 10px; background: var(--main); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer;">تأكيد الاشتراك</button>
+                <div id="subError" style="color: var(--danger); margin-top: 10px; font-size: 0.9rem;"></div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <div class="status-badge">
-      <span class="pulse-dot"></span>
-      جاري العمل على المنصة
+    <!-- HOME PAGE -->
+    <div id="homePage">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Learn English with <br> Ms. Mona Kamel</h1>
+                <p>Welcome to your second home! Everything you need to excel is right here.</p><br>
+                <a href="#courses" class="btn-hero" style="background: #fff; color: var(--main); padding: 15px 35px; border-radius: 50px; text-decoration: none; font-weight: 900;">View Courses</a>
+            </div>
+            <div class="hero-image"><img src="mona.jpg" alt="Ms. Mona Kamel" width="300" height="300"></div>
+        </section>
+
+        <section class="about-section">
+            <span class="about-tag">About Me</span>
+            <div class="about-content">
+                <h2>Who is Ms. Mona Kamel?</h2>
+                <p>Ms. Mona Kamel is a professional English language instructor dedicated to making English learning an enjoyable and rewarding experience.</p>
+            </div>
+        </section>
+        
+        <section class="features">
+            <h2>لماذا تشترك معنا؟ ✨</h2>
+            <div class="features-grid">
+                <div class="feat-card"><div class="num-circle">1</div><h3>شرح مبسط</h3><p>بنحلل كل قاعدة وكل كلمة في المنهج بأسلوب ممتع.</p></div>
+                <div class="feat-card"><div class="num-circle">2</div><h3>تكنولوجيا تعليمية</h3><p>فيديوهات بجودة عالية ومنصة سهلة تنظم لك مذاكرتك.</p></div>
+                <div class="feat-card"><div class="num-circle">3</div><h3>متابعة مستمرة</h3><p>إحنا معاك خطوة بخطوة للرد على استفساراتك.</p></div>
+            </div>
+        </section>
+
+        <!-- كورساتنا التعليمية -->
+        <section class="courses" id="courses">
+            <h2 style="text-align: center; margin-bottom: 40px; font-weight: 900;">كورساتنا التعليمية</h2>
+            <div id="foldersGrid" class="course-grid">
+                <!-- Skeleton Loading -->
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+            </div>
+        </section>
+
+        <!-- PERFECT SCORES SECTION -->
+        <section id="perfectScoresSection" class="perfect-section" style="display: block;">
+            <div class="perfect-header">
+                <i class="fas fa-trophy"></i>
+                <h2>طلاب الدرجة النهائية 🏅</h2>
+                <i class="fas fa-star"></i>
+            </div>
+            <div id="perfectScoresGrid" class="perfect-grid"></div>
+        </section>
+
+        <!-- REVIEWS SECTION -->
+        <section class="reviews">
+            <h2 style="margin-bottom: 40px; font-weight: 900;">قالوا عن Ms. Mona Kamel ✨</h2>
+            <div class="reviews-grid" id="testiGrid"></div>
+            <div id="reviewSectionContainer"></div>
+        </section>
     </div>
 
-    <h1>المنصة تحت الصيانة</h1>
+    <!-- COURSE CONTENT AREA -->
+    <div id="contentArea" style="display: none;">
+        <button type="button" id="backToHomeBtn" style="background:#f0eeff; color:var(--main); border:none; padding:10px 25px; border-radius:15px; cursor:pointer; font-weight:bold; margin-bottom:25px; font-family:'Cairo';">
+            <i class="fas fa-arrow-right"></i> العودة للرئيسية
+        </button>
+        <h2 id="folderTitleName" style="margin-bottom:30px; color:var(--dark); text-align:center; font-weight: 900;"></h2>
+      
+<!-- حاوية رابط مجموعة واتساب -->
+<div id="whatsappGroupContainer" style="margin-bottom: 20px;"></div>
+  
+        <!-- Rating Section -->
+        <div id="courseRatingSection" class="rating-box" style="display: none;"></div>
+        
+        <div id="combinedGrid" class="content-grid"></div>
+    </div>
+    
+    
+           <!-- حاوية الواجبات -->
+        <div id="assignmentsContainer" style="margin-top: 30px;"></div>
 
-    <p class="subtitle">سيتم إتاحتها قريباً ✨</p>
-
-    <p>
-      نعمل حالياً على تطوير وتحسين المنصة لتقديم<br/>
-      تجربة أفضل وأكثر كفاءة لجميع المستخدمين.<br/>
-      نعتذر عن أي إزعاج ونشكركم على صبركم وتفهمكم.
-    </p>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-text">التقدم</span>
-      <div class="divider-line"></div>
+    <!-- QUIZ / VIDEO OVERLAY -->
+    <div id="quizOverlay">
+        <div class="quiz-header">
+            <h2 id="quizTitle" style="font-weight: 900; color: var(--main);"></h2>
+            <button type="button" id="closeQuizBtn" style="background:var(--danger); color:white; border:none; padding:8px 20px; border-radius:10px; cursor:pointer; font-weight:bold; font-family:'Cairo';">إغلاق</button>
+        </div>
+        <div id="quizContainer" style="max-width: 800px; margin: 0 auto; padding-bottom: 100px;"></div>
     </div>
 
-    <div class="progress-section">
-      <div class="progress-label">
-        <span>نسبة الإنجاز</span>
-        <span style="color: var(--accent)">72%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
-      </div>
+    <!-- LOGIN & REGISTRATION MODAL -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeLoginBtn">&times;</span>
+            
+            <!-- شاشة اختيار تسجيل دخول / حساب جديد -->
+            <div id="authChoice">
+                <h2 style="color:var(--main); margin-bottom:20px;">مرحباً بك 🎓</h2>
+                <button type="button" class="auth-btn" id="showLoginChoiceBtn" style="width:100%; margin-bottom:10px; background:var(--main); color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">
+                    تسجيل الدخول
+                </button>
+                <button type="button" class="auth-btn" id="showRegisterBtn" style="background:#fff; color:var(--main); border:2px solid var(--main); width:100%; margin-bottom:10px; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">
+                    إنشاء حساب جديد
+                </button>
+            </div>
+            
+            <!-- شاشة اختيار طريقة تسجيل الدخول -->
+            <div id="loginChoice" style="display:none;">
+                <h2 style="color:var(--main); margin-bottom:20px;">اختر طريقة تسجيل الدخول</h2>
+                <button type="button" class="auth-btn" id="showLoginEmailBtn" style="width:100%; margin-bottom:10px; background:var(--main); color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">
+                    الدخول بالإيميل والباسورد
+                </button>
+                <button type="button" class="auth-btn" id="showLoginUsernameBtn" style="background:#fff; color:var(--main); border:2px solid var(--main); width:100%; margin-bottom:10px; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">
+                    الدخول باليوزر نيم والباسورد
+                </button>
+                <button type="button" class="auth-btn" id="loginGoogleBtn" style="background:#fff; color:#444; border:1px solid #ddd; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; padding:12px; border-radius:12px; font-weight:bold;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="20" alt="Google"> 
+                    الدخول بواسطة جوجل
+                </button>
+                <p id="backToChoiceFromLogin" style="margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--main);">العودة للخلف</p>
+            </div>
+            
+            <!-- نموذج تسجيل الدخول بالإيميل -->
+            <div id="loginEmail" style="display:none; text-align:right;">
+                <h2 style="color:var(--main); margin-bottom:20px;">الدخول بالإيميل والباسورد</h2>
+                <input type="email" id="stEmail" class="reg-input" placeholder="example@email.com" dir="ltr" inputmode="email" name="email">
+                <input type="password" id="stPass" class="reg-input" placeholder="كلمة المرور" name="password">
+                <button type="button" class="auth-btn" id="loginEmailSubmitBtn" style="width:100%; margin-top:15px; background:var(--main); color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">
+                    تسجيل الدخول
+                </button>
+                <p id="backToLoginChoiceFromEmail" style="margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--main);;">العودة للخلف</p>
+            </div>
+            
+            <!-- نموذج تسجيل الدخول باليوزر نيم -->
+            <div id="loginUsername" style="display:none; text-align:right;">
+                <h2 style="color:var(--main); margin-bottom:20px;">الدخول باليوزر نيم والباسورد</h2>
+                <input type="text" id="stUsername" class="reg-input" placeholder="اسم المستخدم" dir="ltr" inputmode="text" name="username">
+                <input type="password" id="stPassUsername" class="reg-input" placeholder="كلمة المرور" name="password">
+                <button type="button" class="auth-btn" id="loginUsernameSubmitBtn" style="width:100%; margin-top:15px; background:var(--main); color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">
+                    تسجيل الدخول
+                </button>
+                <p id="backToLoginChoiceFromUsername" style="margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--main);;">العودة للخلف</p>
+            </div>
+            
+            <!-- نموذج التسجيل (3 خطوات) -->
+            <div id="registerForm" style="display:none; text-align:right;">
+                <h2 style="color:var(--main); margin-bottom:20px;">إنشاء حساب جديد</h2>
+                
+                <!-- شريط التقدم -->
+                <div class="progress-bar">
+                    <div class="progress-fill" id="regProgress" style="width:33%;"></div>
+                </div>
+                
+                <!-- الخطوة 1: البيانات الشخصية -->
+                <div id="step1" class="step-container active">
+                    <h3 style="color:var(--dark); margin-bottom:15px;">📋 الخطوة 1: البيانات الشخصية</h3>
+                    
+                    <label class="reg-label required-field">الاسم الرباعي</label>
+                    <div class="name-grid">
+                        <input type="text" id="n1" class="reg-input" placeholder="الأول" maxlength="50" inputmode="text" name="firstname">
+                        <input type="text" id="n2" class="reg-input" placeholder="الثاني" maxlength="50" inputmode="text" name="middlename1">
+                        <input type="text" id="n3" class="reg-input" placeholder="الثالث" maxlength="50" inputmode="text" name="middlename2">
+                        <input type="text" id="n4" class="reg-input" placeholder="الرابع" maxlength="50" inputmode="text" name="lastname">
+                    </div>
+                    
+                    <label class="reg-label required-field">رقم الواتساب</label>
+                    <div class="phone-row">
+                        <select id="countryCode" class="country-select" name="countrycode">
+                            <option value="+20">+20 (مصر)</option>
+                            <option value="+966">+966 (السعودية)</option>
+                            <option value="+971">+971 (الإمارات)</option>
+                            <option value="+974">+974 (قطر)</option>
+                            <option value="+965">+965 (الكويت)</option>
+                            <option value="+973">+973 (البحرين)</option>
+                            <option value="+968">+968 (عمان)</option>
+                            <option value="+962">+962 (الأردن)</option>
+                            <option value="+970">+970 (فلسطين)</option>
+                        </select>
+                        <input type="tel" id="regWhatsapp" class="reg-input" placeholder="1234567890" maxlength="15" style="flex:1;" inputmode="numeric" pattern="[0-9]*" name="whatsapp">
+                    </div>
+                    <div class="hint-text">أدخل الرقم بدون مفتاح الدولة</div>
+                    
+                    <label class="reg-label">رقم ولي الأمر (اختياري)</label>
+                    <div class="phone-row">
+                        <select id="parentCountryCode" class="country-select" name="parentcountrycode">
+                            <option value="+20">+20 (مصر)</option>
+                            <option value="+966">+966 (السعودية)</option>
+                            <option value="+971">+971 (الإمارات)</option>
+                        </select>
+                        <input type="tel" id="regParentPhone" class="reg-input" placeholder="1234567890" maxlength="15" style="flex:1;" inputmode="numeric" pattern="[0-9]*" name="parentphone">
+                    </div>
+                    
+                    <div id="step1Error" class="error-message" style="display:none;"></div>
+                    
+                    <button type="button" id="step1NextBtn" class="btn btn-main" style="margin-top:20px; width:100%;" disabled>
+                        التالي <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
+                
+                <!-- الخطوة 2: المرحلة الدراسية -->
+                <div id="step2" class="step-container">
+                    <h3 style="color:var(--dark); margin-bottom:15px;">📚 الخطوة 2: المرحلة الدراسية</h3>
+                    
+                    <label class="reg-label required-field">المرحلة التعليمية</label>
+                    <select id="regLevel" class="reg-input" name="level">
+                        <option value="">-- اختر المرحلة --</option>
+                        <option value="primary">المرحلة الابتدائية</option>
+                        <option value="middle">المرحلة الإعدادية</option>
+                        <option value="secondary">المرحلة الثانوية</option>
+                    </select>
+                    
+                    <label class="reg-label required-field">الصف الدراسي</label>
+                    <select id="regGrade" class="reg-input" name="grade">
+                        <option value="">-- اختر الصف أولاً --</option>
+                    </select>
+                    
+                    <div id="step2Error" class="error-message" style="display:none;"></div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button type="button" id="step2PrevBtn" class="btn" style="background:#eee; color:var(--text-primary); flex:1;">
+                            <i class="fas fa-arrow-right"></i> السابق
+                        </button>
+                        <button type="button" id="step2NextBtn" class="btn btn-main" style="flex:2;" disabled>
+                            التالي <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- الخطوة 3: اختيار طريقة التسجيل -->
+                <div id="step3" class="step-container">
+                    <h3 style="color:var(--dark); margin-bottom:15px;">🔐 الخطوة 3: طريقة التسجيل</h3>
+                    
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <button type="button" id="showRegEmailBtn" class="btn" style="flex:1; background:#f0eeff; color:var(--main); border:1px solid var(--main);">
+                            <i class="fas fa-envelope"></i> إيميل
+                        </button>
+                        <button type="button" id="showRegUsernameBtn" class="btn" style="flex:1; background:#f0eeff; color:var(--main); border:1px solid var(--main);">
+                            <i class="fas fa-user"></i> يوزر نيم
+                        </button>
+                    </div>
+                    
+                    <!-- التسجيل بالإيميل -->
+                    <div id="step3Email" class="step-container" style="display:none;">
+                        <input type="email" id="regEmail" class="reg-input" placeholder="example@email.com" dir="ltr" inputmode="email" name="email">
+                        <input type="password" id="regPass" class="reg-input" placeholder="كلمة المرور (6 أحرف فأكثر)" name="password">
+                        <input type="password" id="regPassConfirm" class="reg-input" placeholder="تأكيد كلمة المرور" name="password_confirm">
+                        <button type="button" id="regBtn" class="btn btn-main" style="width:100%; margin-top:15px;">
+                            تسجيل
+                        </button>
+                    </div>
+                    
+                    <!-- التسجيل بيوزر نيم -->
+                    <div id="step3Username" class="step-container" style="display:none;">
+                        <input type="text" id="regUsername" class="reg-input" placeholder="اسم المستخدم" dir="ltr" inputmode="text" name="username">
+                        <input type="password" id="regPassUser" class="reg-input" placeholder="كلمة المرور (6 أحرف فأكثر)" name="password">
+                        <input type="password" id="regPassUserConfirm" class="reg-input" placeholder="تأكيد كلمة المرور" name="password_confirm">
+                        <button type="button" id="regBtnUser" class="btn btn-main" style="width:100%; margin-top:15px;" disabled>
+                            تسجيل
+                        </button>
+                    </div>
+                    
+                    <!-- التسجيل بجوجل -->
+                    <button type="button" id="registerGoogleBtn" class="auth-btn" style="background:#fff; color:#444; border:1px solid #ddd; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-top:15px; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="20" alt="Google">
+                        التسجيل بجوجل
+                    </button>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button type="button" id="step3PrevBtn" class="btn" style="background:#eee; color:var(--text-primary); flex:1;">
+                            <i class="fas fa-arrow-right"></i> السابق
+                        </button>
+                        <button type="button" id="step3CancelBtn" class="btn" style="background:var(--danger); color:white; flex:1;">
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+                
+                <p id="backToChoiceFromRegister" style="margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--main); text-align:center;">العودة للخلف</p>
+            </div>
+        </div>
     </div>
 
-    <div class="cards">
-      <div class="card">
-        <div class="card-icon">🔒</div>
-        <div class="card-label">تحسين الأمان</div>
-      </div>
-      <div class="card">
-        <div class="card-icon">⚡</div>
-        <div class="card-label">رفع الأداء</div>
-      </div>
-      <div class="card">
-        <div class="card-icon">🎨</div>
-        <div class="card-label">تجديد الواجهة</div>
-      </div>
+    <!-- WHATSAPP MODAL -->
+    <div id="waModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">تواصل مع Ms. Mona</h3>
+            <a href="https://wa.me/201026298954" class="social-btn wa" style="display:block; margin-bottom:10px;" target="_blank">01026298954</a>
+            <a href="https://wa.me/201128874885" class="social-btn wa" style="display:block;" target="_blank">01128874885</a>
+            <button type="button" id="closeWaModalBtn" style="margin-top: 15px; border: none; background: none; color: var(--danger); cursor: pointer; font-family:'Cairo';">إغلاق</button>
+        </div>
     </div>
 
-    <a href="https://chat.whatsapp.com/LGRHUx0HcSVK1HhfUCw0yp?mode=gi_t" class="notify-btn">
-      📩 تواصل مع الدعم
-    </a>
+    <footer>
+        <p>جميع الحقوق محفوظة © ٢٠٢٦ | <strong>Ms. Mona Kamel</strong></p>
+        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <a href="https://www.facebook.com/share/1C9MoP8pqj/" class="social-btn fb" target="_blank">
+                <i class="fab fa-facebook-f" style="margin-left: 5px;"></i> فيسبوك
+            </a>
+            <div class="social-btn wa" id="showWaModalBtn">
+                <i class="fab fa-whatsapp" style="margin-left: 5px;"></i> واتساب
+            </div>
+            <a href="https://wa.me/2010 91640622" class="social-btn developer-btn" target="_blank">
+                <i class="fas fa-code" style="margin-left: 5px;"></i> Developed by Abdelrahman Adawi
+            </a>
+        </div>
+    </footer>
 
-    <div class="footer">
-      © 2025 المنصة — جميع الحقوق محفوظة
+        <!-- Toast Container للإشعارات -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- استيراد السكريبت الرئيسي (يجب أن يكون أولاً) -->
+    <script type="module" src="script.js?v=2.2"></script>
+
+    <!-- استيراد السكريبتات المساعدة (defer لضمان تحميل script.js قبلها) -->
+    <script src="notifications.js?v=1.1" defer></script>
+    <script src="badges.js?v=1.1" defer></script>
+    <script src="maintenance.js?v=1.1" defer></script>
+    <script src="whatsapp-group.js?v=1.1" defer></script>
+
+    <script>
+        
+
+        // تحسينات تجربة المستخدم (Offline Detection, Skeleton, ربط الأحداث)
+        function updateOnlineStatus() {
+            const indicator = document.getElementById('offlineIndicator');
+            if (indicator) {
+                indicator.classList.toggle('show', !navigator.onLine);
+            }
+        }
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.skeleton').forEach(el => el.remove());
+            }, 1000);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ربط أزرار الواتساب
+            const showWaModalBtn = document.getElementById('showWaModalBtn');
+            const closeWaModalBtn = document.getElementById('closeWaModalBtn');
+            const waModal = document.getElementById('waModal');
+            if (showWaModalBtn) {
+                showWaModalBtn.addEventListener('click', function() {
+                    if (waModal) waModal.style.display = 'flex';
+                });
+            }
+            if (closeWaModalBtn) {
+                closeWaModalBtn.addEventListener('click', function() {
+                    if (waModal) waModal.style.display = 'none';
+                });
+            }
+
+            // ربط أزرار العودة للرئيسية
+            const logoText = document.getElementById('logoText');
+            const backToHomeBtn = document.getElementById('backToHomeBtn');
+            if (logoText) {
+                logoText.addEventListener('click', function() {
+                    window.location.reload();
+                });
+            }
+            if (backToHomeBtn) {
+                backToHomeBtn.addEventListener('click', function() {
+                    document.getElementById('homePage').style.display = 'block';
+                    document.getElementById('contentArea').style.display = 'none';
+                });
+            }
+
+            // ربط أزرار إغلاق المودالات
+            const closeLoginBtn = document.getElementById('closeLoginBtn');
+            const closeSubscriptionBtn = document.getElementById('closeSubscriptionBtn');
+            const closeQuizBtn = document.getElementById('closeQuizBtn');
+            const loginModal = document.getElementById('loginModal');
+            const subscriptionModal = document.getElementById('subscriptionModal');
+            const quizOverlay = document.getElementById('quizOverlay');
+            if (closeLoginBtn) {
+                closeLoginBtn.addEventListener('click', function() {
+                    if (loginModal) loginModal.style.display = 'none';
+                });
+            }
+            if (closeSubscriptionBtn) {
+                closeSubscriptionBtn.addEventListener('click', function() {
+                    if (subscriptionModal) subscriptionModal.style.display = 'none';
+                });
+            }
+            if (closeQuizBtn) {
+                closeQuizBtn.addEventListener('click', function() {
+                    if (quizOverlay) {
+                        quizOverlay.style.display = 'none';
+                        const quizContainer = document.getElementById('quizContainer');
+                        if (quizContainer) quizContainer.innerHTML = "";
+                    }
+                });
+            }
+
+            // إغلاق المودالات عند الضغط خارجها
+            window.addEventListener('click', function(event) {
+                if (event.target === loginModal) loginModal.style.display = 'none';
+                if (event.target === subscriptionModal) subscriptionModal.style.display = 'none';
+                if (event.target === waModal) waModal.style.display = 'none';
+            });
+
+            // منع التكبير على الـ inputs في الموبايل
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('touchstart', () => {
+                    input.style.fontSize = '16px';
+                });
+            });
+        });
+    </script>
+
+    
+        <!-- ASSIGNMENT OVERLAY -->
+    <div id="assignmentOverlay" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="quiz-header">
+                <h2 id="assignmentTitle"></h2>
+                <button type="button" onclick="closeAssignmentOverlay()" style="background:var(--danger); color:white; border:none; padding:8px 20px; border-radius:10px;">إغلاق</button>
+            </div>
+            <div id="assignmentContainer" style="max-height: 80vh; overflow-y: auto;"></div>
+        </div>
     </div>
+    <script src="assignments.js?v=1.1" defer></script>
+    
+    <!-- Firebase مُهيَّأ بالكامل في script.js (Firebase v10 modular) - لا حاجة لتهيئة إضافية هنا -->
 
-  </div>
 
+
+    
 </body>
 </html>
