@@ -217,12 +217,15 @@ window.checkStep1Completion = function() {
     
     if (!nextBtn || !errorDiv) return false;
     
-    const isNameValid = n1 !== '' && n4 !== '';
+    // التحقق من أن الاسم يحتوي على حروف فقط (عربية أو إنجليزية) وليس أرقاماً
+    const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/;
+    const isNameValid = n1 !== '' && n4 !== '' && nameRegex.test(n1) && nameRegex.test(n4);
     const isWhatsappValid = whatsapp !== '' && validatePhoneNumber(whatsapp, countryCode);
     const isParentPhoneValid = parentPhone === '' || validatePhoneNumber(parentPhone, parentCountryCode);
     
     let errorMessage = '';
-    if (!isNameValid) errorMessage = '❌ يرجى إدخال الاسم الأول واللقب على الأقل';
+    if (!n1 || !n4) errorMessage = '❌ يرجى إدخال الاسم الأول واللقب على الأقل';
+    else if (!nameRegex.test(n1) || !nameRegex.test(n4)) errorMessage = '❌ الاسم يجب أن يحتوي على حروف فقط (بدون أرقام أو رموز)';
     else if (!isWhatsappValid) errorMessage = '❌ يرجى إدخال رقم واتساب صحيح';
     else if (!isParentPhoneValid) errorMessage = '❌ رقم ولي الأمر غير صحيح';
     
@@ -317,6 +320,44 @@ const handleFirebaseError = (error, customMessage = 'حدث خطأ') => {
     window.showToast(`❌ ${message}`, 'error');
     return message;
 };
+
+// ================ RATE LIMITING للحماية من Brute Force ================
+const _loginAttempts = {};
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 دقيقة
+
+function checkRateLimit(identifier) {
+    const now = Date.now();
+    if (!_loginAttempts[identifier]) {
+        _loginAttempts[identifier] = { count: 0, firstAttempt: now, lockedUntil: 0 };
+    }
+    const entry = _loginAttempts[identifier];
+    
+    // تحقق من الحظر
+    if (entry.lockedUntil > now) {
+        const minutesLeft = Math.ceil((entry.lockedUntil - now) / 60000);
+        window.showToast(`❌ تم تجميد محاولات الدخول. حاول بعد ${minutesLeft} دقيقة`, 'error');
+        return false;
+    }
+    
+    // إعادة ضبط العداد بعد انتهاء المدة
+    if (now - entry.firstAttempt > LOCKOUT_DURATION) {
+        entry.count = 0;
+        entry.firstAttempt = now;
+    }
+    
+    entry.count++;
+    if (entry.count >= MAX_LOGIN_ATTEMPTS) {
+        entry.lockedUntil = now + LOCKOUT_DURATION;
+        window.showToast('❌ تجاوزت عدد المحاولات المسموحة. تم تجميد الحساب 15 دقيقة', 'error');
+        return false;
+    }
+    return true;
+}
+
+function resetRateLimit(identifier) {
+    delete _loginAttempts[identifier];
+}
 
 const ADMIN_EMAIL = "mrsmonakamel6@gmail.com";
 
@@ -622,9 +663,18 @@ window.registerWithGoogle = async function() {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
         
+        // التحقق من وجود مستخدم بهذا البريد قبل إكمال التسجيل
         const emailExists = await isEmailExists(user.email);
         if (emailExists) {
             window.showToast('❌ هذا البريد الإلكتروني مستخدم بالفعل. يرجى تسجيل الدخول مباشرة.', 'error');
+            await signOut(auth); // تسجيل الخروج لأن الحساب موجود مسبقاً
+            return;
+        }
+        
+        // التحقق أيضاً من قاعدة البيانات مباشرة للمستخدم الجديد
+        const userSnap = await get(child(dbRef, `students/${user.uid}`));
+        if (userSnap.exists()) {
+            window.showToast('❌ هذا الحساب مسجل بالفعل. يرجى تسجيل الدخول.', 'error');
             await signOut(auth);
             return;
         }
@@ -685,6 +735,9 @@ window.loginEmailSubmit = async function(e) {
         return;
     }
     
+    // تطبيق rate limiting
+    if (!checkRateLimit(e_mail)) return;
+    
     const btn = document.getElementById('loginEmailSubmitBtn');
     if (btn) {
         btn.disabled = true;
@@ -694,6 +747,7 @@ window.loginEmailSubmit = async function(e) {
     
     try {
         await signInWithEmailAndPassword(auth, e_mail, p);
+        resetRateLimit(e_mail); // إعادة ضبط العداد عند النجاح
         window.closeLogin();
         window.showToast('✅ مرحباً بك مجدداً!', 'success');
     } catch(err) {
@@ -726,6 +780,9 @@ window.loginUsernameSubmit = async function(e) {
         window.showToast('❌ يرجى إدخال اسم المستخدم وكلمة المرور', 'error');
         return;
     }
+    
+    // تطبيق rate limiting
+    if (!checkRateLimit(username)) return;
     
     const btn = document.getElementById('loginUsernameSubmitBtn');
     if (btn) {
@@ -1903,6 +1960,18 @@ window.viewQuizResult = async function(folderId, quizId) {
 window.closeQuiz = function() { 
     const quizOverlay = document.getElementById('quizOverlay');
     const quizContainer = document.getElementById('quizContainer');
+    
+    // إيقاف تشغيل الفيديو عند إغلاق النافذة
+    const iframe = document.getElementById('youtubePlayer');
+    if (iframe) {
+        try {
+            iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'stopVideo'
+            }), '*');
+            iframe.src = ''; // إيقاف الفيديو فوراً
+        } catch(e) { /* تجاهل أخطاء postMessage */ }
+    }
     
     // تنظيف موارد تتبع الفيديو لتفادي memory leaks
     if (window._videoProgressInterval) {
