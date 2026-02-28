@@ -2433,39 +2433,43 @@ window.continueWatching = async function(courseId, videoId, currentTime) {
 
 // التحقق من الوضع المخزن عند تحميل الصفحة
 function initDarkMode() {
-    const savedMode = localStorage.getItem('darkMode');
+    const savedTheme = localStorage.getItem('theme') || 'dark'; // الوضع الافتراضي هو dark (style.css)
+    const themeCss = document.getElementById('theme-css');
     const darkModeIcon = document.getElementById('darkModeIcon');
-    
-    if (savedMode === 'enabled') {
-        document.body.classList.add('dark-mode');
-        if (darkModeIcon) {
-            darkModeIcon.classList.remove('fa-moon');
-            darkModeIcon.classList.add('fa-sun');
-        }
-    } else {
-        document.body.classList.remove('dark-mode');
+
+    if (savedTheme === 'light') {
+        themeCss.href = 'ستيل.css?v=2.0'; // الوضع النهاري
         if (darkModeIcon) {
             darkModeIcon.classList.remove('fa-sun');
-            darkModeIcon.classList.add('fa-moon');
+            darkModeIcon.classList.add('fa-moon'); // أيقونة القمر تعني أن الضغط سينقل للنهاري
+        }
+    } else {
+        themeCss.href = 'style.css?v=2.0'; // الوضع الليلي
+        if (darkModeIcon) {
+            darkModeIcon.classList.remove('fa-moon');
+            darkModeIcon.classList.add('fa-sun'); // أيقونة الشمس تعني أن الضغط سينقل لليلي
         }
     }
 }
 
 // تبديل الوضع الليلي
 window.toggleDarkMode = function() {
+    const themeCss = document.getElementById('theme-css');
     const darkModeIcon = document.getElementById('darkModeIcon');
-    
-    if (document.body.classList.contains('dark-mode')) {
-        document.body.classList.remove('dark-mode');
-        localStorage.setItem('darkMode', 'disabled');
+
+    if (themeCss.href.includes('style.css')) {
+        // التبديل إلى الوضع النهاري (ستيل.css)
+        themeCss.href = 'ستيل.css?v=2.0';
+        localStorage.setItem('theme', 'light');
         if (darkModeIcon) {
             darkModeIcon.classList.remove('fa-sun');
             darkModeIcon.classList.add('fa-moon');
         }
         window.showToast('🌞 تم تفعيل الوضع النهاري', 'success');
     } else {
-        document.body.classList.add('dark-mode');
-        localStorage.setItem('darkMode', 'enabled');
+        // التبديل إلى الوضع الليلي (style.css)
+        themeCss.href = 'style.css?v=2.0';
+        localStorage.setItem('theme', 'dark');
         if (darkModeIcon) {
             darkModeIcon.classList.remove('fa-moon');
             darkModeIcon.classList.add('fa-sun');
