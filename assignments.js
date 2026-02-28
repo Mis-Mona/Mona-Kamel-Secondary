@@ -294,14 +294,9 @@ window.submitAssignment = async function(courseId, assignmentId) {
         for (const [key, q] of Object.entries(questions)) {
             if ((q.type === 'mcq' || q.type === 'tf') && !answers[key]) {
                 window.showToast('❌ يرجى الإجابة على جميع الأسئلة', 'error');
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> تسليم الواجب'; }
                 return;
             }
-        }
-
-        const submitBtn = container.querySelector('button[data-course-id]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التسليم...';
         }
 
         const now = new Date();
@@ -324,6 +319,7 @@ window.submitAssignment = async function(courseId, assignmentId) {
     } catch (error) {
         console.error('❌ خطأ في تسليم الواجب:', error);
         window.showToast('❌ حدث خطأ أثناء التسليم، حاول مرة أخرى', 'error');
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> تسليم الواجب'; }
     }
 };
 

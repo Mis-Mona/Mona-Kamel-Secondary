@@ -3590,3 +3590,53 @@ body.dark-mode .install-pwa-btn {
 body.dark-mode .whatsapp-group-card {
     box-shadow: 0 10px 30px rgba(37, 211, 102, 0.2);
 }
+/* ================ RESPONSIVE FIXES (إصلاحات #91-100) ================ */
+
+@media (max-width: 320px) {
+    .hero h1 { font-size: 1.3rem !important; }
+    .auth-btn { padding: 6px 12px !important; font-size: 0.8rem !important; }
+    body { font-size: 13px !important; }
+}
+
+@media (max-width: 768px) {
+    .admin-table, table.responsive-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+    
+    .dropdown-menu, #menuDropdown {
+        position: fixed !important;
+        top: auto !important;
+        right: 10px !important;
+        left: 10px !important;
+        max-width: calc(100vw - 20px) !important;
+        z-index: 9999 !important;
+    }
+    
+    .modal-content button, .modal button.btn {
+        min-height: 44px !important;
+        padding: 12px 20px !important;
+    }
+    
+    .modal { align-items: flex-end !important; }
+    
+    input, select, textarea { font-size: 16px !important; }
+    
+    button, a, [onclick], [role="button"] {
+        min-height: 36px;
+        touch-action: manipulation;
+    }
+}
+
+@media (max-width: 480px) {
+    body { font-size: 14px; }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.3rem !important; }
+    
+    .profile-tabs-container {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+    }
+}
