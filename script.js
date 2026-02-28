@@ -980,8 +980,8 @@ function updateMenuItems(isLoggedIn) {
 // ================ PERFECT SCORES ================
 window.loadPerfectScores = async function() {
     try {
+        // نجيب نتائج الامتحانات (دلوقتي مسموح للكل)
         const resultsSnap = await get(child(dbRef, 'quiz_results'));
-        const studentsSnap = await get(child(dbRef, 'students'));
         
         const perfectScoresSection = document.getElementById('perfectScoresSection');
         const perfectScoresGrid = document.getElementById('perfectScoresGrid');
@@ -990,42 +990,62 @@ window.loadPerfectScores = async function() {
         
         perfectScoresSection.style.display = 'block';
         
-        if (!resultsSnap.exists() || !studentsSnap.exists()) {
+        if (!resultsSnap.exists()) {
             perfectScoresGrid.innerHTML = '<div class="empty-state"><i class="fas fa-trophy"></i><br>🎉 لا توجد درجات نهائية بعد. كن أنت الأول!</div>';
             return;
         }
 
-        const students = studentsSnap.val();
-        const gradeMap = {};
-        Object.values(students).forEach(student => {
-            if (student.shortId) {
-                gradeMap[student.shortId] = student.grade || 'غير محدد';
-            }
-        });
-
         const perfectScores = [];
         resultsSnap.forEach(result => {
             const res = result.val();
+            
+            // فقط الامتحانات اللي فيها الدرجة كاملة
             if (res.score === res.total && res.score > 0) {
+                
                 perfectScores.push({
-                    studentName: res.student || 'طالب',
-                    studentId: res.studentId || '',
+                    studentName: res.studentName || res.student || 'طالب',
                     examName: res.quiz || 'امتحان',
-                    grade: gradeMap[res.studentId] || 'غير محدد',
-                    score: res.score,
-                    total: res.total,
-                    time: res.time || ''
+                    grade: res.studentGrade || 'غير محدد'
+                    // 🔥 مش بنحط score هنا عشان محدش يشوفه
                 });
             }
         });
 
-        const unique = {};
-        perfectScores.forEach(ps => {
-            const key = `${ps.studentId}-${ps.examName}`;
-            if (!unique[key] || ps.time > unique[key].time) {
-                unique[key] = ps;
-            }
-        });
+        // عرض البيانات
+        if (perfectScores.length > 0) {
+            let html = '';
+            perfectScores.forEach(ps => {
+                html += `<div class="perfect-card">
+                    <div class="perfect-name">
+                        <i class="fas fa-user-graduate"></i>
+                        ${escapeHTML(ps.studentName)}
+                    </div>
+                    <div class="perfect-exam">
+                        <i class="fas fa-file-alt"></i>
+                        ${escapeHTML(ps.examName)}
+                    </div>
+                    <div class="perfect-grade">
+                        <i class="fas fa-graduation-cap"></i>
+                        الصف: ${escapeHTML(ps.grade)}
+                    </div>
+                    <div class="perfect-score">
+                        <i class="fas fa-check-circle"></i> ممتاز - الدرجة النهائية 🏆
+                    </div>
+                </div>`;
+            });
+            perfectScoresGrid.innerHTML = html;
+        } else {
+            perfectScoresGrid.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><br>🎉 لا توجد درجات نهائية بعد. كن أنت الأول!</div>';
+        }
+        
+    } catch (error) {
+        console.error("Error loading perfect scores:", error);
+        const perfectScoresGrid = document.getElementById('perfectScoresGrid');
+        if (perfectScoresGrid) {
+            perfectScoresGrid.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>حدث خطأ في تحميل الدرجات النهائية</div>';
+        }
+    }
+};
 
         const finalList = Object.values(unique);
         
