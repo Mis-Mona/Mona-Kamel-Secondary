@@ -2463,6 +2463,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+// ================ UTILITY FUNCTIONS ================
+// دالة لتجنب XSS - تحويل الأحرف الخاصة
+function escapeHTML(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// ================ PROFILE MENU ITEM ================
+// الانتقال لصفحة الملف الشخصي
+window.profileMenuItem = function() {
+    window.location.href = 'profile.html';
+};
+
 // ================ FIREBASE INIT EVENT ================
 // إرسال حدث لإعلام الملفات الأخرى أن Firebase جاهز
 window.dispatchEvent(new CustomEvent('firebaseReady', { detail: { db, auth, dbRef } }));

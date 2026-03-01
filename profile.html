@@ -394,11 +394,16 @@
 
         // Dark Mode
         function initDarkMode() {
-            const savedMode = localStorage.getItem('darkMode');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             const darkModeIcon = document.getElementById('darkModeIcon');
             
-            if (savedMode === 'enabled') {
-                document.body.classList.add('dark-mode');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                if (darkModeIcon) {
+                    darkModeIcon.classList.remove('fa-sun');
+                    darkModeIcon.classList.add('fa-moon');
+                }
+            } else {
                 if (darkModeIcon) {
                     darkModeIcon.classList.remove('fa-moon');
                     darkModeIcon.classList.add('fa-sun');
@@ -406,6 +411,30 @@
             }
         }
         initDarkMode();
+
+        // Toggle Dark Mode
+        window.toggleDarkMode = function() {
+            const darkModeIcon = document.getElementById('darkModeIcon');
+            const isDark = !document.body.classList.contains('light-mode');
+            
+            if (isDark) {
+                // Switch to light
+                document.body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+                if (darkModeIcon) {
+                    darkModeIcon.classList.remove('fa-sun');
+                    darkModeIcon.classList.add('fa-moon');
+                }
+            } else {
+                // Switch to dark
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+                if (darkModeIcon) {
+                    darkModeIcon.classList.remove('fa-moon');
+                    darkModeIcon.classList.add('fa-sun');
+                }
+            }
+        };
 
         // Tab Switching
         window.switchProfileTab = function(tab) {
