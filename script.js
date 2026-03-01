@@ -2464,16 +2464,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ================ UTILITY FUNCTIONS ================
-// دالة لتجنب XSS - تحويل الأحرف الخاصة
-function escapeHTML(str) {
-    if (!str) return '';
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
+// دالة لتجنب XSS - تحويل الأحرف الخاصة (تم تعريفها سابقاً في السطر 104)
 
 // ================ PROFILE MENU ITEM ================
 // الانتقال لصفحة الملف الشخصي
