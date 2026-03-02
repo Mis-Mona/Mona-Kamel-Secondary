@@ -34,6 +34,20 @@
         </div>
     </header>
     
+    <!-- Hamburger Dropdown Menu -->
+    <div id="menuDropdown" style="display:none; position:fixed; top:60px; left:10px; background:var(--card-bg, #fff); border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.15); z-index:9999; min-width:180px; overflow:hidden;">
+        <a id="homeMenuItem" href="index.html" style="display:none; padding:14px 20px; text-decoration:none; color:var(--text,#333); font-weight:600; border-bottom:1px solid rgba(0,0,0,0.07);">
+            <i class="fas fa-home" style="margin-left:8px; color:#6c5ce7;"></i> الرئيسية
+        </a>
+        <a id="profileMenuItem" href="profile.html" style="display:none; padding:14px 20px; text-decoration:none; color:var(--text,#333); font-weight:600; border-bottom:1px solid rgba(0,0,0,0.07);">
+            <i class="fas fa-user" style="margin-left:8px; color:#6c5ce7;"></i> ملفي الشخصي
+        </a>
+        <hr id="menuDivider" style="display:none; margin:0; border:none; border-top:1px solid rgba(0,0,0,0.07);">
+        <a id="logoutMenuItem" href="#" style="display:none; padding:14px 20px; text-decoration:none; color:#e74c3c; font-weight:600;">
+            <i class="fas fa-sign-out-alt" style="margin-left:8px;"></i> تسجيل الخروج
+        </a>
+    </div>
+
         <!-- Main Content -->
     <div class="profile-container">
         <!-- Cover Photo -->
@@ -251,15 +265,6 @@
                         </div>
                     </div>
                     
-                    <!-- ✅ حقل معرف التليجرام الجديد - هذا هو المهم -->
-                    <div class="form-group">
-                        <label>معرف تليجرام لولي الأمر (لإرسال التقارير)</label>
-                        <div>
-                            <input type="text" id="settingsTelegramChatId" class="settings-input" placeholder="مثلاً 123456789">
-                            <small class="hint-text">أرسل أي كلمة للبوت @EduTrackBot هيجيلك الرقم ده</small>
-                        </div>
-                    </div>
-                    
                     <div class="form-group">
                         <label>المرحلة الدراسية</label>
                         <select id="settingsGrade" class="settings-input">
@@ -379,17 +384,19 @@
     <footer>
         <p>جميع الحقوق محفوظة © ٢٠٢٦ | <strong>Ms. Mona Kamel</strong></p>
     </footer>
-    
-    <!-- HAMBURGER DROPDOWN -->
-    <div id="menuDropdown" class="dropdown-menu">
-        <a id="homeMenuItem" class="touch-feedback" href="index.html"><i class="fas fa-home" style="margin-left: 10px;"></i> الرئيسية</a>
-        <a id="profileMenuItem" class="touch-feedback" href="profile.html"><i class="fas fa-user" style="margin-left: 10px;"></i> الملف الشخصي</a>
-        <hr id="menuDivider">
-        <a id="logoutMenuItem" class="touch-feedback" onclick="logout()" style="color: var(--danger);"><i class="fas fa-sign-out-alt" style="margin-left: 10px;"></i> تسجيل الخروج</a>
-    </div>
-    
-    <!-- Menu Overlay -->
-    <div id="menuOverlay" class="menu-overlay"></div>
+
+    <script>
+        // في profile.html: goHome يرجع لـ index.html
+        window.goHome = function() {
+            window.location.href = 'index.html';
+        };
+        // logout يرجع لـ index.html بعد تسجيل الخروج
+        const _origLogout = window.logout;
+        window.logout = async function() {
+            if (typeof _origLogout === 'function') await _origLogout();
+            window.location.href = 'index.html';
+        };
+    </script>
 
     <!-- Scripts - يجب تحميل script.js أولاً (module) ثم باقي السكريبتات بـ defer -->
     <script type="module" src="script.js"></script>
@@ -438,7 +445,6 @@
             const whatsapp = document.getElementById('settingsWhatsapp')?.value.trim();
             const parentCountryCode = document.getElementById('settingsParentCountryCode')?.value;
             const parentPhone = document.getElementById('settingsParentPhone')?.value.trim();
-            const telegramChatId = document.getElementById('settingsTelegramChatId')?.value.trim();
             const grade = document.getElementById('settingsGrade')?.value;
 
             if (!name) {
@@ -446,35 +452,25 @@
                 return;
             }
 
-            const fullWhatsapp = countryCode + (whatsapp || '');
-            const fullParentPhone = parentCountryCode + (parentPhone || '');
+            const fullWhatsapp = whatsapp ? (countryCode + whatsapp) : '';
+            const fullParentPhone = parentPhone ? (parentCountryCode + parentPhone) : '';
 
             const updateData = {
                 name: name,
-                whatsapp: fullWhatsapp || '',
-                parentPhone: fullParentPhone || '',
-                grade: grade
+                whatsapp: fullWhatsapp,
+                parentPhone: fullParentPhone,
+                grade: grade || ''
             };
-
-            if (telegramChatId) {
-                if (!/^\d+$/.test(telegramChatId)) {
-                    window.showToast('❌ معرف تليجرام يجب أن يكون أرقاماً فقط', 'error');
-                    return;
-                }
-                updateData.telegramChatId = telegramChatId;
-            }
 
             window.startProgress();
             try {
                 await window.update(window.ref(window.db, `students/${window.currentUser.uid}`), updateData);
-                window.showToast('✅ تم حفظ التغييرات', 'success');
-                // إعادة تحميل البيانات
-                if (typeof window.loadProgressVisuals === 'function') {
-                    window.loadProgressVisuals();
-                }
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('profileGrade').textContent = grade || '';
+                window.showToast('✅ تم حفظ التغييرات بنجاح', 'success');
             } catch (error) {
                 console.error('Error saving profile:', error);
-                window.showToast('❌ حدث خطأ', 'error');
+                window.showToast('❌ حدث خطأ أثناء الحفظ: ' + error.message, 'error');
             } finally {
                 window.stopProgress();
             }
@@ -486,10 +482,13 @@
                     if (snap.exists()) {
                         const data = snap.val();
                         document.getElementById('settingsName').value = data.name || '';
-                        document.getElementById('settingsWhatsapp').value = (data.whatsapp || '').replace(/^\+\d+/, '');
-                        document.getElementById('settingsParentPhone').value = (data.parentPhone || '').replace(/^\+\d+/, '');
+                        const whatsapp = data.whatsapp || '';
+                        const whatsappNum = whatsapp.replace(/^\+\d+/, '');
+                        document.getElementById('settingsWhatsapp').value = whatsappNum;
+                        const parentPhone = data.parentPhone || '';
+                        const parentNum = parentPhone.replace(/^\+\d+/, '');
+                        document.getElementById('settingsParentPhone').value = parentNum;
                         document.getElementById('settingsGrade').value = data.grade || '';
-                        document.getElementById('settingsTelegramChatId').value = data.telegramChatId || '';
                     }
                 });
             }
@@ -497,7 +496,88 @@
     </script>
     
         
-    <script src="badges.js?v=1.0"></script>
+    <script>
+        // ====== رفع الصورة الشخصية ======
+        document.getElementById('avatarFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                window.showToast('❌ الصورة أكبر من 2MB', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const preview = document.getElementById('avatarPreview');
+                preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                window._pendingAvatarDataUrl = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        window.uploadAvatar = async function() {
+            if (!window._pendingAvatarDataUrl) {
+                window.showToast('❌ اختر صورة أولاً', 'error');
+                return;
+            }
+            if (!window.currentUser) {
+                window.showToast('❌ يرجى تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            window.startProgress();
+            try {
+                // حفظ الصورة كـ base64 في Firebase Database مباشرة
+                const avatarData = window._pendingAvatarDataUrl;
+                await window.update(window.ref(window.db, `students/${window.currentUser.uid}`), {
+                    avatarBase64: avatarData
+                });
+                // تحديث الصورة في الصفحة
+                const avatarEl = document.getElementById('profileAvatar');
+                avatarEl.innerHTML = `<img src="${avatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                window._pendingAvatarDataUrl = null;
+                window.closeAvatarModal();
+                window.showToast('✅ تم رفع الصورة بنجاح', 'success');
+            } catch (error) {
+                console.error('Error uploading avatar:', error);
+                window.showToast('❌ فشل رفع الصورة: ' + error.message, 'error');
+            } finally {
+                window.stopProgress();
+            }
+        };
+
+        // ====== تحميل بيانات الطالب في صفحة البروفيل ======
+        function loadProfileData(retries = 100) {
+            if (window.currentUser && window.db && window.get && window.child && window.dbRef) {
+                window.get(window.child(window.dbRef, `students/${window.currentUser.uid}`)).then(snap => {
+                    if (!snap.exists()) return;
+                    const data = snap.val();
+
+                    // الهيدر
+                    document.getElementById('profileName').textContent = data.name || '';
+                    document.getElementById('profileEmail').textContent = window.currentUser.email || '';
+                    document.getElementById('profileGrade').textContent = data.grade || '';
+
+                    // الصورة
+                    if (data.avatarBase64) {
+                        document.getElementById('profileAvatar').innerHTML =
+                            `<img src="${data.avatarBase64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                    }
+
+                    // الـ settings form
+                    const whatsappRaw = data.whatsapp || '';
+                    const whatsappNum = whatsappRaw.replace(/^\+\d+/, '');
+                    document.getElementById('settingsName').value = data.name || '';
+                    document.getElementById('settingsWhatsapp').value = whatsappNum;
+                    const parentRaw = data.parentPhone || '';
+                    document.getElementById('settingsParentPhone').value = parentRaw.replace(/^\+\d+/, '');
+                    document.getElementById('settingsGrade').value = data.grade || '';
+                    document.getElementById('settingsStudentId').textContent = data.shortId || '---';
+                }).catch(err => console.error('Error loading profile data:', err));
+            } else if (retries > 0) {
+                setTimeout(() => loadProfileData(retries - 1), 100);
+            }
+        }
+        loadProfileData();
+    </script>
     <script src="progress-visual.js?v=1.0"></script>
 
     <script>
