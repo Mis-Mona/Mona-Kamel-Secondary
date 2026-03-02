@@ -509,13 +509,13 @@
             reader.onload = function(ev) {
                 const preview = document.getElementById('avatarPreview');
                 preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-                window._pendingAvatarDataUrl = ev.target.result;
             };
             reader.readAsDataURL(file);
         });
 
         window.uploadAvatar = async function() {
-            if (!window._pendingAvatarDataUrl) {
+            const fileInput = document.getElementById('avatarFile');
+            if (!fileInput.files[0]) {
                 window.showToast('❌ اختر صورة أولاً', 'error');
                 return;
             }
@@ -525,15 +525,32 @@
             }
             window.startProgress();
             try {
-                // حفظ الصورة كـ base64 في Firebase Database مباشرة
-                const avatarData = window._pendingAvatarDataUrl;
-                await window.update(window.ref(window.db, `students/${window.currentUser.uid}`), {
-                    avatarBase64: avatarData
+                // جيب المفتاح من Firebase
+                const keySnap = await window.get(window.child(window.dbRef, 'settings/imgbbKey'));
+                if (!keySnap.exists()) throw new Error('لم يتم العثور على مفتاح الرفع');
+                const imgbbKey = keySnap.val();
+
+                // رفع الصورة على ImgBB
+                const formData = new FormData();
+                formData.append('image', fileInput.files[0]);
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+                    method: 'POST',
+                    body: formData
                 });
+                const json = await res.json();
+                if (!json.success) throw new Error('فشل رفع الصورة على ImgBB');
+
+                const imageUrl = json.data.url;
+
+                // حفظ الـ URL فقط في Firebase
+                await window.update(window.ref(window.db, `students/${window.currentUser.uid}`), {
+                    avatarURL: imageUrl
+                });
+
                 // تحديث الصورة في الصفحة
-                const avatarEl = document.getElementById('profileAvatar');
-                avatarEl.innerHTML = `<img src="${avatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-                window._pendingAvatarDataUrl = null;
+                document.getElementById('profileAvatar').innerHTML =
+                    `<img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+
                 window.closeAvatarModal();
                 window.showToast('✅ تم رفع الصورة بنجاح', 'success');
             } catch (error) {
@@ -557,9 +574,9 @@
                     document.getElementById('profileGrade').textContent = data.grade || '';
 
                     // الصورة
-                    if (data.avatarBase64) {
+                    if (data.avatarURL) {
                         document.getElementById('profileAvatar').innerHTML =
-                            `<img src="${data.avatarBase64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                            `<img src="${data.avatarURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
                     }
 
                     // الـ settings form
