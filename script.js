@@ -834,9 +834,9 @@ onAuthStateChanged(auth, async user => {
             const isAdmin = user.email === ADMIN_EMAIL;
             let isAddedAdmin = false;
             try {
-                const adminsSnap = await get(ref(db, 'admins'));
-                const admins = adminsSnap.val() || {};
-                isAddedAdmin = admins && Object.values(admins).some(a => a.email === user.email);
+                const emailKey = user.email.replace(/\./g, '_');
+                const adminSnap = await get(ref(db, `admins/${emailKey}`));
+                isAddedAdmin = adminSnap.exists();
             } catch (e) {
                 // الطالب العادي مش عنده صلاحية قراءة الأدمنز - ده طبيعي
             }
