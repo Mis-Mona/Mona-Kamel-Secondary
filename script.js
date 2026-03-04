@@ -1698,6 +1698,16 @@ window.submitQuiz = async function(folderId, quizId) {
         const folderTitleName = document.getElementById('folderTitleName');
         const courseName = folderTitleName ? folderTitleName.innerText : '';
         
+        // جلب الصف الدراسي مباشرة من قاعدة البيانات إذا لم يكن محفوظاً في المتغير العام
+        let studentGrade = currentStudentGrade;
+        if (!studentGrade) {
+            const studentSnap = await get(child(dbRef, `students/${currentUser.uid}`));
+            if (studentSnap.exists()) {
+                studentGrade = studentSnap.val().grade || '';
+                currentStudentGrade = studentGrade; // تحديث المتغير العام
+            }
+        }
+
         await set(ref(db, `students/${currentUser.uid}/examResults/${quizId}`), {
             courseId: folderId,
             courseName: courseName,
@@ -1716,7 +1726,7 @@ window.submitQuiz = async function(folderId, quizId) {
             student: currentUser.displayName || '',
             studentName: currentUser.displayName || '',
             studentId: myShortId,
-            studentGrade: currentStudentGrade || '',
+            studentGrade: studentGrade || '',
             uid: currentUser.uid,
             quizId: quizId,
             quiz: quizData.name || '',
