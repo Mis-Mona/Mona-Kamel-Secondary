@@ -686,7 +686,7 @@
                 }
 
                 container.innerHTML = answers.map(ans => {
-                    const ok = normalizeAnswer(ans.answer) === normalizeAnswer(correctAnswer);
+                    const ok = ans.isCorrect === true;
                     return `
                         <div class="ramadan-answer-item ${ok ? 'correct' : 'wrong'}">
                             <div class="ramadan-answer-name"><i class="fas fa-user"></i> ${escapeHTML(ans.name)}</div>
