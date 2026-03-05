@@ -743,29 +743,28 @@ window.loginUsernameSubmit = async function(e) {
     window.startProgress();
     
     try {
-        const studentsRef = ref(db, 'students');
-        const studentsSnap = await get(studentsRef);
+        // البحث عن اليوزرنيم عبر node المخصص بدلاً من قراءة كل الطلاب (أسرع وأكثر أماناً)
+        const usernameSnap = await get(ref(db, `usernames/${username}`));
         
-        if (!studentsSnap.exists()) {
+        if (!usernameSnap.exists()) {
             window.showToast('❌ اسم المستخدم غير موجود', 'error');
             return;
         }
         
-        let foundUser = null;
-        let foundUid = null;
+        const foundUid = usernameSnap.val();
         
-        studentsSnap.forEach((studentSnapshot) => {
-            const studentData = studentSnapshot.val();
-            if (studentData.username && studentData.username.toLowerCase() === username) {
-                foundUser = studentData;
-                foundUid = studentSnapshot.key;
-            }
-        });
-        
-        if (!foundUser || !foundUid) {
+        if (!foundUid) {
             window.showToast('❌ اسم المستخدم غير موجود', 'error');
             return;
         }
+        
+        // جلب بيانات الطالب بـ uid المحدد فقط
+        const userSnap = await get(ref(db, `students/${foundUid}`));
+        if (!userSnap.exists()) {
+            window.showToast('❌ اسم المستخدم غير موجود', 'error');
+            return;
+        }
+        const foundUser = userSnap.val();
         
         let email = foundUser.email;
         if (!email) {
@@ -1146,7 +1145,7 @@ window.loadFolders = function() {
 };
 
 // ================ REVIEWS LOADING ================
-function loadReviews() {
+window.loadReviews = function loadReviews() {
     listenerManager.removeByContext('reviews');
     
     const reviewsRef = ref(db, 'reviews');
@@ -1574,7 +1573,7 @@ window.openVideo = async function(url, title, videoId, folderId) {
                     iframe.contentWindow.postMessage(JSON.stringify({
                         event: 'command',
                         func: 'getCurrentTime'
-                    }), '*');
+                    }), 'https://www.youtube.com');
                 }
             }, 10000); // كل 10 ثواني
             
@@ -2281,7 +2280,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ================ INIT ================
 document.addEventListener('DOMContentLoaded', () => {
     window.loadFolders();
-    loadReviews();
+    window.loadReviews();
     window.loadPerfectScores();
     
     // ✅ تم التصحيح - استخدام الدالة الصحيحة
@@ -2440,7 +2439,7 @@ window.continueWatching = async function(courseId, videoId, currentTime) {
                     event: 'command',
                     func: 'seekTo',
                     args: [parseFloat(currentTime) || 0, true]
-                }), '*');
+                }), 'https://www.youtube.com');
             }
         }, 3000);
     } catch (error) {
@@ -2458,7 +2457,7 @@ function initDarkMode() {
     const darkModeIcon = document.getElementById('darkModeIcon');
 
     if (savedTheme === 'light') {
-        themeCss.href = 'ستيل.css?v=2.0'; // الوضع النهاري
+        themeCss.href = 'style-light.css?v=2.0'; // الوضع النهاري
         if (darkModeIcon) {
             darkModeIcon.classList.remove('fa-sun');
             darkModeIcon.classList.add('fa-moon'); // أيقونة القمر تعني أن الضغط سينقل للنهاري
@@ -2477,9 +2476,9 @@ window.toggleDarkMode = function() {
     const themeCss = document.getElementById('theme-css');
     const darkModeIcon = document.getElementById('darkModeIcon');
 
-    if (themeCss.href.includes('style.css')) {
-        // التبديل إلى الوضع النهاري (ستيل.css)
-        themeCss.href = 'ستيل.css?v=2.0';
+    if (!themeCss.href.includes('style-light.css')) {
+        // التبديل إلى الوضع النهاري
+        themeCss.href = 'style-light.css?v=2.0';
         localStorage.setItem('theme', 'light');
         if (darkModeIcon) {
             darkModeIcon.classList.remove('fa-sun');
