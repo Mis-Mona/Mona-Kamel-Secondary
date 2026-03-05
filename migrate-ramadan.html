@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نسخ بيانات رمضان | أداة الترحيل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(145deg, #0c1a2b, #1a2639);
+            min-height: 100vh;
+            color: white;
+            padding: 40px 5%;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .container { max-width: 800px; width: 100%; }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+
+        #loginSection {
+            background: rgba(255,255,255,0.07);
+            border: 2px solid rgba(255,215,0,0.3);
+            border-radius: 25px;
+            padding: 50px 30px;
+            text-align: center;
+        }
+
+        #loginSection h2 { color: #ffd700; font-size: 1.4rem; margin-bottom: 10px; }
+        #loginSection p  { color: rgba(255,255,255,0.5); margin-bottom: 30px; }
+
+        .google-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            color: #333;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 30px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .google-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .google-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .google-btn img { width: 22px; height: 22px; }
+
+        #mainSection { display: none; }
+
+        .user-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 15px;
+            padding: 12px 20px;
+            margin-bottom: 25px;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; color: #ffd700; }
+        .user-info img { width: 32px; height: 32px; border-radius: 50%; }
+
+        .logout-btn {
+            background: rgba(214,48,49,0.2);
+            color: #d63031;
+            border: 1px solid rgba(214,48,49,0.4);
+            border-radius: 50px;
+            padding: 6px 16px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover { background: rgba(214,48,49,0.4); }
+
+        .card {
+            background: rgba(255,255,255,0.07);
+            border: 2px solid rgba(255,215,0,0.3);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .card h2 { color: #ffd700; font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+
+        .stat-box .num   { font-size: 2rem; font-weight: 900; color: #ffd700; }
+        .stat-box .label { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: 5px; }
+
+        .btn {
+            width: 100%;
+            padding: 16px 30px;
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #1a2639;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(255,215,0,0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .warning-box {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid rgba(255,215,0,0.4);
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: #ffd700;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .progress-wrap {
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            height: 14px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffa500);
+            border-radius: 50px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .log-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            display: none;
+            margin-top: 15px;
+        }
+
+        .log-item { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .log-item.success { color: #00b894; }
+        .log-item.skip    { color: #ffd700; }
+        .log-item.error   { color: #d63031; }
+        .log-item.info    { color: rgba(255,255,255,0.6); }
+
+        .result-box {
+            display: none;
+            background: rgba(0,184,148,0.1);
+            border: 2px solid #00b894;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .result-box .big { font-size: 3rem; margin-bottom: 10px; }
+        .result-box h3   { color: #00b894; font-size: 1.3rem; margin-bottom: 8px; }
+        .result-box p    { color: rgba(255,255,255,0.7); }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>🌙 أداة ترحيل بيانات رمضان</h1>
+    <p class="subtitle">تنسخ الإجابات القديمة من <code style="color:#ffd700;">ramadan_answers</code> إلى <code style="color:#00b894;">ramadan_leaderboard</code></p>
+
+    <!-- تسجيل الدخول -->
+    <div id="loginSection">
+        <h2>🔐 تسجيل الدخول</h2>
+        <p>مخصص للأدمن فقط</p>
+        <button class="google-btn" id="googleLoginBtn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+            تسجيل الدخول بـ Google
+        </button>
+    </div>
+
+    <!-- الأداة الرئيسية -->
+    <div id="mainSection">
+
+        <div class="user-bar">
+            <div class="user-info">
+                <img id="userPhoto" src="" alt="">
+                <span id="userName"></span>
+            </div>
+            <button class="logout-btn" id="btnLogout"><i class="fas fa-sign-out-alt"></i> خروج</button>
+        </div>
+
+        <!-- إحصائيات -->
+        <div class="card">
+            <h2><i class="fas fa-chart-bar"></i> الإحصائيات الحالية</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="num" id="statAnswers">...</div>
+                    <div class="label">إجابات في ramadan_answers</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num" id="statLeaderboard">...</div>
+                    <div class="label">سجلات في ramadan_leaderboard</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num" id="statMissing" style="color:#ffa500;">...</div>
+                    <div class="label">محتاجين ترحيل</div>
+                </div>
+            </div>
+            <button class="btn" id="btnRefresh"><i class="fas fa-sync-alt"></i> تحديث الإحصائيات</button>
+        </div>
+
+        <!-- الترحيل -->
+        <div class="card">
+            <h2><i class="fas fa-copy"></i> نسخ البيانات</h2>
+            <div class="warning-box">
+                <i class="fas fa-info-circle"></i>
+                الأداة دي هتنسخ من <strong>ramadan_answers</strong> للـ <strong>ramadan_leaderboard</strong> — الاسم + صح/غلط + التاريخ بس، من غير كود الطالب أو الإجابة.
+                <br>الإجابات الموجودة بالفعل في الليدربورد هتتخطى تلقائياً.
+            </div>
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <button class="btn" id="btnMigrate"><i class="fas fa-play"></i> ابدأ الترحيل</button>
+            <div class="log-box" id="logBox"></div>
+            <div class="result-box" id="resultBox">
+                <div class="big">✅</div>
+                <h3>تم الترحيل بنجاح!</h3>
+                <p id="resultText"></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA8KQAQgu4nIiomoDpoTLnBz_uAtab63sY",
+        authDomain: "monaacademy-cd983.firebaseapp.com",
+        databaseURL: "https://monaacademy-cd983-default-rtdb.firebaseio.com",
+        projectId: "monaacademy-cd983",
+        storageBucket: "monaacademy-cd983.appspot.com",
+        appId: "1:410646694761:web:bea49c51d3b0ff5eb9cbf8"
+    };
+
+    const app      = initializeApp(firebaseConfig);
+    const db       = getDatabase(app);
+    const auth     = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const SUPER_ADMIN = "mrsmonakamel6@gmail.com";
+
+    // ===== AUTH STATE =====
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            let isAdmin = user.email === SUPER_ADMIN;
+            if (!isAdmin) {
+                const emailKey = user.email
+                    .replace(/\./g,'_').replace(/#/g,'_')
+                    .replace(/\$/g,'_').replace(/\[/g,'_')
+                    .replace(/\]/g,'_').replace(/@/g,'_');
+                const snap = await get(ref(db, `admins/${emailKey}`));
+                isAdmin = snap.exists();
+            }
+
+            if (!isAdmin) {
+                alert('❌ هذا الحساب غير مصرح له بالدخول');
+                await signOut(auth);
+                return;
+            }
+
+            document.getElementById('userPhoto').src = user.photoURL || '';
+            document.getElementById('userName').textContent = user.displayName || user.email;
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('mainSection').style.display = 'block';
+            loadStats();
+        } else {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('mainSection').style.display = 'none';
+        }
+    });
+
+    // ===== تسجيل الدخول =====
+    document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('googleLoginBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تسجيل الدخول...';
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (e) {
+            alert('❌ حدث خطأ: ' + e.message);
+            btn.disabled = false;
+            btn.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google"> تسجيل الدخول بـ Google';
+        }
+    });
+
+    // ===== خروج =====
+    document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
+
+    // ===== إحصائيات =====
+    async function loadStats() {
+        document.getElementById('statAnswers').textContent = '...';
+        document.getElementById('statLeaderboard').textContent = '...';
+        document.getElementById('statMissing').textContent = '...';
+
+        const [snapA, snapL] = await Promise.all([
+            get(ref(db, 'ramadan_answers')),
+            get(ref(db, 'ramadan_leaderboard'))
+        ]);
+
+        const answersCount     = snapA.exists() ? Object.keys(snapA.val()).length : 0;
+        const leaderboardCount = snapL.exists() ? Object.keys(snapL.val()).length : 0;
+        const missing          = Math.max(0, answersCount - leaderboardCount);
+
+        document.getElementById('statAnswers').textContent     = answersCount;
+        document.getElementById('statLeaderboard').textContent = leaderboardCount;
+        document.getElementById('statMissing').textContent     = missing;
+    }
+
+    document.getElementById('btnRefresh').addEventListener('click', loadStats);
+
+    // ===== الترحيل =====
+    document.getElementById('btnMigrate').addEventListener('click', async () => {
+        const btn          = document.getElementById('btnMigrate');
+        const logBox       = document.getElementById('logBox');
+        const resultBox    = document.getElementById('resultBox');
+        const progressWrap = document.getElementById('progressWrap');
+        const progressBar  = document.getElementById('progressBar');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الترحيل...';
+        logBox.style.display = 'block';
+        progressWrap.style.display = 'block';
+        resultBox.style.display = 'none';
+        logBox.innerHTML = '';
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log-item ${type}`;
+            div.textContent = msg;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        try {
+            log('📥 جاري تحميل البيانات...', 'info');
+
+            const [snapAnswers, snapLeaderboard] = await Promise.all([
+                get(ref(db, 'ramadan_answers')),
+                get(ref(db, 'ramadan_leaderboard'))
+            ]);
+
+            if (!snapAnswers.exists()) {
+                log('⚠️ لا توجد بيانات في ramadan_answers', 'skip');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> ابدأ الترحيل';
+                return;
+            }
+
+            const answers = snapAnswers.val();
+
+            // تجميع المفاتيح الموجودة عشان نتجنب التكرار
+            const existingKeys = new Set();
+            if (snapLeaderboard.exists()) {
+                Object.values(snapLeaderboard.val()).forEach(item => {
+                    if (item.questionId && item.studentId) {
+                        existingKeys.add(`${item.questionId}_${item.studentId}`);
+                    }
+                });
+            }
+
+            const allEntries = Object.entries(answers);
+            const total = allEntries.length;
+            let copied = 0, skipped = 0, errors = 0;
+
+            log(`📊 إجمالي الإجابات: ${total}`, 'info');
+
+            for (let i = 0; i < allEntries.length; i++) {
+                const [, ans] = allEntries[i];
+
+                const percent = Math.round(((i + 1) / total) * 100);
+                progressBar.style.width = percent + '%';
+
+                const checkKey = `${ans.questionId}_${ans.studentId}`;
+                if (existingKeys.has(checkKey)) {
+                    log(`⏭️ تخطي: ${ans.name} (موجود بالفعل)`, 'skip');
+                    skipped++;
+                    continue;
+                }
+
+                try {
+                    await push(ref(db, 'ramadan_leaderboard'), {
+                        questionId: ans.questionId,
+                        day:        ans.day,
+                        name:       ans.name,
+                        studentId:  ans.studentId || '',
+                        isCorrect:  ans.isCorrect,
+                        date:       ans.date,
+                        timestamp:  typeof ans.timestamp === 'number' ? ans.timestamp : Date.now()
+                    });
+                    existingKeys.add(checkKey);
+                    log(`✅ تم نسخ: ${ans.name} - يوم ${ans.day}`, 'success');
+                    copied++;
+                } catch (e) {
+                    log(`❌ خطأ في نسخ: ${ans.name} — ${e.message}`, 'error');
+                    errors++;
+                }
+
+                await new Promise(r => setTimeout(r, 50));
+            }
+
+            progressBar.style.width = '100%';
+            document.getElementById('resultText').textContent =
+                `✅ تم نسخ ${copied} — ⏭️ تخطي ${skipped} — ❌ أخطاء ${errors}`;
+            resultBox.style.display = 'block';
+            log(`🎉 انتهى! نسخ: ${copied} | تخطي: ${skipped} | أخطاء: ${errors}`, 'success');
+
+            await loadStats();
+
+        } catch (e) {
+            log(`❌ خطأ عام: ${e.message}`, 'error');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-redo"></i> تشغيل مرة ثانية';
+    });
+</script>
+
+</body>
+</html>
