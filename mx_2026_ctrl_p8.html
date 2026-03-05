@@ -3099,7 +3099,14 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
                 
                 document.getElementById('questionsArea').innerHTML = '';
                 document.getElementById('exTitle').value = '';
-            }).catch(() => showToast('❌ حدث خطأ', 'error'));
+            }).catch((err) => {
+                console.error('❌ خطأ في نشر الامتحان:', err);
+                if (err.code === 'PERMISSION_DENIED' || (err.message && err.message.includes('PERMISSION_DENIED'))) {
+                    showToast('❌ ليس لديك صلاحية نشر الامتحان - تأكد من تسجيل الدخول كأدمن', 'error');
+                } else {
+                    showToast(`❌ حدث خطأ: ${err.message || 'خطأ غير معروف'}`, 'error');
+                }
+            });
         };
 
         function fillDropdowns(folders) {

@@ -323,7 +323,6 @@ const ADMIN_EMAIL = "mrsmonakamel6@gmail.com";
 // ================ دوال مساعدة للتحقق من البيانات المكررة ================
 async function isEmailExists(email) {
     try {
-        // بحث مباشر بالإيميل بدلاً من تحميل كل الطلاب
         const studentsSnap = await get(child(dbRef, 'students'));
         if (!studentsSnap.exists()) return false;
         const emailLower = email.toLowerCase();
@@ -334,7 +333,9 @@ async function isEmailExists(email) {
         });
         return exists;
     } catch (error) {
-        console.error('Error checking email:', error);
+        // لو مفيش permission لقراءة كل الطلاب، نفترض الإيميل مش موجود
+        // Firebase Auth هتمنع التكرار تلقائياً
+        console.warn('isEmailExists: permission denied, skipping check');
         return false;
     }
 }
@@ -353,35 +354,39 @@ async function isUsernameExists(username) {
         });
         return exists;
     } catch (error) {
-        console.error('Error checking username:', error);
-        return false;
+        // لو مفيش permission، نتحقق من node مخصص للـ usernames
+        try {
+            const snap = await get(ref(db, `usernames/${username.toLowerCase()}`));
+            return snap.exists();
+        } catch (e) {
+            console.warn('isUsernameExists: permission denied, skipping check');
+            return false;
+        }
     }
 }
 
 // ================ دالة توليد كود طالب فريد ================
 async function generateUniqueStudentId() {
-    try {
-        const studentsSnap = await get(child(dbRef, 'students'));
-        const existingIds = new Set();
-        
-        if (studentsSnap.exists()) {
-            studentsSnap.forEach(s => {
-                const d = s.val();
-                if (d.shortId) existingIds.add(d.shortId);
-            });
+    // توليد كود عشوائي 10 أرقام بدون الحاجة لقراءة كل الطلاب
+    // احتمال التكرار ضئيل جداً (1 من 9 مليار)
+    const MAX_ATTEMPTS = 10;
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        const newId = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        // التحقق فقط من هذا الكود المحدد بدل قراءة كل الطلاب
+        try {
+            const snap = await get(ref(db, `studentIds/${newId}`));
+            if (!snap.exists()) {
+                // حجز الكود فوراً في node منفصل
+                await set(ref(db, `studentIds/${newId}`), true);
+                return newId;
+            }
+        } catch (e) {
+            // لو فشل التحقق (permission) ارجع الكود مباشرة - احتمال التكرار ضئيل جداً
+            return newId;
         }
-        
-        const MAX_ATTEMPTS = 50; // حد صارم لمنع الحلقة اللانهائية
-        for (let i = 0; i < MAX_ATTEMPTS; i++) {
-            const newId = Math.floor(1000000000 + Math.random() * 9000000000).toString();
-            if (!existingIds.has(newId)) return newId;
-        }
-        // fallback: استخدام timestamp + random
-        return Date.now().toString().slice(-10);
-    } catch (error) {
-        console.error('❌ خطأ في توليد كود الطالب:', error);
-        throw new Error('فشل في توليد كود الطالب');
     }
+    // fallback نهائي
+    return Date.now().toString().slice(-10);
 }
 
 // ================ REGISTRATION FUNCTIONS ================
@@ -579,6 +584,9 @@ window.handleRegisterUsername = async function() {
             examResults: {},
             createdAt: new Date().toLocaleString('ar-EG')
         });
+        
+        // حفظ اليوزرنيم في node منفصل للتحقق السريع
+        await set(ref(db, `usernames/${username.toLowerCase()}`), res.user.uid);
         
         console.log('✅ تم التسجيل بنجاح!');
         window.showToast(`✅ تم التسجيل بنجاح! كود الطالب: ${sid}`, 'success', 5000);
