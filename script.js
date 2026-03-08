@@ -1685,7 +1685,29 @@ window.startQuiz = async function(folderId, quizId) {
         
         // ========== START TIMER ==========
         if (timeLimitMinutes && timeLimitMinutes > 0) {
-            let secondsLeft = timeLimitMinutes * 60;
+            const timerKey = `quizStartTime_${currentUser.uid}_${quizId}`;
+            const totalSeconds = timeLimitMinutes * 60;
+            
+            // جلب أو تسجيل وقت البداية
+            let startTime = parseInt(localStorage.getItem(timerKey) || '0');
+            if (!startTime) {
+                startTime = Date.now();
+                localStorage.setItem(timerKey, startTime);
+            }
+            
+            // حساب الوقت المتبقي بناءً على وقت البداية الفعلي
+            let secondsLeft = totalSeconds - Math.floor((Date.now() - startTime) / 1000);
+            
+            // لو الوقت خلص وهو بره الامتحان
+            if (secondsLeft <= 0) {
+                localStorage.removeItem(timerKey);
+                window.showToast('⏰ انتهى وقت الامتحان! سيتم تسليم إجاباتك تلقائياً', 'warning', 3000);
+                setTimeout(() => window.submitQuiz(folderId, quizId), 1500);
+                return;
+            }
+            
+            // حفظ الـ key عشان نمسحه بعد التسليم
+            window._quizTimerKey = timerKey;
             
             function updateTimerDisplay() {
                 const mins = Math.floor(secondsLeft / 60);
@@ -1695,7 +1717,6 @@ window.startQuiz = async function(folderId, quizId) {
                 if (display) {
                     display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
                 }
-                // تحذير عند آخر دقيقة
                 if (timerBox) {
                     if (secondsLeft <= 60) {
                         timerBox.style.background = 'linear-gradient(135deg, #e17055, #d63031)';
@@ -1709,11 +1730,14 @@ window.startQuiz = async function(folderId, quizId) {
             updateTimerDisplay();
             
             window._quizTimer = setInterval(() => {
-                secondsLeft--;
+                // إعادة حساب من المصدر الحقيقي كل ثانية (دقة أعلى)
+                secondsLeft = totalSeconds - Math.floor((Date.now() - startTime) / 1000);
                 updateTimerDisplay();
                 if (secondsLeft <= 0) {
                     clearInterval(window._quizTimer);
                     window._quizTimer = null;
+                    localStorage.removeItem(timerKey);
+                    window._quizTimerKey = null;
                     window.showToast('⏰ انتهى الوقت! سيتم تسليم إجاباتك تلقائياً', 'warning', 3000);
                     setTimeout(() => window.submitQuiz(folderId, quizId), 1500);
                 }
@@ -1825,6 +1849,11 @@ window.submitQuiz = async function(folderId, quizId) {
         }
 
         await window.loadPerfectScores();
+        // مسح وقت البداية من localStorage بعد التسليم الناجح
+        if (window._quizTimerKey) {
+            localStorage.removeItem(window._quizTimerKey);
+            window._quizTimerKey = null;
+        }
         window.closeQuiz();
     } catch (error) {
         console.error('Submit quiz error:', error);
