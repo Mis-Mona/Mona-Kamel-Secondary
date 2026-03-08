@@ -1620,6 +1620,12 @@
                     <h3><i class="fas fa-pen"></i> بناء اختبار جديد</h3>
                     <select id="exFolderSelect" class="mt-1"></select>
                     <input type="text" id="exTitle" placeholder="عنوان الاختبار" class="mt-1">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px; background: #fff8e1; border: 1px solid #ffc107; border-radius: 10px; padding: 12px 15px;">
+                        <i class="fas fa-clock" style="color: #f39c12; font-size: 1.2rem;"></i>
+                        <label style="font-weight: bold; color: #333; white-space: nowrap;">وقت الامتحان:</label>
+                        <input type="number" id="exTimeLimit" placeholder="بالدقائق (اختياري)" min="1" max="300" style="flex:1; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; font-family: 'Cairo'; font-size: 0.95rem;">
+                        <span style="color: #666; font-size: 0.85rem; white-space: nowrap;">دقيقة</span>
+                    </div>
                     
                     <div id="questionsArea" style="margin-top: 20px;"></div>
                     
@@ -2078,6 +2084,12 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
             <div class="card" style="background: linear-gradient(145deg, #f8f9fa, #ffffff); margin-bottom: 25px;">
                 <label style="font-weight: bold;">اسم الامتحان:</label>
                 <input type="text" id="editExamName" class="reg-input" style="margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px; background: #fff8e1; border: 1px solid #ffc107; border-radius: 10px; padding: 12px 15px;">
+                    <i class="fas fa-clock" style="color: #f39c12; font-size: 1.2rem;"></i>
+                    <label style="font-weight: bold; color: #333; white-space: nowrap;">وقت الامتحان:</label>
+                    <input type="number" id="editExamTimeLimit" placeholder="بالدقائق (اختياري)" min="0" max="300" style="flex:1; border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; font-family: Cairo; font-size: 0.95rem;">
+                    <span style="color: #666; font-size: 0.85rem; white-space: nowrap;">دقيقة (0 = بدون وقت)</span>
+                </div>
             </div>
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 10px;">
@@ -3047,6 +3059,8 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
         window.saveFinalExam = function() {
             const folderId = document.getElementById('exFolderSelect')?.value;
             const title = document.getElementById('exTitle')?.value.trim();
+            const timeLimitVal = parseInt(document.getElementById('exTimeLimit')?.value || '0');
+            const timeLimitMinutes = timeLimitVal > 0 ? timeLimitVal : null;
             
             if (!folderId) {
                 showToast('اختر الكورس', 'error');
@@ -3086,6 +3100,7 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
             push(ref(db, `quizzes/${folderId}`), { 
                 name: title, 
                 questions,
+                ...(timeLimitMinutes ? { timeLimitMinutes } : {}),
                 createdAt: new Date().toLocaleString('ar-EG')
             }).then(() => {
                 showToast('✅ تم نشر الامتحان');
@@ -3167,6 +3182,7 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
             document.getElementById('editExamCourseId').value = courseId;
             document.getElementById('editExamId').value = examId;
             document.getElementById('editExamName').value = examData.name || '';
+            document.getElementById('editExamTimeLimit').value = examData.timeLimitMinutes || '';
             
             const container = document.getElementById('editQuestionsArea');
             container.innerHTML = '';
@@ -3376,6 +3392,8 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
             const courseId = document.getElementById('editExamCourseId')?.value;
             const examId = document.getElementById('editExamId')?.value;
             const name = document.getElementById('editExamName')?.value.trim();
+            const timeLimitVal = parseInt(document.getElementById('editExamTimeLimit')?.value || '0');
+            const timeLimitMinutes = timeLimitVal > 0 ? timeLimitVal : null;
             
             if (!courseId || !examId) {
                 showToast('❌ خطأ: بيانات الامتحان ناقصة، أغلق وافتح من جديد', 'error');
@@ -3398,6 +3416,7 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
                 await update(ref(db, `quizzes/${courseId}/${examId}`), {
                     name,
                     questions,
+                    timeLimitMinutes: timeLimitMinutes || null,
                     updatedAt: new Date().toLocaleString('ar-EG')
                 });
                 

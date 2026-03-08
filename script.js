@@ -1454,6 +1454,13 @@ window.loadCourseContent = async function(folderId, folderName, hasAccess) {
             info.innerHTML = `<i class="fas fa-question-circle"></i> ${questionsCount} سؤال`;
             detailsDiv.appendChild(info);
             
+            if (quizData.timeLimitMinutes && quizData.timeLimitMinutes > 0) {
+                const timerBadge = document.createElement('span');
+                timerBadge.style.cssText = 'display:inline-flex; align-items:center; gap:5px; background:#fff3cd; color:#856404; border:1px solid #ffc107; border-radius:20px; padding:3px 10px; font-size:0.82rem; font-weight:bold; margin-top:5px;';
+                timerBadge.innerHTML = `<i class="fas fa-clock"></i> ${quizData.timeLimitMinutes} دقيقة`;
+                detailsDiv.appendChild(timerBadge);
+            }
+            
             if (!hasAccess) {
                 const lockMsg = document.createElement('span');
                 lockMsg.style.cssText = 'color:#ff7675; font-size:0.8rem;';
@@ -1634,7 +1641,25 @@ window.startQuiz = async function(folderId, quizId) {
         
         if (!quizContainer) return;
         
-        let html = `<div style="margin-bottom: 20px; color: var(--main); font-weight: bold;">⏳ ابدأ الامتحان</div>`;
+        // ========== TIMER SETUP ==========
+        const timeLimitMinutes = quizData.timeLimitMinutes;
+        let timerHtml = '';
+        if (timeLimitMinutes && timeLimitMinutes > 0) {
+            timerHtml = `
+            <div id="quizTimerBox" style="
+                position: sticky; top: 0; z-index: 100;
+                display: flex; align-items: center; justify-content: center; gap: 12px;
+                background: linear-gradient(135deg, #6c5ce7, #8b7cf0);
+                color: white; font-size: 1.4rem; font-weight: 900;
+                padding: 14px 20px; border-radius: 14px; margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(108,92,231,0.4);">
+                <i class="fas fa-clock"></i>
+                <span>الوقت المتبقي:</span>
+                <span id="quizTimerDisplay" style="font-size: 1.6rem; letter-spacing: 2px; font-variant-numeric: tabular-nums;"></span>
+            </div>`;
+        }
+        
+        let html = timerHtml + `<div style="margin-bottom: 20px; color: var(--main); font-weight: bold;">⏳ ابدأ الامتحان</div>`;
         const questions = quizData.questions || {};
         
         Object.keys(questions).forEach((qKey, idx) => {
@@ -1657,6 +1682,44 @@ window.startQuiz = async function(folderId, quizId) {
         
         html += `<button type="button" onclick="window.submitQuiz('${folderId}', '${quizId}')" style="background:var(--main); color:white; border:none; padding:15px; border-radius:15px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1rem; font-family:'Cairo';">تسليم الإجابات</button>`;
         quizContainer.innerHTML = html;
+        
+        // ========== START TIMER ==========
+        if (timeLimitMinutes && timeLimitMinutes > 0) {
+            let secondsLeft = timeLimitMinutes * 60;
+            
+            function updateTimerDisplay() {
+                const mins = Math.floor(secondsLeft / 60);
+                const secs = secondsLeft % 60;
+                const display = document.getElementById('quizTimerDisplay');
+                const timerBox = document.getElementById('quizTimerBox');
+                if (display) {
+                    display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                }
+                // تحذير عند آخر دقيقة
+                if (timerBox) {
+                    if (secondsLeft <= 60) {
+                        timerBox.style.background = 'linear-gradient(135deg, #e17055, #d63031)';
+                        timerBox.style.animation = 'none';
+                    } else if (secondsLeft <= 180) {
+                        timerBox.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                    }
+                }
+            }
+            
+            updateTimerDisplay();
+            
+            window._quizTimer = setInterval(() => {
+                secondsLeft--;
+                updateTimerDisplay();
+                if (secondsLeft <= 0) {
+                    clearInterval(window._quizTimer);
+                    window._quizTimer = null;
+                    window.showToast('⏰ انتهى الوقت! سيتم تسليم إجاباتك تلقائياً', 'warning', 3000);
+                    setTimeout(() => window.submitQuiz(folderId, quizId), 1500);
+                }
+            }, 1000);
+        }
+        
     } catch (error) {
         console.error('Start quiz error:', error);
         window.showToast('❌ حدث خطأ في بدء الامتحان', 'error');
@@ -1868,6 +1931,12 @@ window.viewQuizResult = async function(folderId, quizId) {
 window.closeQuiz = function() { 
     const quizOverlay = document.getElementById('quizOverlay');
     const quizContainer = document.getElementById('quizContainer');
+    
+    // تنظيف مؤقت الامتحان
+    if (window._quizTimer) {
+        clearInterval(window._quizTimer);
+        window._quizTimer = null;
+    }
     
     // تنظيف موارد تتبع الفيديو لتفادي memory leaks
     if (window._videoProgressInterval) {
