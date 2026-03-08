@@ -1523,6 +1523,10 @@
             <div class="nav-link touch-feedback" onclick="showSection('pointsSection', this)">
                 <i class="fas fa-star"></i> إضافة نقاط
             </div>
+            <div class="nav-link touch-feedback" onclick="showSection('globalSearchSection', this)">
+                <i class="fas fa-search-plus"></i> البحث الشامل
+                <span class="badge-beta">NEW</span>
+            </div>
             
             <div class="sidebar-footer">
                 <a href="index.html" class="nav-link touch-feedback" style="color: var(--secondary);">
@@ -1963,6 +1967,103 @@ True" style="font-family: monospace; line-height: 1.8;"></textarea>
                                 <tr><td colspan="5" class="empty-state">جاري التحميل...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Global Search Section -->
+            <section id="globalSearchSection" class="admin-section">
+                <div class="card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-search-plus" style="color: var(--primary);"></i> البحث الشامل</h2>
+                    </div>
+                    <p style="color: #666; margin-bottom: 20px;">ابحث في كل بيانات الطلاب — الاسم، الكود، الواتساب، المرحلة، الاشتراكات، النقاط</p>
+
+                    <!-- Search Bar -->
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                        <input type="text" id="globalSearchInput"
+                            placeholder="🔍 اكتب أي شيء: اسم، كود، واتساب، مرحلة..."
+                            style="flex: 1; min-width: 220px; font-size: 1rem;"
+                            oninput="runGlobalSearch()">
+                        <select id="globalSearchGrade" onchange="runGlobalSearch()" style="min-width: 180px;">
+                            <option value="">كل المراحل</option>
+                            <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                            <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                            <option value="السادس الابتدائي">السادس الابتدائي</option>
+                            <option value="الأول الإعدادي">الأول الإعدادي</option>
+                            <option value="الثاني الإعدادي">الثاني الإعدادي</option>
+                            <option value="الثالث الإعدادي">الثالث الإعدادي</option>
+                            <option value="الأول الثانوي">الأول الثانوي</option>
+                            <option value="الثاني الثانوي">الثاني الثانوي</option>
+                            <option value="الثالث الثانوي">الثالث الثانوي</option>
+                            <option value="أولى ثانوي">أولى ثانوي</option>
+                            <option value="ثانية ثانوي">ثانية ثانوي</option>
+                            <option value="ثالثة ثانوي">ثالثة ثانوي</option>
+                            <option value="أولى إعدادي">أولى إعدادي</option>
+                            <option value="ثانية إعدادي">ثانية إعدادي</option>
+                            <option value="ثالثة إعدادي">ثالثة إعدادي</option>
+                        </select>
+                        <button class="btn btn-main touch-feedback" onclick="runGlobalSearch()">
+                            <i class="fas fa-search"></i> بحث
+                        </button>
+                        <button class="btn touch-feedback" onclick="clearGlobalSearch()" style="background: var(--border-color); color: var(--text-secondary);">
+                            <i class="fas fa-times"></i> مسح
+                        </button>
+                    </div>
+
+                    <!-- Stats bar -->
+                    <div id="globalSearchStats" style="
+                        background: linear-gradient(135deg, #f0eeff, #e5e2ff);
+                        border-radius: 12px;
+                        padding: 12px 20px;
+                        margin-bottom: 18px;
+                        color: var(--primary);
+                        font-weight: 700;
+                        font-size: 0.95rem;
+                        display: none;
+                    "></div>
+
+                    <!-- Results Table -->
+                    <div class="table-container">
+                        <table id="globalSearchTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>الاسم</th>
+                                    <th>كود الطالب</th>
+                                    <th>المرحلة</th>
+                                    <th>واتساب</th>
+                                    <th>الاشتراكات</th>
+                                    <th>النقاط ⭐</th>
+                                    <th>تاريخ التسجيل</th>
+                                </tr>
+                            </thead>
+                            <tbody id="globalSearchResults">
+                                <tr>
+                                    <td colspan="8" class="empty-state" style="padding: 40px; color: #aaa;">
+                                        <i class="fas fa-search" style="font-size: 2rem; display: block; margin-bottom: 10px; opacity: 0.4;"></i>
+                                        اكتب في خانة البحث لعرض النتائج
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Student Detail Modal trigger card -->
+                <div id="globalStudentDetailCard" style="display:none;" class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="color: var(--primary);"><i class="fas fa-id-card"></i> تفاصيل الطالب</h3>
+                        <button class="btn touch-feedback" onclick="document.getElementById('globalStudentDetailCard').style.display='none'" style="background: var(--border-color); color: var(--text-secondary);">
+                            <i class="fas fa-times"></i> إغلاق
+                        </button>
+                    </div>
+                    <div id="globalStudentDetailContent" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px;"></div>
+                    
+                    <!-- Subscriptions list -->
+                    <div id="globalStudentSubscriptions" style="margin-top: 20px; display: none;">
+                        <h4 style="margin-bottom: 10px; color: var(--secondary);"><i class="fas fa-bookmark"></i> الاشتراكات</h4>
+                        <div id="globalStudentSubList" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
                     </div>
                 </div>
             </section>
@@ -4259,6 +4360,145 @@ B`;
 
         document.querySelector('[onclick="showSection(\'pointsSection\', this)"]')?.addEventListener('click', function() {
             setTimeout(loadPointsHistory, 200);
+        });
+
+        // ================ GLOBAL SEARCH ================
+        window.runGlobalSearch = function() {
+            const query = (document.getElementById('globalSearchInput')?.value || '').trim().toLowerCase();
+            const gradeFilter = (document.getElementById('globalSearchGrade')?.value || '').trim();
+            const tbody = document.getElementById('globalSearchResults');
+            const statsBar = document.getElementById('globalSearchStats');
+
+            if (!query && !gradeFilter) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state" style="padding:40px; color:#aaa;">
+                    <i class="fas fa-search" style="font-size:2rem; display:block; margin-bottom:10px; opacity:0.4;"></i>
+                    اكتب في خانة البحث لعرض النتائج
+                </td></tr>`;
+                statsBar.style.display = 'none';
+                document.getElementById('globalStudentDetailCard').style.display = 'none';
+                return;
+            }
+
+            const students = Object.entries(allStudents || {});
+            let results = [];
+
+            students.forEach(([uid, s]) => {
+                // Grade filter
+                if (gradeFilter && s.grade !== gradeFilter) return;
+
+                // Text search across all fields
+                if (query) {
+                    const haystack = [
+                        s.name || '',
+                        s.shortId || '',
+                        s.whatsapp || '',
+                        s.grade || '',
+                        String(s.points || ''),
+                        s.email || '',
+                        s.createdAt || '',
+                        // search inside subscriptions keys/names
+                        Object.keys(s.subscriptions || {}).join(' ')
+                    ].join(' ').toLowerCase();
+
+                    if (!haystack.includes(query)) return;
+                }
+
+                results.push({ uid, ...s });
+            });
+
+            // Sort by name
+            results.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            // Stats
+            statsBar.style.display = 'block';
+            statsBar.innerHTML = `<i class="fas fa-filter" style="margin-left:6px;"></i> عدد النتائج: <strong>${results.length}</strong> طالب${gradeFilter ? ` &nbsp;|&nbsp; المرحلة: <strong>${escapeHTML(gradeFilter)}</strong>` : ''}${query ? ` &nbsp;|&nbsp; البحث: <strong>${escapeHTML(query)}</strong>` : ''}`;
+
+            if (results.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state" style="padding:30px; color:#aaa;">
+                    <i class="fas fa-search-minus" style="font-size:1.5rem; display:block; margin-bottom:8px;"></i>
+                    لا توجد نتائج مطابقة
+                </td></tr>`;
+                return;
+            }
+
+            let html = '';
+            results.forEach((s, i) => {
+                const subCount = s.subscriptions ? Object.keys(s.subscriptions).length : 0;
+                const createdAt = s.createdAt ? new Date(s.createdAt).toLocaleDateString('ar-EG') : '—';
+                html += `<tr style="cursor:pointer;" onclick="showGlobalStudentDetail('${escapeHTML(s.uid)}')">
+                    <td style="font-weight:700; color:var(--primary);">${i + 1}</td>
+                    <td><strong>${escapeHTML(s.name || '—')}</strong></td>
+                    <td><span class="student-id-display">${escapeHTML(s.shortId || '—')}</span></td>
+                    <td><span class="badge-grade">${escapeHTML(s.grade || 'غير محدد')}</span></td>
+                    <td>${escapeHTML(s.whatsapp || '—')}</td>
+                    <td><span class="badge-success">${subCount} كورس</span></td>
+                    <td><span style="color:var(--gold); font-weight:bold;">${s.points || 0} ⭐</span></td>
+                    <td style="font-size:0.85rem; color:#888;">${createdAt}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        };
+
+        window.clearGlobalSearch = function() {
+            const inp = document.getElementById('globalSearchInput');
+            const sel = document.getElementById('globalSearchGrade');
+            if (inp) inp.value = '';
+            if (sel) sel.value = '';
+            runGlobalSearch();
+        };
+
+        window.showGlobalStudentDetail = function(uid) {
+            const s = allStudents[uid];
+            if (!s) return;
+
+            const card = document.getElementById('globalStudentDetailCard');
+            const content = document.getElementById('globalStudentDetailContent');
+            const subSection = document.getElementById('globalStudentSubscriptions');
+            const subList = document.getElementById('globalStudentSubList');
+
+            const fields = [
+                { label: '👤 الاسم', value: s.name },
+                { label: '🆔 كود الطالب', value: s.shortId, highlight: true },
+                { label: '📚 المرحلة', value: s.grade },
+                { label: '📱 واتساب', value: s.whatsapp },
+                { label: '⭐ النقاط', value: `${s.points || 0} نقطة`, gold: true },
+                { label: '📅 تاريخ التسجيل', value: s.createdAt ? new Date(s.createdAt).toLocaleString('ar-EG') : '—' },
+                { label: '📧 البريد الإلكتروني', value: s.email || '—' },
+            ];
+
+            content.innerHTML = fields.map(f => `
+                <div style="background: #f8f9fc; border-radius: 12px; padding: 15px; border-right: 4px solid var(--primary);">
+                    <div style="font-size:0.8rem; color:#888; margin-bottom:5px;">${f.label}</div>
+                    <div style="font-weight:700; font-size:${f.highlight ? '1.1rem' : '1rem'}; color:${f.gold ? 'var(--gold)' : f.highlight ? 'var(--primary)' : 'var(--text-primary)'};">
+                        ${escapeHTML(String(f.value || '—'))}
+                    </div>
+                </div>
+            `).join('');
+
+            // Subscriptions
+            const subs = s.subscriptions ? Object.entries(s.subscriptions) : [];
+            if (subs.length > 0) {
+                subSection.style.display = 'block';
+                subList.innerHTML = subs.map(([key, val]) => {
+                    const courseName = allFolders[key]?.name || val?.name || key;
+                    return `<span style="background: linear-gradient(135deg, #f0eeff, #e5e2ff); color: var(--primary); padding: 6px 14px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; border: 1.5px solid var(--primary);">
+                        <i class="fas fa-bookmark" style="margin-left:5px;"></i>${escapeHTML(courseName)}
+                    </span>`;
+                }).join('');
+            } else {
+                subSection.style.display = 'none';
+            }
+
+            card.style.display = 'block';
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        // Trigger search when section is opened
+        document.querySelector('[onclick="showSection(\'globalSearchSection\', this)"]')?.addEventListener('click', function() {
+            setTimeout(() => {
+                const inp = document.getElementById('globalSearchInput');
+                if (inp) inp.focus();
+            }, 200);
         });
 
     </script>
