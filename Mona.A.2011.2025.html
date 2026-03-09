@@ -489,6 +489,7 @@ tr:hover td{background:rgba(108,63,197,.05)}
 
 <script>
 // ====== FIREBASE CONFIG ======
+// ⚠️ تأكد من ضبط Firebase Database Security Rules وتقييد الـ apiKey في Google Cloud Console
 const firebaseConfig = {
   apiKey: "AIzaSyBalgsZ2MmHFkF7bvAGky0MImzTVgqXTy8",
   authDomain: "monakamel-academy.firebaseapp.com",
@@ -503,11 +504,12 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 const ADMIN_EMAIL = 'mrsmonakamel6@gmail.com';
+const ADMIN_EMAILS = ['mrsmonakamel6@gmail.com', 'admin@monakamel.com'];
 let allStudents = [], allCourses = {}, allExams = {}, allScores = {}, allGrades = {};
 
 // ====== AUTH ======
 auth.onAuthStateChanged(user => {
-  if (user && user.email === ADMIN_EMAIL) {
+  if (user && ADMIN_EMAILS.includes(user.email)) {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminApp').style.display = 'block';
     document.getElementById('adminName').textContent = user.displayName || user.email;
@@ -728,6 +730,8 @@ function addVideo() {
   if (!name || !url) { notify('اكمل البيانات', 'error'); return; }
   const ytId = getYTId(url);
   if (!ytId) { notify('رابط يوتيوب غير صحيح', 'error'); return; }
+  // ✅ التحقق من صحة رابط يوتيوب فقط
+  if (!/^[a-zA-Z0-9_-]{11}$/.test(ytId)) { notify('رابط يوتيوب غير صحيح', 'error'); return; }
   const thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
   db.ref('website/courses/' + key + '/videos').push({ name, url, ytId, thumb, createdAt: new Date().toLocaleDateString('ar-EG') })
     .then(() => { notify('تم إضافة الفيديو ✅'); document.getElementById('vName').value=''; document.getElementById('vUrl').value=''; document.getElementById('ytPreviewWrap').style.display='none'; renderVideosList(key); })
@@ -1060,23 +1064,25 @@ function renderAnalytics() {
       </div>
     </div>`;
 
-  // Exam stats
+  // Exam stats — ✅ تأمين من القسمة على صفر
   const examPerf = {};
   Object.values(allGrades).forEach(g => {
     if (!examPerf[g.examTitle]) examPerf[g.examTitle] = { total: 0, passed: 0 };
     examPerf[g.examTitle].total++;
     if (g.total && g.score/g.total >= 0.5) examPerf[g.examTitle].passed++;
   });
-  document.getElementById('examStats').innerHTML = Object.entries(examPerf).map(([name, p]) => `
-    <div style="margin-bottom:12px">
+  document.getElementById('examStats').innerHTML = Object.entries(examPerf).map(([name, p]) => {
+    const pct = p.total > 0 ? Math.round(p.passed/p.total*100) : 0;
+    return `<div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px">
         <span>${name}</span>
-        <span style="color:var(--text-muted)">${p.passed}/${p.total} ناجح (${Math.round(p.passed/p.total*100)}%)</span>
+        <span style="color:var(--text-muted)">${p.passed}/${p.total} ناجح (${pct}%)</span>
       </div>
       <div style="background:rgba(255,255,255,.08);border-radius:4px;height:8px">
-        <div style="background:var(--success);height:8px;border-radius:4px;width:${Math.round(p.passed/p.total*100)}%"></div>
+        <div style="background:var(--success);height:8px;border-radius:4px;width:${pct}%"></div>
       </div>
-    </div>`).join('') || '<p style="color:var(--text-muted);font-size:.85rem">لا يوجد بيانات امتحانات بعد</p>';
+    </div>`;
+  }).join('') || '<p style="color:var(--text-muted);font-size:.85rem">لا يوجد بيانات امتحانات بعد</p>';
 }
 
 // ====== GLOBAL SEARCH ======

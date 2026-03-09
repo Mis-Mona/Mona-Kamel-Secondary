@@ -841,7 +841,8 @@ buildPhoneSelects();
 
 
 // ====== FIREBASE CONFIG ======
-// 🔴 ضع بيانات Firebase الخاصة بك هنا
+// ⚠️ تأكد من ضبط Firebase Database Security Rules بشكل صحيح
+// وإنك تعمل restrict على الـ apiKey في Google Cloud Console
 const firebaseConfig = {
   apiKey: "AIzaSyBalgsZ2MmHFkF7bvAGky0MImzTVgqXTy8",
   authDomain: "monakamel-academy.firebaseapp.com",
@@ -858,12 +859,21 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 // ====== STATE ======
-const ADMIN = { u:'admin', p:'mona2025admin' };
+// ✅ تم إزالة بيانات الأدمن الثابتة — المصادقة تتم عبر Firebase Auth فقط
+const ADMIN_EMAILS = ['admin@monakamel.com', 'mrsmonakamel6@gmail.com'];
 let currentUser = null, selectedStars = 5;
 let students = [];
 let topScores = [];
 let reviews = [];
 let pendingReviews = [];
+
+// ====== DEFAULT DATA (Fallback) ======
+const DEFAULT_SCORES = [];
+const DEFAULT_REVIEWS = [
+  { name: 'أحمد محمد', grade: 'تالتة ثانوي', text: 'منصة رائعة وشرح مبسط جداً، ساعدني أتفوق في الإنجليزي ✨', stars: 5 },
+  { name: 'سارة علي', grade: 'تاني إعدادي', text: 'مس منى بتشرح بأسلوب سهل ومفهوم، بحب دروسها جداً 💙', stars: 5 },
+  { name: 'محمود حسن', grade: 'أول ثانوي', text: 'الامتحانات التجريبية ساعدتني أكتر من أي حاجة تانية 🎯', stars: 5 }
+];
 
 // ====== LOAD DATA FROM FIREBASE ======
 async function loadFromFirebase() {
@@ -986,7 +996,7 @@ function updateGradeOptions(){
 auth.onAuthStateChanged(user => {
   if (user) {
     // تحقق لو أدمن
-    if (user.email === 'admin@monakamel.com' || user.email === 'mrsmonakamel6@gmail.com') {
+    if (ADMIN_EMAILS.includes(user.email)) {
       currentUser = { uid: user.uid, name1: 'المدير', email: user.email, isAdmin: true };
       updateNavForUser();
       return;
@@ -1022,20 +1032,7 @@ function handleLogin() {
   const pass = document.getElementById('loginPass').value;
   if (!email || !pass) { showNotification('اكمل البيانات', 'error'); return; }
 
-  // تحقق لو أدمن
-  if (email === ADMIN.u && pass === ADMIN.p) {
-    auth.signInWithEmailAndPassword('admin@monakamel.com', pass)
-      .catch(() => {
-        // لو الأدمن مش في Firebase Auth، سجّل دخوله محلياً
-        currentUser = { name1: 'المدير', isAdmin: true };
-        closeModal('login');
-        showNotification('أهلاً بك في لوحة الإدارة! 🎉');
-        updateNavForUser();
-        setTimeout(() => openAdminPanel(), 800);
-      });
-    return;
-  }
-
+  // ✅ المصادقة تتم عبر Firebase فقط بدون استثناءات محلية
   auth.signInWithEmailAndPassword(email, pass)
     .then(result => {
       closeModal('login');
@@ -1114,6 +1111,21 @@ function handleRegister() {
     showNotification('اكمل كل البيانات', 'error'); return;
   }
   if (pw.length < 6) { showNotification('كلمة المرور لازم تكون 6 حروف على الأقل', 'error'); return; }
+
+  // ✅ التحقق من صحة رقم الهاتف
+  const rawStudentPhone = document.getElementById('regStudentPhone').value.trim();
+  const rawParentPhone = document.getElementById('regParentPhone').value.trim();
+  if (!/^\d{7,15}$/.test(rawStudentPhone)) {
+    showNotification('رقم واتساب الطالب غير صحيح', 'error'); return;
+  }
+  if (rawParentPhone && !/^\d{7,15}$/.test(rawParentPhone)) {
+    showNotification('رقم واتساب ولي الأمر غير صحيح', 'error'); return;
+  }
+
+  // ✅ التحقق من صحة الإيميل
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+    showNotification('الإيميل غير صحيح', 'error'); return;
+  }
 
   auth.createUserWithEmailAndPassword(em, pw)
     .then(result => {
@@ -1568,6 +1580,16 @@ function submitExam() {
   if (examState.timerInterval) clearInterval(examState.timerInterval);
   const { exam } = examState;
   const questions = exam.questions || [];
+
+  // ✅ تحقق من الأسئلة غير المجابة
+  const unanswered = questions.filter((_, qi) => examState.answers[qi] === undefined).length;
+  if (unanswered > 0 && examState.timeLeft > 0) {
+    if (!confirm(`لسه فيه ${unanswered} سؤال مش مجاوب، هتسلم؟`)) {
+      if (exam.timer) startExamTimer();
+      return;
+    }
+  }
+
   let score = 0;
   questions.forEach((q, qi) => {
     const ans = examState.answers[qi];
@@ -1601,7 +1623,7 @@ function submitExam() {
       <div style="display:flex;flex-direction:column;gap:10px;max-width:300px;margin:0 auto">
         ${questions.map((q,qi) => {
           const ans = examState.answers[qi];
-          const correct = q.type==='tf' ? ans===q.answer : ans===q.answer;
+          const correct = ans === q.answer;
           return `<div style="display:flex;justify-content:space-between;font-size:.82rem;padding:8px 12px;border-radius:8px;background:${correct?'rgba(46,204,113,.1)':'rgba(231,76,60,.1)'};border:1px solid ${correct?'rgba(46,204,113,.3)':'rgba(231,76,60,.3)'}">
             <span>سؤال ${qi+1}</span>
             <span>${correct?'✅ صح':'❌ غلط'}</span>
@@ -1617,6 +1639,7 @@ function submitExam() {
 function openExam(url){ openExamPlayer(url); }
 
 // ====== INIT ======
+// ✅ real-time listeners تشتغل بعد loadFromFirebase مباشرة
 loadFromFirebase().then(()=>{
   listenToScores();
   listenToReviews();
