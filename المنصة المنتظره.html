@@ -666,10 +666,6 @@ textarea.form-input{resize:vertical;min-height:90px}
       <input type="text" class="form-input" id="regName4" placeholder="مثال: السيد">
     </div>
     <div class="form-group">
-      <label class="form-label">اسم المستخدم</label>
-      <input type="text" class="form-input" id="regUsername" placeholder="مثال: ahmed_2025">
-    </div>
-    <div class="form-group">
       <label class="form-label">الإيميل</label>
       <input type="email" class="form-input" id="regEmail" placeholder="example@email.com">
     </div>
@@ -709,6 +705,62 @@ textarea.form-input{resize:vertical;min-height:90px}
     <div class="divider"><span>أو</span></div>
     <button class="btn-google" onclick="handleGoogleLogin()"><i class="fab fa-google" style="color:#4285F4"></i> التسجيل بجوجل</button>
     <div class="modal-switch">عندك حساب بالفعل؟ <a onclick="switchModal('register','login')">سجّل دخولك</a></div>
+  </div>
+</div>
+
+<!-- GOOGLE COMPLETE PROFILE MODAL -->
+<div class="modal-overlay" id="googleCompleteModal">
+  <div class="modal">
+    <div style="text-align:center;font-size:2.4rem;margin-bottom:10px">📋</div>
+    <h2 class="modal-title">أكمل بياناتك</h2>
+    <p class="modal-sub">مرحباً! أكمل بياناتك عشان تقدر تستخدم المنصة</p>
+    <div class="form-group">
+      <label class="form-label">الاسم الأول <span style="color:#E74C3C">*</span></label>
+      <input type="text" class="form-input" id="gcName1" placeholder="مثال: أحمد">
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">الاسم الثاني <span style="color:#E74C3C">*</span></label>
+        <input type="text" class="form-input" id="gcName2" placeholder="مثال: محمد">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">الاسم الثالث</label>
+        <input type="text" class="form-input" id="gcName3" placeholder="اختياري">
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">الاسم الأخير <span style="color:#E74C3C">*</span></label>
+      <input type="text" class="form-input" id="gcName4" placeholder="مثال: السيد">
+    </div>
+    <div class="form-group">
+      <label class="form-label">رقم واتساب الطالب <span style="color:#E74C3C">*</span></label>
+      <div class="phone-input-wrap">
+        <select class="phone-flag" id="gcStudentCode"></select>
+        <input type="tel" class="form-input" id="gcStudentPhone" placeholder="رقم الواتساب" style="flex:1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">رقم واتساب ولي الأمر</label>
+      <div class="phone-input-wrap">
+        <select class="phone-flag" id="gcParentCode"></select>
+        <input type="tel" class="form-input" id="gcParentPhone" placeholder="رقم الواتساب" style="flex:1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">المرحلة الدراسية <span style="color:#E74C3C">*</span></label>
+        <select class="form-select" id="gcStage" onchange="updateGCGradeOptions()">
+          <option value="">اختر المرحلة</option>
+          <option value="prep">إعدادي</option>
+          <option value="sec">ثانوي</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">الصف <span style="color:#E74C3C">*</span></label>
+        <select class="form-select" id="gcGrade"><option value="">اختر الصف</option></select>
+      </div>
+    </div>
+    <button class="btn-form" onclick="handleGoogleCompleteProfile()" style="margin-top:20px"><i class="fas fa-save"></i> حفظ البيانات والمتابعة</button>
   </div>
 </div>
 
@@ -771,7 +823,7 @@ textarea.form-input{resize:vertical;min-height:90px}
       <div class="admin-content-section" id="section-students">
         <p class="admin-section-title">👥 إدارة الطلاب</p>
         <div style="overflow-x:auto">
-          <table class="data-table"><thead><tr><th>الاسم الرباعي</th><th>المستخدم</th><th>الصف</th><th>واتساب الطالب</th><th>واتساب ولي الأمر</th><th>إجراء</th></tr></thead><tbody id="studentsTable"></tbody></table>
+          <table class="data-table"><thead><tr><th>الاسم الرباعي</th><th>الإيميل</th><th>الصف</th><th>واتساب الطالب</th><th>واتساب ولي الأمر</th><th>طريقة التسجيل</th><th>إجراء</th></tr></thead><tbody id="studentsTable"></tbody></table>
         </div>
       </div>
       <div class="admin-content-section" id="section-scores">
@@ -833,7 +885,8 @@ const countries = [
   ['🇦🇺 أستراليا','+61'],['🇸🇬 سنغافورة','+65'],['🇮🇩 إندونيسيا','+62'],
 ];
 function buildPhoneSelects() {
-  const opts = countries.map(([n,c]) => `<option value="${c}">${c} ${n}</option>`).join('');
+  window._phoneCodes = countries.map(([n,c]) => ({ flag: '', code: c, name: n }));
+  const opts = countries.map(([n,c]) => `<option value="${c}"${c==='+20'?' selected':''}>${c} ${n}</option>`).join('');
   document.getElementById('regStudentCode').innerHTML = opts;
   document.getElementById('regParentCode').innerHTML = opts;
 }
@@ -1010,14 +1063,29 @@ auth.onAuthStateChanged(user => {
           auth.signOut();
           showNotification('❌ تم حظر حسابك، تواصل مع الإدارة', 'error');
           currentUser = null;
-          updateNavForUser();
           return;
         }
         currentUser = { uid: user.uid, _key: user.uid, ...data };
+        updateNavForUser();
       } else {
-        // مستخدم جوجل مش عنده بيانات كاملة
-        currentUser = { uid: user.uid, name1: user.displayName?.split(' ')[0] || 'مستخدم', email: user.email, isGoogle: true };
+        // مستخدم جوجل سجل دخول بدون بيانات كاملة — اطلب منه يكمل
+        if (user.providerData && user.providerData[0]?.providerId === 'google.com') {
+          window._pendingGoogleUser = user;
+          const parts = (user.displayName || '').split(' ');
+          document.getElementById('gcName1').value = parts[0] || '';
+          document.getElementById('gcName2').value = parts[1] || '';
+          document.getElementById('gcName3').value = parts[2] || '';
+          document.getElementById('gcName4').value = parts[3] || '';
+          buildGCPhoneSelects();
+          document.getElementById('googleCompleteModal').classList.add('active');
+        } else {
+          // حالة غير متوقعة — سجّل الخروج
+          auth.signOut();
+          currentUser = null;
+        }
       }
+    }).catch(() => {
+      currentUser = null;
       updateNavForUser();
     });
   } else {
@@ -1065,31 +1133,112 @@ function handleForgotPassword() {
 // ====== GOOGLE LOGIN ======
 function handleGoogleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
   auth.signInWithPopup(provider)
     .then(result => {
       const user = result.user;
-      // سجّل في Database لو أول مرة
-      db.ref('website/students/' + user.uid).once('value').then(snap => {
+      return db.ref('website/students/' + user.uid).once('value').then(snap => {
         if (!snap.exists()) {
-          db.ref('website/students/' + user.uid).set({
-            name1: user.displayName?.split(' ')[0] || '',
-            name2: user.displayName?.split(' ')[1] || '',
-            name3: '', name4: '',
-            email: user.email,
-            photoURL: user.photoURL || '',
-            isGoogle: true,
-            isAdmin: false,
-            createdAt: new Date().toLocaleDateString('ar-EG')
-          });
+          // مستخدم جديد — اعرض مودال إكمال البيانات
+          window._pendingGoogleUser = user;
+          closeModal('login');
+          closeModal('register');
+          const parts = (user.displayName || '').split(' ');
+          document.getElementById('gcName1').value = parts[0] || '';
+          document.getElementById('gcName2').value = parts[1] || '';
+          document.getElementById('gcName3').value = parts[2] || '';
+          document.getElementById('gcName4').value = parts[3] || '';
+          buildGCPhoneSelects();
+          document.getElementById('googleCompleteModal').classList.add('active');
+        } else {
+          closeModal('login');
+          closeModal('register');
+          showNotification('أهلاً بك مجدداً ' + (user.displayName?.split(' ')[0] || '') + '! 🎉');
         }
       });
-      closeModal('login');
-      closeModal('register');
-      showNotification('أهلاً بك ' + (user.displayName?.split(' ')[0] || '') + '! 🎉');
     })
     .catch(err => {
       if (err.code !== 'auth/popup-closed-by-user')
         showNotification('مشكلة في تسجيل جوجل، حاول تاني', 'error');
+    });
+}
+
+function buildGCPhoneSelects() {
+  const opts = countries.map(([n,c]) => `<option value="${c}"${c==='+20'?' selected':''}>${c} ${n}</option>`).join('');
+  ['gcStudentCode','gcParentCode'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel) sel.innerHTML = opts;
+  });
+}
+
+function updateGCGradeOptions() {
+  const stage = document.getElementById('gcStage').value;
+  const gradeSelect = document.getElementById('gcGrade');
+  gradeSelect.innerHTML = '<option value="">اختر الصف</option>';
+  const prepGrades = ['أولى إعدادي','ثانية إعدادي','تالتة إعدادي'];
+  const secGrades = ['أولى ثانوي','تانية ثانوي','تالتة ثانوي'];
+  (stage === 'prep' ? prepGrades : stage === 'sec' ? secGrades : []).forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    gradeSelect.appendChild(opt);
+  });
+}
+
+function handleGoogleCompleteProfile() {
+  const user = window._pendingGoogleUser;
+  if (!user) { showNotification('حدث خطأ، حاول تسجيل الدخول مرة تانية', 'error'); return; }
+
+  const n1 = document.getElementById('gcName1').value.trim();
+  const n2 = document.getElementById('gcName2').value.trim();
+  const n3 = document.getElementById('gcName3').value.trim();
+  const n4 = document.getElementById('gcName4').value.trim();
+  const rawStudentPhone = document.getElementById('gcStudentPhone').value.trim();
+  const rawParentPhone = document.getElementById('gcParentPhone').value.trim();
+  const stage = document.getElementById('gcStage').value;
+  const grade = document.getElementById('gcGrade').value;
+  const sp = document.getElementById('gcStudentCode').value + rawStudentPhone;
+  const pp = document.getElementById('gcParentCode').value + rawParentPhone;
+
+  if (!n1 || !n2 || !n4 || !stage || !grade) {
+    showNotification('اكمل كل البيانات المطلوبة', 'error'); return;
+  }
+  if (!/^\d{7,15}$/.test(rawStudentPhone)) {
+    showNotification('رقم واتساب الطالب غير صحيح', 'error'); return;
+  }
+  if (rawParentPhone && !/^\d{7,15}$/.test(rawParentPhone)) {
+    showNotification('رقم واتساب ولي الأمر غير صحيح', 'error'); return;
+  }
+
+  const btn = document.querySelector('#googleCompleteModal .btn-form');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...'; }
+
+  const fullName = [n1, n2, n3, n4].filter(Boolean).join(' ');
+  const profile = {
+    name1: n1, name2: n2, name3: n3 || '', name4: n4,
+    fullName: fullName,
+    email: user.email,
+    studentPhone: sp,
+    parentPhone: pp || '',
+    stage, grade,
+    isAdmin: false,
+    authProvider: 'google',
+    createdAt: new Date().toLocaleDateString('ar-EG'),
+    createdTimestamp: Date.now()
+  };
+
+  db.ref('website/students/' + user.uid).set(profile)
+    .then(() => {
+      window._pendingGoogleUser = null;
+      document.getElementById('googleCompleteModal').classList.remove('active');
+      showNotification('أهلاً بك ' + n1 + '! تم إنشاء حسابك بنجاح 🎉');
+      currentUser = { uid: user.uid, ...profile };
+      updateNavForUser();
+    })
+    .catch(err => {
+      showNotification('خطأ في حفظ البيانات: ' + err.message, 'error');
+    })
+    .finally(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> حفظ البيانات والمتابعة'; }
     });
 }
 
@@ -1099,7 +1248,6 @@ function handleRegister() {
   const n2 = document.getElementById('regName2').value.trim();
   const n3 = document.getElementById('regName3').value.trim();
   const n4 = document.getElementById('regName4').value.trim();
-  const u = document.getElementById('regUsername').value.trim();
   const em = document.getElementById('regEmail').value.trim();
   const sp = document.getElementById('regStudentCode').value + document.getElementById('regStudentPhone').value.trim();
   const pp = document.getElementById('regParentCode').value + document.getElementById('regParentPhone').value.trim();
@@ -1107,12 +1255,11 @@ function handleRegister() {
   const grade = document.getElementById('regGrade').value;
   const pw = document.getElementById('regPass').value;
 
-  if (!n1 || !n2 || !n3 || !n4 || !u || !em || !stage || !grade || !pw) {
-    showNotification('اكمل كل البيانات', 'error'); return;
+  if (!n1 || !n2 || !n4 || !em || !stage || !grade || !pw) {
+    showNotification('اكمل كل البيانات المطلوبة', 'error'); return;
   }
   if (pw.length < 6) { showNotification('كلمة المرور لازم تكون 6 حروف على الأقل', 'error'); return; }
 
-  // ✅ التحقق من صحة رقم الهاتف
   const rawStudentPhone = document.getElementById('regStudentPhone').value.trim();
   const rawParentPhone = document.getElementById('regParentPhone').value.trim();
   if (!/^\d{7,15}$/.test(rawStudentPhone)) {
@@ -1121,30 +1268,47 @@ function handleRegister() {
   if (rawParentPhone && !/^\d{7,15}$/.test(rawParentPhone)) {
     showNotification('رقم واتساب ولي الأمر غير صحيح', 'error'); return;
   }
-
-  // ✅ التحقق من صحة الإيميل
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
     showNotification('الإيميل غير صحيح', 'error'); return;
   }
 
+  const btn = document.querySelector('#registerModal .btn-form');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...'; }
+
   auth.createUserWithEmailAndPassword(em, pw)
     .then(result => {
       const uid = result.user.uid;
-      const profile = { name1: n1, name2: n2, name3: n3, name4: n4, username: u, email: em, studentPhone: sp, parentPhone: pp, stage, grade, isAdmin: false, createdAt: new Date().toLocaleDateString('ar-EG') };
-      // حفظ البيانات في Database باستخدام UID
+      const fullName = [n1, n2, n3, n4].filter(Boolean).join(' ');
+      // تحديث displayName في Firebase Auth
+      result.user.updateProfile({ displayName: fullName });
+      const profile = {
+        name1: n1, name2: n2, name3: n3 || '', name4: n4,
+        fullName: fullName,
+        email: em,
+        studentPhone: sp,
+        parentPhone: pp || '',
+        stage, grade,
+        isAdmin: false,
+        authProvider: 'email',
+        createdAt: new Date().toLocaleDateString('ar-EG'),
+        createdTimestamp: Date.now()
+      };
       return db.ref('website/students/' + uid).set(profile);
     })
     .then(() => {
       closeModal('register');
-      showNotification('أهلاً بك ' + n1 + '! تم إنشاء حسابك 🎉');
+      showNotification('أهلاً بك ' + n1 + '! تم إنشاء حسابك بنجاح 🎉');
     })
     .catch(err => {
       const msgs = {
-        'auth/email-already-in-use': 'الإيميل ده مسجل بالفعل',
+        'auth/email-already-in-use': 'الإيميل ده مسجل بالفعل، جرب تسجيل الدخول',
         'auth/invalid-email': 'الإيميل غير صحيح',
-        'auth/weak-password': 'كلمة المرور ضعيفة جداً'
+        'auth/weak-password': 'كلمة المرور ضعيفة جداً — استخدم 6 أحرف على الأقل'
       };
-      showNotification(msgs[err.code] || 'خطأ في إنشاء الحساب', 'error');
+      showNotification(msgs[err.code] || 'خطأ في إنشاء الحساب: ' + err.message, 'error');
+    })
+    .finally(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء الحساب'; }
     });
 }
 
@@ -1262,12 +1426,13 @@ function renderAdminTable(list){
   document.getElementById('studentsTable').innerHTML=list.map((s,i)=>`
     <tr>
       <td>${s.name1||s.name||''} ${s.name2||''} ${s.name3||''} ${s.name4||''}</td>
-      <td>${s.username||'—'}</td>
-      <td>${s.grade||s.grade||'—'}</td>
+      <td>${s.email||'—'}</td>
+      <td>${s.grade||'—'}</td>
       <td>${s.studentPhone||s.whatsapp||'—'}</td>
       <td>${s.parentPhone||'—'}</td>
+      <td>${s.authProvider||'email'}</td>
       <td><button class="action-btn delete" onclick="deleteStudent('${s._key||i}')">حذف</button></td>
-    </tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">لا يوجد طلاب</td></tr>';
+    </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">لا يوجد طلاب</td></tr>';
 }
 function renderAdminScores(){
   document.getElementById('adminScoresTable').innerHTML=topScores.map((s,i)=>`
