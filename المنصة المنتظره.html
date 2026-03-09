@@ -986,7 +986,7 @@ function updateGradeOptions(){
 auth.onAuthStateChanged(user => {
   if (user) {
     // تحقق لو أدمن
-    if (user.email === 'admin@monakamel.com') {
+    if (user.email === 'admin@monakamel.com' || user.email === 'mrsmonakamel6@gmail.com') {
       currentUser = { uid: user.uid, name1: 'المدير', email: user.email, isAdmin: true };
       updateNavForUser();
       return;
@@ -1148,7 +1148,7 @@ function updateNavForUser(){
   if(!currentUser)return;
   document.getElementById('navBtns').innerHTML=`
     <span style="color:var(--primary-light);font-weight:700;font-size:.88rem">👋 أهلاً ${currentUser.name1}</span>
-    ${currentUser.isAdmin?'<button class="btn-nav-register" onclick="openAdminPanel()">⚙️ الإدارة</button>':''}
+    ${currentUser.isAdmin?'<button class="btn-nav-register" onclick="openAdminPanel()" style="background:linear-gradient(135deg,#FFD93D,#FF6B35);color:#000">👑 لوحة الإدارة</button>':''}
     <button class="btn-nav-login" onclick="logout()">خروج</button>`;
 }
 
@@ -1206,9 +1206,7 @@ function submitReview(){
 
 // ====== ADMIN ======
 function openAdminPanel(){
-  document.getElementById('adminPanel').classList.add('active');
-  document.body.style.overflow='hidden';
-  loadAdminData();
+  window.location.href = 'Mona.A.2011.2025.html';
 }
 function closeAdminPanel(){document.getElementById('adminPanel').classList.remove('active');document.body.style.overflow=''}
 function showAdminSection(sec,el){
