@@ -135,20 +135,6 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);ove
 .channel-icon.youtube{color:#F00}.channel-icon.tiktok{color:#00F2EA}.channel-icon.facebook{color:#1877F2}.channel-icon.whatsapp{color:#25D366}.channel-icon.support{color:var(--accent)}
 .channel-name{font-size:1.05rem;font-weight:800;margin-bottom:6px}
 .channel-desc{font-size:.83rem;color:var(--text-muted)}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 footer{background:#080812;padding:60px 30px 30px;border-top:1px solid rgba(108,63,197,.2)}
 .footer-inner{max-width:1200px;margin:0 auto}
 .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:50px;margin-bottom:50px}
@@ -193,9 +179,6 @@ footer{background:#080812;padding:60px 30px 30px;border-top:1px solid rgba(108,6
 .modal-switch{text-align:center;margin-top:18px;font-size:.88rem;color:var(--text-muted)}
 .modal-switch a{color:var(--primary-light);font-weight:700;cursor:pointer;text-decoration:none}
 textarea.form-input{resize:vertical;min-height:90px}
-
-
-
 .admin-panel{display:none;position:fixed;inset:0;background:var(--dark);z-index:3000;overflow-y:auto;flex-direction:column}
 .admin-panel.active{display:flex}
 .admin-header{background:var(--dark2);border-bottom:1px solid var(--card-border);padding:16px 30px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
@@ -260,7 +243,6 @@ textarea.form-input{resize:vertical;min-height:90px}
   .admin-form-row{grid-template-columns:1fr}
   .scores-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
   .channels-grid{grid-template-columns:repeat(2,1fr)}
-  
 }
 /* ===== MOBILE ===== */
 @media(max-width:600px){
@@ -299,8 +281,6 @@ textarea.form-input{resize:vertical;min-height:90px}
   .channel-icon{font-size:1.9rem;margin-bottom:10px}
   .channel-name{font-size:.88rem}
   .channel-desc{font-size:.73rem}
-  
-  
   footer{padding:36px 16px 22px}
   .footer-top{gap:20px}
   .footer-bottom{flex-direction:column;text-align:center;gap:12px}
@@ -328,8 +308,7 @@ textarea.form-input{resize:vertical;min-height:90px}
   .section-tag{font-size:.76rem;padding:5px 13px}
   .section-title{font-size:1.5rem}
   .section-sub{font-size:.88rem}
-  
-  .scores-header,.channels-section>div,
+  .scores-header,.channels-section>div{padding:0}
 }
 
 /* Admin mobile bottom nav */
@@ -809,6 +788,9 @@ textarea.form-input{resize:vertical;min-height:90px}
   </div>
 </div>
 
+  </div>
+</div>
+
 <!-- ADMIN PANEL -->
 <div class="admin-panel" id="adminPanel">
   <div class="admin-header">
@@ -928,38 +910,19 @@ const countries = [
 function buildPhoneSelects() {
   window._phoneCodes = countries.map(([n,c]) => ({ flag: '', code: c, name: n }));
   const opts = countries.map(([n,c]) => `<option value="${c}"${c==='+20'?' selected':''}>${c} ${n}</option>`).join('');
-  ['regStudentCode','regParentCode','gcStudentCode','gcParentCode'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.innerHTML = opts;
-  });
+  document.getElementById('regStudentCode').innerHTML = opts;
+  document.getElementById('regParentCode').innerHTML = opts;
 }
 buildPhoneSelects();
 
 
 // ====== FIREBASE CONFIG ======
-// ⚠️ مهم جداً: ضبط Firebase Database Security Rules في Firebase Console:
-// {
-//   "rules": {
-//     "website": {
-//       "students": {
-//         "$uid": {
-//           ".read": "auth != null && auth.uid == $uid",
-//           ".write": "auth != null && auth.uid == $uid"
-//         }
-//       },
-//       "grades":          { ".read": "auth != null", ".write": "auth != null" },
-//       "scores":          { ".read": true,           ".write": "auth != null" },
-
-
-//       "exams_v2":        { ".read": "auth != null", ".write": false },
-//       "courses":         { ".read": true,           ".write": false }
-//     }
-//   }
-// }
+// ⚠️ تأكد من ضبط Firebase Database Security Rules بشكل صحيح
+// وإنك تعمل restrict على الـ apiKey في Google Cloud Console
 const firebaseConfig = {
   apiKey: "AIzaSyBalgsZ2MmHFkF7bvAGky0MImzTVgqXTy8",
   authDomain: "monakamel-academy.firebaseapp.com",
-  databaseURL: "https://monakamel-academy-default-rtdb.firebasedatabase.app",
+  databaseURL: "https://monakamel-academy-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "monakamel-academy",
   storageBucket: "monakamel-academy.firebasestorage.app",
   messagingSenderId: "1012338556086",
@@ -974,7 +937,7 @@ const auth = firebase.auth();
 // ====== STATE ======
 // ✅ تم إزالة بيانات الأدمن الثابتة — المصادقة تتم عبر Firebase Auth فقط
 const ADMIN_EMAILS = ['admin@monakamel.com', 'mrsmonakamel6@gmail.com'];
-let currentUser = null, selectedStars = 5;
+let currentUser = null;
 let students = [];
 let topScores = [];
 
@@ -994,10 +957,578 @@ async function loadFromFirebase() {
       await db.ref('website/scores').set(
         DEFAULT_SCORES.reduce((acc, s, i) => { acc['s'+i] = s; return acc; }, {})
       );
-    }loadAdminData();showNotification('تم القبول ✅');
+    }
+
+    // تحميل الطلاب (للأدمن فقط)
+    const studentsSnap = await db.ref('website/students').once('value');
+    if (studentsSnap.exists()) {
+      students = Object.entries(studentsSnap.val()).map(([key, val]) => ({ _key: key, ...val }));
+    }
+
+    renderScores();
+  } catch(err) {
+    console.warn('Firebase غير متصل، جاري استخدام البيانات المحلية:', err.message);
+    // fallback لـ localStorage لو Firebase مش شغال
+    students = JSON.parse(localStorage.getItem('mk_students')||'[]');
+    topScores = JSON.parse(localStorage.getItem('mk_scores') || JSON.stringify(DEFAULT_SCORES));
+    renderScores();
+  }
+}
+
+// Real-time listener للدرجات
+function listenToScores() {
+  db.ref('website/scores').on('value', snap => {
+    if (snap.exists()) {
+      topScores = Object.values(snap.val());
+      renderScores();
+    }
   });
 }
-function adminAddExam(){
+
+// Real-time listener للآراء
+  });
+}
+
+// ====== PARTICLES ======
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.cssText=`left:${Math.random()*100}%;width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;animation-duration:${Math.random()*15+10}s;animation-delay:${Math.random()*10}s;opacity:${Math.random()*.3+.1}`;
+    c.appendChild(p);
+  }
+})();
+
+// ====== SCROLL ======
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// ====== MENU ======
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('active')}
+function closeMenu(){document.getElementById('mobileMenu').classList.remove('active')}
+
+// ====== NOTIFY ======
+function showNotification(msg,type='success'){
+  const el=document.getElementById('notification');
+  el.querySelector('i').className=type==='success'?'fas fa-check-circle':'fas fa-exclamation-circle';
+  document.getElementById('notification-msg').textContent=msg;
+  el.className='notification '+type+' show';
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ====== MODALS ======
+function showModal(t){document.getElementById(t+'Modal').classList.add('active');document.body.style.overflow='hidden'}
+function closeModal(t){
+  document.getElementById(t+'Modal').classList.remove('active');
+  document.body.style.overflow='';
+  // إعادة ضبط خطوات التسجيل
+  if(t==='register'){
+    const s1=document.getElementById('regStep1'),s2=document.getElementById('regStep2');
+    if(s1)s1.style.display='block';
+    if(s2)s2.style.display='none';
+    const bar=document.getElementById('stepBar'),dot2=document.getElementById('step2Dot');
+    if(bar)bar.style.width='0%';
+    if(dot2)dot2.style.background='rgba(255,255,255,.1)';
+    const ef=document.getElementById('emailFields'),ec=document.getElementById('emailChevron');
+    if(ef)ef.style.display='none';
+    if(ec)ec.style.transform='';
+  }
+}
+function switchModal(f,t){closeModal(f);setTimeout(()=>showModal(t),200)}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',function(e){if(e.target===this){this.classList.remove('active');document.body.style.overflow=''}});
+});
+
+// ====== GRADE OPTIONS ======
+function updateGradeOptions(){
+  const s=document.getElementById('regStage').value;
+  const g=document.getElementById('regGrade');
+  g.innerHTML='<option value="">اختر الصف</option>';
+  const opts=s==='prep'?['أول إعدادي','تاني إعدادي','تالتة إعدادي']:s==='sec'?['أول ثانوي','تاني ثانوي','تالتة ثانوي']:[];
+  opts.forEach(o=>g.innerHTML+=`<option value="${o}">${o}</option>`);
+}
+
+// ====== FIREBASE AUTH LISTENER ======
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // تحقق لو أدمن
+    if (ADMIN_EMAILS.includes(user.email)) {
+      currentUser = { uid: user.uid, name1: 'المدير', email: user.email, isAdmin: true };
+      updateNavForUser();
+      return;
+    }
+    // جيب بيانات الطالب من Database
+    db.ref('website/students/' + user.uid).once('value').then(snap => {
+      if (snap.exists()) {
+        const data = snap.val();
+        // فحص الحظر
+        if (data.banned) {
+          auth.signOut();
+          showNotification('❌ تم حظر حسابك، تواصل مع الإدارة', 'error');
+          currentUser = null;
+          return;
+        }
+        currentUser = { uid: user.uid, _key: user.uid, ...data };
+        updateNavForUser();
+      } else {
+        // مستخدم جوجل سجل دخول بدون بيانات كاملة — اطلب منه يكمل
+        if (user.providerData && user.providerData[0]?.providerId === 'google.com') {
+          window._pendingGoogleUser = user;
+          const parts = (user.displayName || '').split(' ');
+          document.getElementById('gcName1').value = parts[0] || '';
+          document.getElementById('gcName2').value = parts[1] || '';
+          document.getElementById('gcName3').value = parts[2] || '';
+          document.getElementById('gcName4').value = parts[3] || '';
+          buildGCPhoneSelects();
+          document.getElementById('googleCompleteModal').classList.add('active');
+        } else {
+          // حالة غير متوقعة — سجّل الخروج
+          auth.signOut();
+          currentUser = null;
+        }
+      }
+    }).catch(() => {
+      currentUser = null;
+      updateNavForUser();
+    });
+  } else {
+    currentUser = null;
+    document.getElementById('navBtns').innerHTML = '<button class="btn-nav-login" onclick="showModal(\'login\')">تسجيل الدخول</button><button class="btn-nav-register" onclick="showModal(\'register\')">إنشاء حساب</button>';
+  }
+});
+
+// ====== LOGIN ======
+function handleLogin() {
+  const email = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!email || !pass) { showNotification('اكمل البيانات', 'error'); return; }
+
+  // ✅ المصادقة تتم عبر Firebase فقط بدون استثناءات محلية
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(result => {
+      closeModal('login');
+      showNotification('أهلاً بك! 🎉');
+    })
+    .catch(err => {
+      const msgs = {
+        'auth/user-not-found': 'الإيميل ده مش مسجل',
+        'auth/wrong-password': 'كلمة المرور غلط',
+        'auth/invalid-email': 'الإيميل غير صحيح',
+        'auth/too-many-requests': 'كتير أوي، استنى شوية وجرب تاني',
+        'auth/invalid-credential': 'الإيميل أو كلمة المرور غلط'
+      };
+      showNotification(msgs[err.code] || 'خطأ في تسجيل الدخول', 'error');
+    });
+}
+
+// ====== FORGOT PASSWORD ======
+function handleForgotPassword() {
+  const email = document.getElementById('loginUser').value.trim();
+  if (!email) { showNotification('اكتب الإيميل الأول', 'error'); return; }
+  auth.sendPasswordResetEmail(email)
+    .then(() => showNotification('تم إرسال رابط إعادة التعيين على إيميلك 📧'))
+    .catch(err => {
+      if (err.code === 'auth/user-not-found') showNotification('الإيميل ده مش مسجل', 'error');
+      else showNotification('خطأ، حاول تاني', 'error');
+    });
+}
+
+// ====== GOOGLE LOGIN ======
+function handleGoogleLogin(fromRegister) {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  auth.signInWithPopup(provider)
+    .then(result => {
+      const user = result.user;
+      return db.ref('website/students/' + user.uid).once('value').then(snap => {
+        if (!snap.exists()) {
+          // مستخدم جديد
+          if (fromRegister && window._pendingRegProfile) {
+            // جاء من نموذج التسجيل — لديه بيانات جاهزة، احفظها مباشرة
+            const p = window._pendingRegProfile;
+            const fullName = [p.name1, p.name2, p.name3, p.name4].filter(Boolean).join(' ');
+            const profile = {
+              ...p,
+              fullName,
+              email: user.email,
+              isAdmin: false,
+              isGoogle: true,
+              authProvider: 'google',
+              createdAt: new Date().toLocaleDateString('ar-EG'),
+              createdTimestamp: Date.now()
+            };
+            return db.ref('website/students/' + user.uid).set(profile).then(() => {
+              window._pendingRegProfile = null;
+              closeModal('register');
+              showNotification('أهلاً بك ' + p.name1 + '! تم إنشاء حسابك بنجاح 🎉');
+              currentUser = { uid: user.uid, ...profile };
+              updateNavForUser();
+            });
+          } else {
+            // دخل من زر Login مباشرة — اطلب منه البيانات
+            window._pendingGoogleUser = user;
+            closeModal('login');
+            closeModal('register');
+            const parts = (user.displayName || '').split(' ');
+            document.getElementById('gcName1').value = parts[0] || '';
+            document.getElementById('gcName2').value = parts[1] || '';
+            document.getElementById('gcName3').value = parts[2] || '';
+            document.getElementById('gcName4').value = parts[3] || '';
+            buildGCPhoneSelects();
+            document.getElementById('googleCompleteModal').classList.add('active');
+          }
+        } else {
+          closeModal('login');
+          closeModal('register');
+          showNotification('أهلاً بك مجدداً ' + (user.displayName?.split(' ')[0] || '') + '! 🎉');
+        }
+      });
+    })
+    .catch(err => {
+      if (err.code !== 'auth/popup-closed-by-user')
+        showNotification('مشكلة في تسجيل جوجل، حاول تاني', 'error');
+    });
+}
+
+function buildGCPhoneSelects() {
+  const opts = countries.map(([n,c]) => `<option value="${c}"${c==='+20'?' selected':''}>${c} ${n}</option>`).join('');
+  ['gcStudentCode','gcParentCode'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel) sel.innerHTML = opts;
+  });
+}
+
+function updateGCGradeOptions() {
+  const stage = document.getElementById('gcStage').value;
+  const gradeSelect = document.getElementById('gcGrade');
+  gradeSelect.innerHTML = '<option value="">اختر الصف</option>';
+  const prepGrades = ['أولى إعدادي','ثانية إعدادي','تالتة إعدادي'];
+  const secGrades = ['أولى ثانوي','تانية ثانوي','تالتة ثانوي'];
+  (stage === 'prep' ? prepGrades : stage === 'sec' ? secGrades : []).forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    gradeSelect.appendChild(opt);
+  });
+}
+
+function handleGoogleCompleteProfile() {
+  const user = window._pendingGoogleUser;
+  if (!user) { showNotification('حدث خطأ، حاول تسجيل الدخول مرة تانية', 'error'); return; }
+
+  const n1 = document.getElementById('gcName1').value.trim();
+  const n2 = document.getElementById('gcName2').value.trim();
+  const n3 = document.getElementById('gcName3').value.trim();
+  const n4 = document.getElementById('gcName4').value.trim();
+  const rawStudentPhone = document.getElementById('gcStudentPhone').value.trim();
+  const rawParentPhone = document.getElementById('gcParentPhone').value.trim();
+  const stage = document.getElementById('gcStage').value;
+  const grade = document.getElementById('gcGrade').value;
+  const sp = document.getElementById('gcStudentCode').value + rawStudentPhone;
+  const pp = document.getElementById('gcParentCode').value + rawParentPhone;
+
+  if (!n1 || !n2 || !n4 || !stage || !grade) {
+    showNotification('اكمل كل البيانات المطلوبة', 'error'); return;
+  }
+  if (!/^\d{7,15}$/.test(rawStudentPhone)) {
+    showNotification('رقم واتساب الطالب غير صحيح', 'error'); return;
+  }
+  if (rawParentPhone && !/^\d{7,15}$/.test(rawParentPhone)) {
+    showNotification('رقم واتساب ولي الأمر غير صحيح', 'error'); return;
+  }
+
+  const btn = document.querySelector('#googleCompleteModal .btn-form');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...'; }
+
+  const fullName = [n1, n2, n3, n4].filter(Boolean).join(' ');
+  const profile = {
+    name1: n1, name2: n2, name3: n3 || '', name4: n4,
+    fullName: fullName,
+    email: user.email,
+    studentPhone: sp,
+    parentPhone: pp || '',
+    stage, grade,
+    isAdmin: false,
+    isGoogle: true,
+    authProvider: 'google',
+    createdAt: new Date().toLocaleDateString('ar-EG'),
+    createdTimestamp: Date.now()
+  };
+
+  db.ref('website/students/' + user.uid).set(profile)
+    .then(() => {
+      window._pendingGoogleUser = null;
+      document.getElementById('googleCompleteModal').classList.remove('active');
+      showNotification('أهلاً بك ' + n1 + '! تم إنشاء حسابك بنجاح 🎉');
+      currentUser = { uid: user.uid, ...profile };
+      updateNavForUser();
+    })
+    .catch(err => {
+      showNotification('خطأ في حفظ البيانات: ' + err.message, 'error');
+    })
+    .finally(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> حفظ البيانات والمتابعة'; }
+    });
+}
+
+// ====== REGISTER STEPS ======
+function validateStep1() {
+  const n1 = document.getElementById('regName1').value.trim();
+  const n2 = document.getElementById('regName2').value.trim();
+  const n4 = document.getElementById('regName4').value.trim();
+  const stage = document.getElementById('regStage').value;
+  const grade = document.getElementById('regGrade').value;
+  const rawStudentPhone = document.getElementById('regStudentPhone').value.trim();
+  const rawParentPhone = document.getElementById('regParentPhone').value.trim();
+
+  if (!n1) { showNotification('أدخل الاسم الأول', 'error'); return false; }
+  if (!n2) { showNotification('أدخل الاسم الثاني', 'error'); return false; }
+  if (!n4) { showNotification('أدخل الاسم الأخير', 'error'); return false; }
+  if (!stage) { showNotification('اختر المرحلة الدراسية', 'error'); return false; }
+  if (!grade) { showNotification('اختر الصف', 'error'); return false; }
+  if (!rawStudentPhone) { showNotification('أدخل رقم واتساب الطالب', 'error'); return false; }
+  if (!/^\d{7,15}$/.test(rawStudentPhone)) { showNotification('رقم واتساب الطالب غير صحيح', 'error'); return false; }
+  if (rawParentPhone && !/^\d{7,15}$/.test(rawParentPhone)) { showNotification('رقم واتساب ولي الأمر غير صحيح', 'error'); return false; }
+  return true;
+}
+
+function goToRegStep2() {
+  if (!validateStep1()) return;
+  document.getElementById('regStep1').style.display = 'none';
+  document.getElementById('regStep2').style.display = 'block';
+  document.getElementById('stepBar').style.width = '100%';
+  document.getElementById('step2Dot').style.background = 'var(--gradient)';
+  // scroll to top of modal
+  document.querySelector('#registerModal .modal').scrollTop = 0;
+}
+
+function backToRegStep1() {
+  document.getElementById('regStep2').style.display = 'none';
+  document.getElementById('regStep1').style.display = 'block';
+  document.getElementById('stepBar').style.width = '0%';
+  document.getElementById('step2Dot').style.background = 'rgba(255,255,255,.1)';
+  // إغلاق حقول الإيميل
+  document.getElementById('emailFields').style.display = 'none';
+  document.getElementById('emailChevron').style.transform = '';
+}
+
+function toggleEmailFields() {
+  const fields = document.getElementById('emailFields');
+  const chevron = document.getElementById('emailChevron');
+  const emailOption = document.getElementById('emailOption');
+  const isOpen = fields.style.display !== 'none';
+  fields.style.display = isOpen ? 'none' : 'block';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  emailOption.style.borderColor = isOpen ? 'rgba(108,63,197,.3)' : 'var(--primary)';
+}
+
+function getRegProfileData() {
+  return {
+    name1: document.getElementById('regName1').value.trim(),
+    name2: document.getElementById('regName2').value.trim(),
+    name3: document.getElementById('regName3').value.trim(),
+    name4: document.getElementById('regName4').value.trim(),
+    studentPhone: document.getElementById('regStudentCode').value + document.getElementById('regStudentPhone').value.trim(),
+    parentPhone: document.getElementById('regParentCode').value + document.getElementById('regParentPhone').value.trim(),
+    stage: document.getElementById('regStage').value,
+    grade: document.getElementById('regGrade').value,
+  };
+}
+
+// ====== REGISTER ======
+function handleRegister() {
+  if (!validateStep1()) { backToRegStep1(); return; }
+
+  const em = document.getElementById('regEmail').value.trim();
+  const pw = document.getElementById('regPass').value;
+
+  if (!em) { showNotification('أدخل الإيميل', 'error'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showNotification('الإيميل غير صحيح', 'error'); return; }
+  if (!pw) { showNotification('أدخل كلمة المرور', 'error'); return; }
+  if (pw.length < 6) { showNotification('كلمة المرور لازم تكون 6 أحرف على الأقل', 'error'); return; }
+
+  const btn = document.querySelector('#registerModal #emailFields .btn-form');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...'; }
+
+  const profileData = getRegProfileData();
+  const fullName = [profileData.name1, profileData.name2, profileData.name3, profileData.name4].filter(Boolean).join(' ');
+
+  auth.createUserWithEmailAndPassword(em, pw)
+    .then(result => {
+      result.user.updateProfile({ displayName: fullName });
+      const profile = {
+        ...profileData,
+        fullName,
+        email: em,
+        isAdmin: false,
+        authProvider: 'email',
+        createdAt: new Date().toLocaleDateString('ar-EG'),
+        createdTimestamp: Date.now()
+      };
+      return db.ref('website/students/' + result.user.uid).set(profile);
+    })
+    .then(() => {
+      closeModal('register');
+      showNotification('أهلاً بك ' + profileData.name1 + '! تم إنشاء حسابك بنجاح 🎉');
+    })
+    .catch(err => {
+      console.error('Registration error:', err);
+      const msgs = {
+        'auth/email-already-in-use': 'الإيميل ده مسجل بالفعل، جرب تسجيل الدخول',
+        'auth/invalid-email': 'الإيميل غير صحيح',
+        'auth/weak-password': 'كلمة المرور ضعيفة — استخدم 6 أحرف أو أكتر',
+        'auth/network-request-failed': 'مشكلة في الاتصال بالانترنت، جرب تاني',
+        'auth/operation-not-allowed': 'تسجيل الدخول بالإيميل غير مفعّل — تواصل مع الأدمن',
+        'PERMISSION_DENIED': 'خطأ في صلاحيات قاعدة البيانات — تواصل مع الأدمن'
+      };
+      // Check for Firebase Database PERMISSION_DENIED
+      const msg = msgs[err.code] || (err.message && err.message.includes('PERMISSION_DENIED') ? 'خطأ في صلاحيات قاعدة البيانات — تواصل مع الأدمن' : 'خطأ: ' + err.message);
+      showNotification(msg, 'error');
+    })
+    .finally(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء الحساب بالإيميل'; }
+    });
+}
+
+function handleGoogleRegister() {
+  if (!validateStep1()) { backToRegStep1(); return; }
+  // احفظ بيانات الخطوة الأولى مؤقتاً
+  window._pendingRegProfile = getRegProfileData();
+  handleGoogleLogin(true);
+}
+
+
+
+
+// ====== LOGOUT ======
+function logout() {
+  auth.signOut().then(() => {
+    currentUser = null;
+    showNotification('تم تسجيل الخروج');
+  });
+}
+
+function updateNavForUser(){
+  if(!currentUser)return;
+  document.getElementById('navBtns').innerHTML=`
+    <span style="color:var(--primary-light);font-weight:700;font-size:.88rem">👋 أهلاً ${currentUser.name1}</span>
+    ${currentUser.isAdmin?'<button class="btn-nav-register" onclick="openAdminPanel()" style="background:linear-gradient(135deg,#FFD93D,#FF6B35);color:#000">👑 لوحة الإدارة</button>':''}
+    <button class="btn-nav-login" onclick="logout()">خروج</button>`;
+}
+
+// ====== SCORES ======
+function renderScores(){
+  const grid=document.getElementById('scoresGrid');
+  const medals=['gold','silver','bronze'],emojis=['🥇','🥈','🥉'];
+  grid.innerHTML=topScores.slice(0,3).map((s,i)=>`
+    <div class="score-card ${medals[i]||''}">
+      <div class="score-rank">${i<3?emojis[i]:i+1}</div>
+      <div class="score-name">${s.name}</div>
+      <div class="score-meta">
+        <span><i class="fas fa-graduation-cap"></i> ${s.grade}</span>
+        <span><i class="fas fa-file-alt"></i> ${s.exam}</span>
+      </div>
+      <div class="score-badge">${s.mark}</div>
+    </div>`).join('');
+}
+
+
+// ====== STARS ======
+}
+
+// ====== ADMIN ======
+function openAdminPanel(){
+  window.location.href = 'Mona.A.2011.2025.html';
+}
+function closeAdminPanel(){document.getElementById('adminPanel').classList.remove('active');document.body.style.overflow=''}
+function showAdminSection(sec,el){
+  document.querySelectorAll('.admin-mob-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.admin-mobile-nav .admin-mob-item').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+sec+"'"))b.classList.add('active');
+  });
+  document.querySelectorAll('.admin-content-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+sec).classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+async function loadAdminData(){
+  try {
+    // تحميل طلاب الموقع (UID-based)
+    const newSnap = await db.ref('website/students').once('value');
+    let newStudents = [];
+    if(newSnap.exists()) newStudents = Object.entries(newSnap.val()).map(([k,v])=>({_key:k,...v}));
+    students = newStudents;
+    document.getElementById('totalStudents').textContent = newStudents.length;
+
+    // تحميل الدرجات
+    const scSnap = await db.ref('website/scores').once('value');
+    if(scSnap.exists()) topScores = Object.entries(scSnap.val()).map(([k,v])=>({_key:k,...v}));
+
+    renderAdminTable(newStudents);
+    renderAdminScores();
+    document.getElementById('totalScores').textContent=topScores.length;
+
+  } catch(err) {
+    console.warn('Firebase admin load error:', err);
+    renderAdminTable(students);
+    renderAdminScores();
+  }
+}
+
+function renderAdminTable(list){
+  document.getElementById('studentsTable').innerHTML=list.map((s,i)=>`
+    <tr>
+      <td>${s.name1||s.name||''} ${s.name2||''} ${s.name3||''} ${s.name4||''}</td>
+      <td>${s.email||'—'}</td>
+      <td>${s.grade||'—'}</td>
+      <td>${s.studentPhone||s.whatsapp||'—'}</td>
+      <td>${s.parentPhone||'—'}</td>
+      <td>${s.authProvider||'email'}</td>
+      <td><button class="action-btn delete" onclick="deleteStudent('${s._key||i}')">حذف</button></td>
+    </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">لا يوجد طلاب</td></tr>';
+}
+function renderAdminScores(){
+  document.getElementById('adminScoresTable').innerHTML=topScores.map((s,i)=>`
+    <tr><td>${i+1}</td><td>${s.name}</td><td>${s.grade}</td><td>${s.exam}</td><td>${s.mark}</td>
+    <td><button class="action-btn delete" onclick="adminDeleteScore('${s._key||i}')">حذف</button></td></tr>`).join('');
+}
+
+function adminAddScore(){
+  const n=document.getElementById('adminScoreName').value.trim();
+  const g=document.getElementById('adminScoreGrade').value.trim();
+  const e=document.getElementById('adminScoreExam').value.trim();
+  const m=document.getElementById('adminScoreMark').value.trim();
+  if(!n||!g||!e||!m){showNotification('اكمل بيانات الدرجة','error');return}
+  const score={name:n,grade:g,exam:e,mark:m,time:new Date().toLocaleDateString('ar-EG')};
+  db.ref('website/scores').push(score).then(()=>{
+    showNotification('تم إضافة الطالب لقائمة الشرف 🏆');
+    ['adminScoreName','adminScoreGrade','adminScoreExam','adminScoreMark'].forEach(id=>document.getElementById(id).value='');
+  }).catch(()=>{
+    topScores.unshift(score);if(topScores.length>10)topScores.pop();
+    localStorage.setItem('mk_scores',JSON.stringify(topScores));
+    renderScores();renderAdminScores();
+    showNotification('تم الإضافة محلياً 🏆');
+  });
+}
+function adminDeleteScore(key){
+  if(typeof key === 'string' && key.startsWith('-')){
+    db.ref('website/scores/'+key).remove().then(()=>showNotification('تم الحذف')).catch(()=>showNotification('خطأ','error'));
+  } else {
+    topScores.splice(key,1);localStorage.setItem('mk_scores',JSON.stringify(topScores));
+    renderScores();renderAdminScores();showNotification('تم الحذف');
+  }
+}
+function deleteStudent(key){
+  if(typeof key === 'string' && key.startsWith('-')){
+    db.ref('website/students/'+key).remove().then(()=>{
+      showNotification('تم حذف الطالب');loadAdminData();
+    }).catch(()=>showNotification('خطأ','error'));
+  } else {
+    students.splice(key,1);localStorage.setItem('mk_students',JSON.stringify(students));
+    loadAdminData();showNotification('تم حذف الطالب');
+  }
+}
   const t=document.getElementById('examTitle').value.trim();
   const target=document.getElementById('examTarget')?document.getElementById('examTarget').value.trim():'';
   const l=document.getElementById('examLink').value.trim();
@@ -1400,7 +1931,7 @@ function openExam(url){ openExamPlayer(url); }
 // ✅ real-time listeners تشتغل بعد loadFromFirebase مباشرة
 loadFromFirebase().then(()=>{
   listenToScores();
-  });
+});
 loadCourses();
 loadExamsV2();
 
