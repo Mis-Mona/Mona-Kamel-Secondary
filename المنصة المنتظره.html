@@ -38,7 +38,7 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);ove
 .particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .particle{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--primary-light);opacity:.3;animation:particleFloat linear infinite}
 @keyframes particleFloat{0%{transform:translateY(100vh) rotate(0);opacity:0}10%{opacity:.3}90%{opacity:.3}100%{transform:translateY(-100px) rotate(720deg);opacity:0}}
-.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 30px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .section-tag{display:inline-block;background:rgba(108,63,197,.15);border:1px solid rgba(108,63,197,.4);color:var(--primary-light);padding:6px 18px;border-radius:20px;font-size:.85rem;font-weight:700;margin-bottom:16px}
 .hero-text h1{font-size:clamp(1.9rem,3.5vw,3rem);font-weight:900;line-height:1.3;margin-bottom:20px}
 .hero-text h1 .highlight{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -51,13 +51,13 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);ove
 .hero-stats{display:flex;gap:30px;margin-top:40px;flex-wrap:wrap}
 .hero-stat .num{font-size:1.9rem;font-weight:900;color:var(--primary-light)}
 .hero-stat .lbl{font-size:.8rem;color:var(--text-muted)}
-.hero-image-wrap{position:relative;display:flex;justify-content:center;align-items:center}
+.hero-image-wrap{position:relative;display:flex;justify-content:center;align-items:center;padding:36px}
 .hero-image-circle{width:380px;height:380px;border-radius:50%;background:var(--gradient2);position:relative;overflow:hidden;box-shadow:0 0 80px rgba(108,63,197,.4),0 0 30px rgba(108,63,197,.2);border:3px solid rgba(108,63,197,.5)}
 .hero-image-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;background:linear-gradient(180deg,rgba(108,63,197,.3) 0%,rgba(74,42,138,.8) 100%);padding-bottom:20px}
 .teacher-avatar{font-size:8rem;line-height:1;filter:drop-shadow(0 10px 30px rgba(0,0,0,.5))}
-.hero-badge,.hero-badge2{position:absolute;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(10px)}
-.hero-badge{bottom:20px;right:-20px;animation:float 3s ease-in-out infinite}
-.hero-badge2{top:30px;left:-20px;animation:float 3s ease-in-out infinite 1.5s}
+.hero-badge,.hero-badge2{position:absolute;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(10px);z-index:10}
+.hero-badge{bottom:20px;right:0;animation:float 3s ease-in-out infinite}
+.hero-badge2{top:30px;left:0;animation:float 3s ease-in-out infinite 1.5s}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .badge-icon{font-size:1.4rem}
 .badge-text .t1{font-size:.72rem;color:var(--text-muted)}
@@ -221,78 +221,160 @@ textarea.form-input{resize:vertical;min-height:90px}
 .notification.success i{color:#2ECC71}
 .notification.error{border-color:rgba(231,76,60,.4)}
 .notification.error i{color:#E74C3C}
-/* ===== TABLET ===== */
+/* ============================================================
+   COMPREHENSIVE RESPONSIVE SYSTEM
+   Breakpoints:
+   xs  : ≤ 380px   (small phones: Galaxy A, iPhone SE)
+   sm  : ≤ 600px   (phones)
+   md  : ≤ 900px   (tablets portrait)
+   lg  : ≤ 1200px  (tablets landscape / small laptops)
+   xl  : > 1200px  (desktops)
+   ============================================================ */
+
+/* ---- LARGE SCREENS: keep layout tight and centered ---- */
+@media(min-width:1400px){
+  .hero-content,.about-section,.courses-inner,.top-scores-inner,
+  .channels-section,.footer-inner,.firebuzz-section{max-width:1280px}
+  .hero-image-circle{width:440px;height:440px}
+  .hero-text h1{font-size:3.2rem}
+}
+
+/* ---- TABLETS ≤ 1024px ---- */
+@media(max-width:1024px){
+  .hero-content{gap:40px;padding:0 24px}
+  .hero-image-circle{width:320px;height:320px}
+  .hero-text h1{font-size:2.2rem}
+  .about-section{padding:80px 24px}
+  .footer-top{gap:36px}
+}
+
+/* ---- TABLETS PORTRAIT ≤ 900px ---- */
 @media(max-width:900px){
+  /* Navbar */
   .navbar{padding:12px 16px}
   .nav-links{display:none}
   .hamburger{display:flex}
   .nav-btns{gap:6px}
-  .btn-nav-login{padding:7px 12px;font-size:.8rem}
-  .btn-nav-register{padding:7px 12px;font-size:.8rem}
-  .hero-content{grid-template-columns:1fr;text-align:center;gap:30px;padding:0 20px}
-  .hero-image-wrap{order:-1}
-  .hero-image-circle{width:240px;height:240px}
-  .hero-stats{justify-content:center}
-  .hero-btns{justify-content:center}
+  .btn-nav-login{padding:7px 12px;font-size:.82rem}
+  .btn-nav-register{padding:7px 12px;font-size:.82rem}
+
+  /* Hero: 2-col layout preserved on tablets */
+  .hero-content{grid-template-columns:1fr 1fr;gap:28px;padding:0 20px;align-items:center}
+  .hero-image-wrap{order:0}
+  .hero-image-circle{width:280px;height:280px}
+  .hero-badge{right:-8px;bottom:10px;padding:9px 12px}
+  .hero-badge2{left:-8px;top:16px;padding:9px 12px}
+  .badge-text .t2{font-size:.85rem}
+  .hero-text h1{font-size:1.85rem;line-height:1.3}
+  .hero-text p{font-size:.95rem}
+  .hero-stats{gap:20px}
+  .hero-stat .num{font-size:1.6rem}
+
+  /* About */
   .about-section{padding:60px 20px}
   .about-grid{grid-template-columns:1fr;gap:40px}
-  .about-img{max-width:340px;margin:0 auto}
+  .about-img-wrap{max-width:380px;margin:0 auto;width:100%}
   .about-overlay{bottom:-10px;right:10px}
+
+  /* Footer & Channels */
   .footer-top{grid-template-columns:1fr;gap:28px}
-  #channels > div { grid-template-columns:1fr!important; gap:28px!important }
+  #channels > div{grid-template-columns:1fr!important;gap:28px!important}
+  .channels-grid{grid-template-columns:repeat(3,1fr)}
+
+  /* Scores */
+  .scores-grid{grid-template-columns:repeat(2,1fr);gap:14px}
+
+  /* Admin */
   .admin-sidebar{width:180px}
   .form-row{grid-template-columns:1fr}
   .admin-form-row{grid-template-columns:1fr}
-  .scores-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
-  .channels-grid{grid-template-columns:repeat(2,1fr)}
+
+  /* Sections padding */
+  .courses-section{padding:60px 20px}
+  .firebuzz-section{padding:60px 20px}
+  .top-scores-section{padding:60px 20px}
+  .channels-section{padding:60px 20px}
 }
-/* ===== MOBILE ===== */
+
+/* ---- PHONES ≤ 600px ---- */
 @media(max-width:600px){
+  /* Navbar */
   .navbar{padding:10px 14px}
   .nav-logo{font-size:1.05rem}
   .nav-logo .logo-icon{width:34px;height:34px;font-size:.95rem}
   .btn-nav-login{display:none}
   .btn-nav-register{padding:7px 11px;font-size:.78rem}
   .mobile-menu{top:62px;padding:14px}
-  .hero{padding-top:70px;min-height:auto;padding-bottom:50px}
-  .hero-content{padding:20px 16px;gap:22px}
-  .hero-image-circle{width:190px;height:190px}
+
+  /* Hero: single column */
+  .hero{padding-top:68px;min-height:auto;padding-bottom:50px}
+  .hero-content{
+    grid-template-columns:1fr;
+    text-align:center;
+    gap:24px;
+    padding:28px 16px 10px;
+    justify-items:center;
+  }
+  .hero-image-wrap{order:-1;width:100%;display:flex;justify-content:center}
+  .hero-image-circle{width:210px;height:210px}
   .hero-badge,.hero-badge2{display:none}
-  .hero-text h1{font-size:1.6rem;line-height:1.35}
-  .hero-text p{font-size:.9rem;margin-bottom:20px}
-  .hero-btns{flex-direction:column;align-items:center;gap:10px}
-  .btn-primary,.btn-secondary{width:100%;justify-content:center;padding:13px 20px;font-size:.9rem}
-  .hero-stats{gap:16px}
-  .hero-stat .num{font-size:1.4rem}
-  .hero-stat .lbl{font-size:.75rem}
+  .hero-ring-1,.hero-ring-2{display:none}
+  .hero-text{width:100%}
+  .hero-text h1{font-size:clamp(1.45rem,5.5vw,1.9rem);line-height:1.35}
+  .hero-text p{font-size:.9rem;margin-bottom:20px;line-height:1.7}
+  .hero-btns{flex-direction:column;align-items:center;gap:10px;width:100%}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center;padding:13px 20px;font-size:.92rem;max-width:340px}
+  .hero-stats{justify-content:center;gap:18px;margin-top:24px;flex-wrap:wrap}
+  .hero-stat .num{font-size:1.5rem}
+  .hero-stat .lbl{font-size:.76rem}
+  .section-tag{font-size:.77rem;padding:5px 13px}
+  .section-title{font-size:clamp(1.4rem,6vw,1.9rem)}
+  .section-sub{font-size:.9rem}
+
+  /* Sections */
   .about-section{padding:44px 16px}
-  .about-img{max-width:260px;aspect-ratio:3/4}
-  .about-avatar{font-size:7rem}
+  .about-img-wrap{max-width:280px}
   .about-features{grid-template-columns:1fr;gap:10px}
   .about-info h2{font-size:1.4rem}
   .about-info p{font-size:.9rem}
   .about-overlay{bottom:-8px;right:8px;padding:14px 18px}
   .about-overlay .num{font-size:2rem}
+
   .top-scores-section{padding:44px 16px}
   .scores-grid{grid-template-columns:1fr;gap:12px}
   .score-card{padding:18px 14px 50px}
   .score-name{font-size:.95rem}
+  .scores-header .section-sub{display:none}
+
   .channels-section{padding:44px 16px}
   .channels-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .channel-card{padding:18px 12px}
   .channel-icon{font-size:1.9rem;margin-bottom:10px}
   .channel-name{font-size:.88rem}
   .channel-desc{font-size:.73rem}
+
+  .courses-section{padding:44px 16px}
+  .courses-grid-public{grid-template-columns:1fr;gap:14px}
+  .pub-course-thumb,.pub-course-thumb-ph{height:130px}
+
+  .firebuzz-section{padding:44px 16px}
+  .firebuzz-grid{grid-template-columns:1fr;gap:12px}
+
+  /* Footer */
   footer{padding:36px 16px 22px}
   .footer-top{gap:20px}
   .footer-bottom{flex-direction:column;text-align:center;gap:12px}
   .dev-btn{justify-content:center}
+
+  /* Modals */
   .modal{margin:8px;padding:22px 14px;border-radius:16px;max-height:94vh}
   .modal-title{font-size:1.25rem}
   .modal-sub{font-size:.83rem}
   .form-row{grid-template-columns:1fr}
   .phone-input-wrap{flex-direction:row}
   .phone-flag{min-width:90px;font-size:.78rem;padding:10px 6px}
+
+  /* Admin */
   .admin-sidebar{display:none}
   .admin-mobile-nav{display:flex!important}
   .admin-main{padding:12px}
@@ -305,12 +387,26 @@ textarea.form-input{resize:vertical;min-height:90px}
   .data-table th,.data-table td{padding:9px 7px}
   .admin-header{padding:11px 14px}
   .admin-header h2{font-size:.95rem}
-  .notification{width:88%;left:6%;transform:none translateY(-20px);white-space:normal}
+
+  /* Notification */
+  .notification{width:90%;left:5%;right:5%;transform:translateY(-20px);white-space:normal}
   .notification.show{transform:translateY(0)}
-  .section-tag{font-size:.76rem;padding:5px 13px}
-  .section-title{font-size:1.5rem}
-  .section-sub{font-size:.88rem}
-  .scores-header,.channels-section>div{padding:0}
+}
+
+/* ---- SMALL PHONES ≤ 380px ---- */
+@media(max-width:380px){
+  .navbar{padding:9px 12px}
+  .nav-logo{font-size:.95rem}
+  .nav-logo .logo-icon{width:30px;height:30px;font-size:.85rem}
+  .btn-nav-register{padding:6px 9px;font-size:.74rem}
+  .hero-image-circle{width:180px;height:180px}
+  .hero-text h1{font-size:1.4rem}
+  .btn-primary,.btn-secondary{font-size:.84rem;padding:11px 16px}
+  .hero-stat .num{font-size:1.3rem}
+  .channels-grid{grid-template-columns:1fr;gap:8px}
+  .admin-stats-grid{grid-template-columns:1fr}
+  .scores-grid{grid-template-columns:1fr}
+  .modal{margin:4px;padding:18px 12px}
 }
 
 /* Admin mobile bottom nav */
@@ -403,9 +499,9 @@ textarea.form-input{resize:vertical;min-height:90px}
             onerror="this.style.display='none';document.getElementById('heroFallback').style.display='flex'">
           <div id="heroFallback" style="display:none;width:100%;height:100%;border-radius:50%;background:var(--gradient2);align-items:flex-end;justify-content:center;font-size:8rem;padding-bottom:10px">👩‍🏫</div>
         </div>
-        <!-- حلقات زخرفية -->
-        <div style="position:absolute;inset:-16px;border-radius:50%;border:1px dashed rgba(108,63,197,.3);animation:spin 20s linear infinite;pointer-events:none"></div>
-        <div style="position:absolute;inset:-30px;border-radius:50%;border:1px dashed rgba(255,107,53,.2);animation:spin 30s linear infinite reverse;pointer-events:none"></div>
+        <!-- حلقات زخرفية - hidden on mobile via CSS -->
+        <div class="hero-ring-1" style="position:absolute;inset:-16px;border-radius:50%;border:1px dashed rgba(108,63,197,.3);animation:spin 20s linear infinite;pointer-events:none"></div>
+        <div class="hero-ring-2" style="position:absolute;inset:-30px;border-radius:50%;border:1px dashed rgba(255,107,53,.2);animation:spin 30s linear infinite reverse;pointer-events:none"></div>
         <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
       </div>
       <div class="hero-badge">
@@ -1794,8 +1890,11 @@ function renderPublicExams() {
     const prevGrade = uid ? Object.values(allGrades || {}).find(g => g.studentUid === uid && g.examKey === key) : null;
     const pct = prevGrade && prevGrade.total ? Math.round((prevGrade.score/prevGrade.total)*100) : null;
     const doneHtml = prevGrade ? `<div style="margin-top:10px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:6px 10px;font-size:.78rem;color:#2ECC71;font-weight:700"><i class="fas fa-check-circle"></i> اتعملت — نتيجتك: ${prevGrade.score}/${prevGrade.total} (${pct}%)</div>` : '';
-    return `<div class="exam-card" onclick="openExamPlayer('${key}')" style="${prevGrade ? 'opacity:.7' : ''}">
-      <div class="exam-tag">${label}</div>
+    return `<div class="exam-card" onclick="goToExamPage('${key}')" style="${prevGrade ? 'opacity:.8' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="exam-tag">${label}</div>
+        <button onclick="event.stopPropagation();shareExam('${key}')" style="background:rgba(108,63,197,.12);border:1px solid rgba(108,63,197,.3);color:var(--primary-light);padding:4px 10px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='rgba(108,63,197,.25)'" onmouseout="this.style.background='rgba(108,63,197,.12)'"><i class="fas fa-share-alt"></i> مشاركة</button>
+      </div>
       <div class="exam-title">${e.title}</div>
       <div class="exam-meta">
         <i class="fas fa-file-alt" style="color:var(--primary-light)"></i> ${e.questions?.length||0} سؤال
@@ -1807,6 +1906,29 @@ function renderPublicExams() {
   }).join('');
 }
 
+function goToExamPage(key) {
+  if (!currentUser) {
+    showNotification('سجّل دخولك أولاً 🔐', 'error');
+    setTimeout(() => showModal('login'), 800);
+    return;
+  }
+  const base = window.location.origin + decodeURIComponent(window.location.pathname).replace(/[^\/]*$/, '');
+  window.location.href = base + 'exam.html?id=' + key;
+}
+
+function shareExam(key) {
+  const e = allExamsV2[key];
+  if (!e) return;
+  const base = window.location.origin + decodeURIComponent(window.location.pathname).replace(/[^\/]*$/, '');
+  const url = base + 'exam.html?id=' + key;
+  const shareText = '📝 امتحان ' + e.title + ' على منصة مس منى كامل';
+  if (navigator.share) {
+    navigator.share({ title: e.title, text: shareText, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => showNotification('تم نسخ رابط الامتحان 🔗'));
+  }
+}
+
 // ====== EXAM PLAYER ======
 let examState = { exam: null, key: null, answers: {}, submitted: false, timerInterval: null, timeLeft: 0 };
 let allGrades = {};
@@ -1816,38 +1938,10 @@ db.ref('website/grades').on('value', snap => {
 });
 
 async function openExamPlayer(key) {
-  if (!currentUser) {
-    showNotification('سجّل دخولك أولاً 🔐', 'error');
-    setTimeout(() => showModal('login'), 800);
-    return;
-  }
-  const exam = allExamsV2[key];
-  if (!exam) return;
-
-  // ✅ منع الطالب من حل الامتحان أكتر من مرة
-  const uid = currentUser.uid || currentUser._key;
-  const prevGrade = Object.values(allGrades).find(g => g.studentUid === uid && g.examKey === key);
-  if (prevGrade) {
-    const pct = prevGrade.total ? Math.round((prevGrade.score/prevGrade.total)*100) : 0;
-    document.getElementById('examPlayerContent').innerHTML = `
-      <div style="text-align:center;padding:30px 0">
-        <div style="font-size:3.5rem;margin-bottom:14px">🔒</div>
-        <h2 style="font-size:1.2rem;font-weight:900;margin-bottom:10px">لقد أجريت هذا الامتحان من قبل</h2>
-        <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:20px">الامتحان يُحل مرة واحدة فقط</p>
-        <div style="font-size:2rem;font-weight:900;color:${pct>=50?'#2ECC71':'#E74C3C'};margin-bottom:10px">${prevGrade.score} / ${prevGrade.total}</div>
-        <div style="color:var(--text-muted)">نسبتك: <strong style="color:${pct>=50?'#2ECC71':'#E74C3C'}">${pct}%</strong></div>
-        <button onclick="closeExamModal()" style="margin-top:24px;padding:12px 30px;border-radius:12px;border:none;background:var(--gradient);color:white;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer">
-          <i class="fas fa-times"></i> إغلاق
-        </button>
-      </div>`;
-    document.getElementById('examPlayerModal').style.display = 'flex';
-    return;
-  }
-
-  examState = { exam, key, answers: {}, submitted: false, timerInterval: null, timeLeft: exam.timer ? exam.timer * 60 : 0 };
-  renderExamPlayer();
-  document.getElementById('examPlayerModal').style.display = 'flex';
+  goToExamPage(key);
 }
+
+function openExam(url){ goToExamPage(url); }
 
 function closeExamModal() {
   if (examState.timerInterval) clearInterval(examState.timerInterval);
@@ -2014,13 +2108,14 @@ function submitExam() {
     </div>`;
 }
 
-function openExam(url){ openExamPlayer(url); }
+function openExam(url){ goToExamPage(url); }
 
 // ====== SHARE COURSE ======
 function sharePublicCourse(key) {
   const c = allCourses[key];
   if (!c) return;
-  const url = window.location.origin + (window.location.pathname.replace('المنصة_المنتظره.html','')) + 'course.html?id=' + key;
+  const base = window.location.origin + decodeURIComponent(window.location.pathname).replace(/[^\/]*$/, '');
+  const url = base + 'course.html?id=' + key;
   const shareText = '📚 كورس ' + c.name + ' (' + c.grade + ') على منصة مس منى كامل';
   if (navigator.share) {
     navigator.share({ title: c.name, text: shareText, url });
