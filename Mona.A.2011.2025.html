@@ -493,7 +493,7 @@ tr:hover td{background:rgba(108,63,197,.05)}
 const firebaseConfig = {
   apiKey: "AIzaSyBalgsZ2MmHFkF7bvAGky0MImzTVgqXTy8",
   authDomain: "monakamel-academy.firebaseapp.com",
-  databaseURL: "https://monakamel-academy-default-rtdb.firebaseio.com",
+  databaseURL: "https://monakamel-academy-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "monakamel-academy",
   storageBucket: "monakamel-academy.firebasestorage.app",
   messagingSenderId: "1012338556086",
@@ -503,7 +503,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-const ADMIN_EMAIL = 'mrsmonakamel6@gmail.com';
 const ADMIN_EMAILS = ['mrsmonakamel6@gmail.com', 'admin@monakamel.com'];
 let allStudents = [], allCourses = {}, allExams = {}, allScores = {}, allGrades = {};
 
@@ -522,7 +521,7 @@ auth.onAuthStateChanged(user => {
 
 function adminGoogleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ login_hint: ADMIN_EMAIL });
+  provider.setCustomParameters({ login_hint: ADMIN_EMAILS[0] });
   auth.signInWithPopup(provider).catch(err => {
     document.getElementById('loginErr').style.display = 'block';
   });

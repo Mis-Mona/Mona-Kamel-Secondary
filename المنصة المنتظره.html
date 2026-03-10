@@ -135,20 +135,20 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);ove
 .channel-icon.youtube{color:#F00}.channel-icon.tiktok{color:#00F2EA}.channel-icon.facebook{color:#1877F2}.channel-icon.whatsapp{color:#25D366}.channel-icon.support{color:var(--accent)}
 .channel-name{font-size:1.05rem;font-weight:800;margin-bottom:6px}
 .channel-desc{font-size:.83rem;color:var(--text-muted)}
-.reviews-section{padding:80px 30px;background:var(--dark2);position:relative;overflow:hidden}
-.reviews-section::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gradient)}
-.reviews-inner{max-width:1200px;margin:0 auto}
-.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;margin-top:50px}
-.review-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:26px;transition:all .3s}
-.review-card:hover{transform:translateY(-4px);border-color:var(--primary)}
-.review-stars{color:var(--accent2);font-size:1.1rem;margin-bottom:12px}
-.review-text{color:var(--text-muted);line-height:1.8;font-size:.93rem;margin-bottom:18px}
-.review-author{display:flex;align-items:center;gap:12px}
-.review-avatar{width:40px;height:40px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0}
-.review-name{font-weight:700;font-size:.93rem}
-.review-grade{font-size:.78rem;color:var(--text-muted)}
-.add-review-btn{display:block;margin:38px auto 0;padding:13px 34px;border-radius:12px;border:1.5px solid var(--primary);color:var(--primary-light);background:transparent;font-family:'Cairo',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .3s}
-.add-review-btn:hover{background:rgba(108,63,197,.15)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 footer{background:#080812;padding:60px 30px 30px;border-top:1px solid rgba(108,63,197,.2)}
 .footer-inner{max-width:1200px;margin:0 auto}
 .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:50px;margin-bottom:50px}
@@ -193,9 +193,9 @@ footer{background:#080812;padding:60px 30px 30px;border-top:1px solid rgba(108,6
 .modal-switch{text-align:center;margin-top:18px;font-size:.88rem;color:var(--text-muted)}
 .modal-switch a{color:var(--primary-light);font-weight:700;cursor:pointer;text-decoration:none}
 textarea.form-input{resize:vertical;min-height:90px}
-.stars-input{display:flex;gap:8px;margin-bottom:6px}
-.star-btn{font-size:1.5rem;cursor:pointer;color:rgba(255,255,255,.2);transition:all .2s;background:none;border:none}
-.star-btn.active{color:var(--accent2)}
+
+
+
 .admin-panel{display:none;position:fixed;inset:0;background:var(--dark);z-index:3000;overflow-y:auto;flex-direction:column}
 .admin-panel.active{display:flex}
 .admin-header{background:var(--dark2);border-bottom:1px solid var(--card-border);padding:16px 30px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
@@ -260,7 +260,7 @@ textarea.form-input{resize:vertical;min-height:90px}
   .admin-form-row{grid-template-columns:1fr}
   .scores-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
   .channels-grid{grid-template-columns:repeat(2,1fr)}
-  .reviews-grid{grid-template-columns:1fr}
+  
 }
 /* ===== MOBILE ===== */
 @media(max-width:600px){
@@ -299,8 +299,8 @@ textarea.form-input{resize:vertical;min-height:90px}
   .channel-icon{font-size:1.9rem;margin-bottom:10px}
   .channel-name{font-size:.88rem}
   .channel-desc{font-size:.73rem}
-  .reviews-section{padding:44px 16px}
-  .reviews-grid{grid-template-columns:1fr;gap:12px}
+  
+  
   footer{padding:36px 16px 22px}
   .footer-top{gap:20px}
   .footer-bottom{flex-direction:column;text-align:center;gap:12px}
@@ -328,8 +328,8 @@ textarea.form-input{resize:vertical;min-height:90px}
   .section-tag{font-size:.76rem;padding:5px 13px}
   .section-title{font-size:1.5rem}
   .section-sub{font-size:.88rem}
-  .add-review-btn{width:100%;text-align:center}
-  .scores-header,.channels-section>div,.reviews-inner>div{padding:0}
+  
+  .scores-header,.channels-section>div,
 }
 
 /* Admin mobile bottom nav */
@@ -809,39 +809,6 @@ textarea.form-input{resize:vertical;min-height:90px}
   </div>
 </div>
 
-<!-- REVIEW MODAL -->
-<div class="modal-overlay" id="reviewModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('review')"><i class="fas fa-times"></i></button>
-    <div style="text-align:center;font-size:2.4rem;margin-bottom:10px">⭐</div>
-    <h2 class="modal-title">أضف رأيك</h2>
-    <p class="modal-sub">شاركنا تجربتك مع مس منى كامل</p>
-    <div class="form-group">
-      <label class="form-label">التقييم</label>
-      <div class="stars-input" id="starsInput">
-        <button class="star-btn active" onclick="setStars(1)">★</button>
-        <button class="star-btn active" onclick="setStars(2)">★</button>
-        <button class="star-btn active" onclick="setStars(3)">★</button>
-        <button class="star-btn active" onclick="setStars(4)">★</button>
-        <button class="star-btn active" onclick="setStars(5)">★</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">الاسم</label>
-      <input type="text" class="form-input" id="reviewName" placeholder="اسمك">
-    </div>
-    <div class="form-group">
-      <label class="form-label">الصف الدراسي</label>
-      <input type="text" class="form-input" id="reviewGrade" placeholder="مثال: تالتة ثانوي">
-    </div>
-    <div class="form-group">
-      <label class="form-label">رأيك</label>
-      <textarea class="form-input" id="reviewText" placeholder="اكتب رأيك هنا..."></textarea>
-    </div>
-    <button class="btn-form" onclick="submitReview()"><i class="fas fa-paper-plane"></i> إرسال الرأي</button>
-  </div>
-</div>
-
 <!-- ADMIN PANEL -->
 <div class="admin-panel" id="adminPanel">
   <div class="admin-header">
@@ -862,7 +829,6 @@ textarea.form-input{resize:vertical;min-height:90px}
         <div class="admin-stats-grid">
           <div class="admin-stat-card"><div class="icon">👥</div><div class="val" id="totalStudents">0</div><div class="lbl">إجمالي الطلاب</div></div>
           <div class="admin-stat-card"><div class="icon">🏆</div><div class="val" id="totalScores">10</div><div class="lbl">أعلى الدرجات</div></div>
-          <div class="admin-stat-card"><div class="icon">💬</div><div class="val" id="totalReviews">0</div><div class="lbl">الآراء</div></div>
           <div class="admin-stat-card"><div class="icon">📝</div><div class="val">—</div><div class="lbl">الامتحانات</div></div>
         </div>
       </div>
@@ -891,12 +857,6 @@ textarea.form-input{resize:vertical;min-height:90px}
           <div style="overflow-x:auto">
             <table class="data-table"><thead><tr><th>#</th><th>الاسم</th><th>الصف</th><th>الامتحان</th><th>الدرجة</th><th>حذف</th></tr></thead><tbody id="adminScoresTable"></tbody></table>
           </div>
-        </div>
-      </div>
-      <div class="admin-content-section" id="section-reviews">
-        <p class="admin-section-title">💬 إدارة الآراء</p>
-        <div style="overflow-x:auto">
-          <table class="data-table"><thead><tr><th>الاسم</th><th>الصف</th><th>الرأي</th><th>التقييم</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="reviewsTable"></tbody></table>
         </div>
       </div>
       <div class="admin-content-section" id="section-courses">
@@ -968,19 +928,38 @@ const countries = [
 function buildPhoneSelects() {
   window._phoneCodes = countries.map(([n,c]) => ({ flag: '', code: c, name: n }));
   const opts = countries.map(([n,c]) => `<option value="${c}"${c==='+20'?' selected':''}>${c} ${n}</option>`).join('');
-  document.getElementById('regStudentCode').innerHTML = opts;
-  document.getElementById('regParentCode').innerHTML = opts;
+  ['regStudentCode','regParentCode','gcStudentCode','gcParentCode'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = opts;
+  });
 }
 buildPhoneSelects();
 
 
 // ====== FIREBASE CONFIG ======
-// ⚠️ تأكد من ضبط Firebase Database Security Rules بشكل صحيح
-// وإنك تعمل restrict على الـ apiKey في Google Cloud Console
+// ⚠️ مهم جداً: ضبط Firebase Database Security Rules في Firebase Console:
+// {
+//   "rules": {
+//     "website": {
+//       "students": {
+//         "$uid": {
+//           ".read": "auth != null && auth.uid == $uid",
+//           ".write": "auth != null && auth.uid == $uid"
+//         }
+//       },
+//       "grades":          { ".read": "auth != null", ".write": "auth != null" },
+//       "scores":          { ".read": true,           ".write": "auth != null" },
+
+
+//       "exams_v2":        { ".read": "auth != null", ".write": false },
+//       "courses":         { ".read": true,           ".write": false }
+//     }
+//   }
+// }
 const firebaseConfig = {
   apiKey: "AIzaSyBalgsZ2MmHFkF7bvAGky0MImzTVgqXTy8",
   authDomain: "monakamel-academy.firebaseapp.com",
-  databaseURL: "https://monakamel-academy-default-rtdb.europe-west1.firebasedatabase.app",
+  databaseURL: "https://monakamel-academy-default-rtdb.firebasedatabase.app",
   projectId: "monakamel-academy",
   storageBucket: "monakamel-academy.firebasestorage.app",
   messagingSenderId: "1012338556086",
@@ -998,16 +977,9 @@ const ADMIN_EMAILS = ['admin@monakamel.com', 'mrsmonakamel6@gmail.com'];
 let currentUser = null, selectedStars = 5;
 let students = [];
 let topScores = [];
-let reviews = [];
-let pendingReviews = [];
 
 // ====== DEFAULT DATA (Fallback) ======
 const DEFAULT_SCORES = [];
-const DEFAULT_REVIEWS = [
-  { name: 'أحمد محمد', grade: 'تالتة ثانوي', text: 'منصة رائعة وشرح مبسط جداً، ساعدني أتفوق في الإنجليزي ✨', stars: 5 },
-  { name: 'سارة علي', grade: 'تاني إعدادي', text: 'مس منى بتشرح بأسلوب سهل ومفهوم، بحب دروسها جداً 💙', stars: 5 },
-  { name: 'محمود حسن', grade: 'أول ثانوي', text: 'الامتحانات التجريبية ساعدتني أكتر من أي حاجة تانية 🎯', stars: 5 }
-];
 
 // ====== LOAD DATA FROM FIREBASE ======
 async function loadFromFirebase() {
@@ -1022,671 +994,8 @@ async function loadFromFirebase() {
       await db.ref('website/scores').set(
         DEFAULT_SCORES.reduce((acc, s, i) => { acc['s'+i] = s; return acc; }, {})
       );
-    }
-
-    // تحميل الآراء المقبولة
-    const reviewsSnap = await db.ref('website/reviews').once('value');
-    if (reviewsSnap.exists()) {
-      reviews = Object.values(reviewsSnap.val());
-    } else {
-      reviews = DEFAULT_REVIEWS;
-      await db.ref('website/reviews').set(
-        DEFAULT_REVIEWS.reduce((acc, r, i) => { acc['r'+i] = r; return acc; }, {})
-      );
-    }
-
-    // تحميل الطلاب (للأدمن فقط)
-    const studentsSnap = await db.ref('website/students').once('value');
-    if (studentsSnap.exists()) {
-      students = Object.entries(studentsSnap.val()).map(([key, val]) => ({ _key: key, ...val }));
-    }
-
-    // تحميل الآراء المعلقة
-    const pendingSnap = await db.ref('website/pending_reviews').once('value');
-    if (pendingSnap.exists()) {
-      pendingReviews = Object.entries(pendingSnap.val()).map(([key, val]) => ({ _key: key, ...val }));
-    }
-
-    renderScores();
-    renderReviews();
-  } catch(err) {
-    console.warn('Firebase غير متصل، جاري استخدام البيانات المحلية:', err.message);
-    // fallback لـ localStorage لو Firebase مش شغال
-    students = JSON.parse(localStorage.getItem('mk_students')||'[]');
-    topScores = JSON.parse(localStorage.getItem('mk_scores') || JSON.stringify(DEFAULT_SCORES));
-    reviews = JSON.parse(localStorage.getItem('mk_reviews') || JSON.stringify(DEFAULT_REVIEWS));
-    pendingReviews = JSON.parse(localStorage.getItem('mk_pending_reviews')||'[]');
-    renderScores();
-    renderReviews();
-  }
-}
-
-// Real-time listener للدرجات
-function listenToScores() {
-  db.ref('website/scores').on('value', snap => {
-    if (snap.exists()) {
-      topScores = Object.values(snap.val());
-      renderScores();
-    }
+    }loadAdminData();showNotification('تم القبول ✅');
   });
-}
-
-// Real-time listener للآراء
-function listenToReviews() {
-  db.ref('website/reviews').on('value', snap => {
-    if (snap.exists()) {
-      reviews = Object.values(snap.val());
-      renderReviews();
-    }
-  });
-}
-
-// ====== PARTICLES ======
-(function(){
-  const c=document.getElementById('particles');
-  for(let i=0;i<12;i++){
-    const p=document.createElement('div');p.className='particle';
-    p.style.cssText=`left:${Math.random()*100}%;width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;animation-duration:${Math.random()*15+10}s;animation-delay:${Math.random()*10}s;opacity:${Math.random()*.3+.1}`;
-    c.appendChild(p);
-  }
-})();
-
-// ====== SCROLL ======
-window.addEventListener('scroll',()=>{
-  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
-});
-
-// ====== MENU ======
-function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('active')}
-function closeMenu(){document.getElementById('mobileMenu').classList.remove('active')}
-
-// ====== NOTIFY ======
-function showNotification(msg,type='success'){
-  const el=document.getElementById('notification');
-  el.querySelector('i').className=type==='success'?'fas fa-check-circle':'fas fa-exclamation-circle';
-  document.getElementById('notification-msg').textContent=msg;
-  el.className='notification '+type+' show';
-  setTimeout(()=>el.classList.remove('show'),3000);
-}
-
-// ====== MODALS ======
-function showModal(t){document.getElementById(t+'Modal').classList.add('active');document.body.style.overflow='hidden'}
-function closeModal(t){
-  document.getElementById(t+'Modal').classList.remove('active');
-  document.body.style.overflow='';
-  // إعادة ضبط خطوات التسجيل
-  if(t==='register'){
-    const s1=document.getElementById('regStep1'),s2=document.getElementById('regStep2');
-    if(s1)s1.style.display='block';
-    if(s2)s2.style.display='none';
-    const bar=document.getElementById('stepBar'),dot2=document.getElementById('step2Dot');
-    if(bar)bar.style.width='0%';
-    if(dot2)dot2.style.background='rgba(255,255,255,.1)';
-    const ef=document.getElementById('emailFields'),ec=document.getElementById('emailChevron');
-    if(ef)ef.style.display='none';
-    if(ec)ec.style.transform='';
-  }
-}
-function switchModal(f,t){closeModal(f);setTimeout(()=>showModal(t),200)}
-document.querySelectorAll('.modal-overlay').forEach(o=>{
-  o.addEventListener('click',function(e){if(e.target===this){this.classList.remove('active');document.body.style.overflow=''}});
-});
-
-// ====== GRADE OPTIONS ======
-function updateGradeOptions(){
-  const s=document.getElementById('regStage').value;
-  const g=document.getElementById('regGrade');
-  g.innerHTML='<option value="">اختر الصف</option>';
-  const opts=s==='prep'?['أول إعدادي','تاني إعدادي','تالتة إعدادي']:s==='sec'?['أول ثانوي','تاني ثانوي','تالتة ثانوي']:[];
-  opts.forEach(o=>g.innerHTML+=`<option value="${o}">${o}</option>`);
-}
-
-// ====== FIREBASE AUTH LISTENER ======
-auth.onAuthStateChanged(user => {
-  if (user) {
-    // تحقق لو أدمن
-    if (ADMIN_EMAILS.includes(user.email)) {
-      currentUser = { uid: user.uid, name1: 'المدير', email: user.email, isAdmin: true };
-      updateNavForUser();
-      return;
-    }
-    // جيب بيانات الطالب من Database
-    db.ref('website/students/' + user.uid).once('value').then(snap => {
-      if (snap.exists()) {
-        const data = snap.val();
-        // فحص الحظر
-        if (data.banned) {
-          auth.signOut();
-          showNotification('❌ تم حظر حسابك، تواصل مع الإدارة', 'error');
-          currentUser = null;
-          return;
-        }
-        currentUser = { uid: user.uid, _key: user.uid, ...data };
-        updateNavForUser();
-      } else {
-        // مستخدم جوجل سجل دخول بدون بيانات كاملة — اطلب منه يكمل
-        if (user.providerData && user.providerData[0]?.providerId === 'google.com') {
-          window._pendingGoogleUser = user;
-          const parts = (user.displayName || '').split(' ');
-          document.getElementById('gcName1').value = parts[0] || '';
-          document.getElementById('gcName2').value = parts[1] || '';
-          document.getElementById('gcName3').value = parts[2] || '';
-          document.getElementById('gcName4').value = parts[3] || '';
-          buildGCPhoneSelects();
-          document.getElementById('googleCompleteModal').classList.add('active');
-        } else {
-          // حالة غير متوقعة — سجّل الخروج
-          auth.signOut();
-          currentUser = null;
-        }
-      }
-    }).catch(() => {
-      currentUser = null;
-      updateNavForUser();
-    });
-  } else {
-    currentUser = null;
-    document.getElementById('navBtns').innerHTML = '<button class="btn-nav-login" onclick="showModal(\'login\')">تسجيل الدخول</button><button class="btn-nav-register" onclick="showModal(\'register\')">إنشاء حساب</button>';
-  }
-});
-
-// ====== LOGIN ======
-function handleLogin() {
-  const email = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  if (!email || !pass) { showNotification('اكمل البيانات', 'error'); return; }
-
-  // ✅ المصادقة تتم عبر Firebase فقط بدون استثناءات محلية
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(result => {
-      closeModal('login');
-      showNotification('أهلاً بك! 🎉');
-    })
-    .catch(err => {
-      const msgs = {
-        'auth/user-not-found': 'الإيميل ده مش مسجل',
-        'auth/wrong-password': 'كلمة المرور غلط',
-        'auth/invalid-email': 'الإيميل غير صحيح',
-        'auth/too-many-requests': 'كتير أوي، استنى شوية وجرب تاني',
-        'auth/invalid-credential': 'الإيميل أو كلمة المرور غلط'
-      };
-      showNotification(msgs[err.code] || 'خطأ في تسجيل الدخول', 'error');
-    });
-}
-
-// ====== FORGOT PASSWORD ======
-function handleForgotPassword() {
-  const email = document.getElementById('loginUser').value.trim();
-  if (!email) { showNotification('اكتب الإيميل الأول', 'error'); return; }
-  auth.sendPasswordResetEmail(email)
-    .then(() => showNotification('تم إرسال رابط إعادة التعيين على إيميلك 📧'))
-    .catch(err => {
-      if (err.code === 'auth/user-not-found') showNotification('الإيميل ده مش مسجل', 'error');
-      else showNotification('خطأ، حاول تاني', 'error');
-    });
-}
-
-// ====== GOOGLE LOGIN ======
-function handleGoogleLogin(fromRegister) {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: 'select_account' });
-  auth.signInWithPopup(provider)
-    .then(result => {
-      const user = result.user;
-      return db.ref('website/students/' + user.uid).once('value').then(snap => {
-        if (!snap.exists()) {
-          // مستخدم جديد
-          if (fromRegister && window._pendingRegProfile) {
-            // جاء من نموذج التسجيل — لديه بيانات جاهزة، احفظها مباشرة
-            const p = window._pendingRegProfile;
-            const fullName = [p.name1, p.name2, p.name3, p.name4].filter(Boolean).join(' ');
-            const profile = {
-              ...p,
-              fullName,
-              email: user.email,
-              isAdmin: false,
-              authProvider: 'google',
-              createdAt: new Date().toLocaleDateString('ar-EG'),
-              createdTimestamp: Date.now()
-            };
-            return db.ref('website/students/' + user.uid).set(profile).then(() => {
-              window._pendingRegProfile = null;
-              closeModal('register');
-              showNotification('أهلاً بك ' + p.name1 + '! تم إنشاء حسابك بنجاح 🎉');
-              currentUser = { uid: user.uid, ...profile };
-              updateNavForUser();
-            });
-          } else {
-            // دخل من زر Login مباشرة — اطلب منه البيانات
-            window._pendingGoogleUser = user;
-            closeModal('login');
-            closeModal('register');
-            const parts = (user.displayName || '').split(' ');
-            document.getElementById('gcName1').value = parts[0] || '';
-            document.getElementById('gcName2').value = parts[1] || '';
-            document.getElementById('gcName3').value = parts[2] || '';
-            document.getElementById('gcName4').value = parts[3] || '';
-            buildGCPhoneSelects();
-            document.getElementById('googleCompleteModal').classList.add('active');
-          }
-        } else {
-          closeModal('login');
-          closeModal('register');
-          showNotification('أهلاً بك مجدداً ' + (user.displayName?.split(' ')[0] || '') + '! 🎉');
-        }
-      });
-    })
-    .catch(err => {
-      if (err.code !== 'auth/popup-closed-by-user')
-        showNotification('مشكلة في تسجيل جوجل، حاول تاني', 'error');
-    });
-}
-
-function buildGCPhoneSelects() {
-  const opts = countries.map(([n,c]) => `<option value="${c}"${c==='+20'?' selected':''}>${c} ${n}</option>`).join('');
-  ['gcStudentCode','gcParentCode'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (sel) sel.innerHTML = opts;
-  });
-}
-
-function updateGCGradeOptions() {
-  const stage = document.getElementById('gcStage').value;
-  const gradeSelect = document.getElementById('gcGrade');
-  gradeSelect.innerHTML = '<option value="">اختر الصف</option>';
-  const prepGrades = ['أولى إعدادي','ثانية إعدادي','تالتة إعدادي'];
-  const secGrades = ['أولى ثانوي','تانية ثانوي','تالتة ثانوي'];
-  (stage === 'prep' ? prepGrades : stage === 'sec' ? secGrades : []).forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g; opt.textContent = g;
-    gradeSelect.appendChild(opt);
-  });
-}
-
-function handleGoogleCompleteProfile() {
-  const user = window._pendingGoogleUser;
-  if (!user) { showNotification('حدث خطأ، حاول تسجيل الدخول مرة تانية', 'error'); return; }
-
-  const n1 = document.getElementById('gcName1').value.trim();
-  const n2 = document.getElementById('gcName2').value.trim();
-  const n3 = document.getElementById('gcName3').value.trim();
-  const n4 = document.getElementById('gcName4').value.trim();
-  const rawStudentPhone = document.getElementById('gcStudentPhone').value.trim();
-  const rawParentPhone = document.getElementById('gcParentPhone').value.trim();
-  const stage = document.getElementById('gcStage').value;
-  const grade = document.getElementById('gcGrade').value;
-  const sp = document.getElementById('gcStudentCode').value + rawStudentPhone;
-  const pp = document.getElementById('gcParentCode').value + rawParentPhone;
-
-  if (!n1 || !n2 || !n4 || !stage || !grade) {
-    showNotification('اكمل كل البيانات المطلوبة', 'error'); return;
-  }
-  if (!/^\d{7,15}$/.test(rawStudentPhone)) {
-    showNotification('رقم واتساب الطالب غير صحيح', 'error'); return;
-  }
-  if (rawParentPhone && !/^\d{7,15}$/.test(rawParentPhone)) {
-    showNotification('رقم واتساب ولي الأمر غير صحيح', 'error'); return;
-  }
-
-  const btn = document.querySelector('#googleCompleteModal .btn-form');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...'; }
-
-  const fullName = [n1, n2, n3, n4].filter(Boolean).join(' ');
-  const profile = {
-    name1: n1, name2: n2, name3: n3 || '', name4: n4,
-    fullName: fullName,
-    email: user.email,
-    studentPhone: sp,
-    parentPhone: pp || '',
-    stage, grade,
-    isAdmin: false,
-    authProvider: 'google',
-    createdAt: new Date().toLocaleDateString('ar-EG'),
-    createdTimestamp: Date.now()
-  };
-
-  db.ref('website/students/' + user.uid).set(profile)
-    .then(() => {
-      window._pendingGoogleUser = null;
-      document.getElementById('googleCompleteModal').classList.remove('active');
-      showNotification('أهلاً بك ' + n1 + '! تم إنشاء حسابك بنجاح 🎉');
-      currentUser = { uid: user.uid, ...profile };
-      updateNavForUser();
-    })
-    .catch(err => {
-      showNotification('خطأ في حفظ البيانات: ' + err.message, 'error');
-    })
-    .finally(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> حفظ البيانات والمتابعة'; }
-    });
-}
-
-// ====== REGISTER STEPS ======
-function validateStep1() {
-  const n1 = document.getElementById('regName1').value.trim();
-  const n2 = document.getElementById('regName2').value.trim();
-  const n4 = document.getElementById('regName4').value.trim();
-  const stage = document.getElementById('regStage').value;
-  const grade = document.getElementById('regGrade').value;
-  const rawStudentPhone = document.getElementById('regStudentPhone').value.trim();
-  const rawParentPhone = document.getElementById('regParentPhone').value.trim();
-
-  if (!n1) { showNotification('أدخل الاسم الأول', 'error'); return false; }
-  if (!n2) { showNotification('أدخل الاسم الثاني', 'error'); return false; }
-  if (!n4) { showNotification('أدخل الاسم الأخير', 'error'); return false; }
-  if (!stage) { showNotification('اختر المرحلة الدراسية', 'error'); return false; }
-  if (!grade) { showNotification('اختر الصف', 'error'); return false; }
-  if (!rawStudentPhone) { showNotification('أدخل رقم واتساب الطالب', 'error'); return false; }
-  if (!/^\d{7,15}$/.test(rawStudentPhone)) { showNotification('رقم واتساب الطالب غير صحيح', 'error'); return false; }
-  if (rawParentPhone && !/^\d{7,15}$/.test(rawParentPhone)) { showNotification('رقم واتساب ولي الأمر غير صحيح', 'error'); return false; }
-  return true;
-}
-
-function goToRegStep2() {
-  if (!validateStep1()) return;
-  document.getElementById('regStep1').style.display = 'none';
-  document.getElementById('regStep2').style.display = 'block';
-  document.getElementById('stepBar').style.width = '100%';
-  document.getElementById('step2Dot').style.background = 'var(--gradient)';
-  // scroll to top of modal
-  document.querySelector('#registerModal .modal').scrollTop = 0;
-}
-
-function backToRegStep1() {
-  document.getElementById('regStep2').style.display = 'none';
-  document.getElementById('regStep1').style.display = 'block';
-  document.getElementById('stepBar').style.width = '0%';
-  document.getElementById('step2Dot').style.background = 'rgba(255,255,255,.1)';
-  // إغلاق حقول الإيميل
-  document.getElementById('emailFields').style.display = 'none';
-  document.getElementById('emailChevron').style.transform = '';
-}
-
-function toggleEmailFields() {
-  const fields = document.getElementById('emailFields');
-  const chevron = document.getElementById('emailChevron');
-  const emailOption = document.getElementById('emailOption');
-  const isOpen = fields.style.display !== 'none';
-  fields.style.display = isOpen ? 'none' : 'block';
-  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
-  emailOption.style.borderColor = isOpen ? 'rgba(108,63,197,.3)' : 'var(--primary)';
-}
-
-function getRegProfileData() {
-  return {
-    name1: document.getElementById('regName1').value.trim(),
-    name2: document.getElementById('regName2').value.trim(),
-    name3: document.getElementById('regName3').value.trim(),
-    name4: document.getElementById('regName4').value.trim(),
-    studentPhone: document.getElementById('regStudentCode').value + document.getElementById('regStudentPhone').value.trim(),
-    parentPhone: document.getElementById('regParentCode').value + document.getElementById('regParentPhone').value.trim(),
-    stage: document.getElementById('regStage').value,
-    grade: document.getElementById('regGrade').value,
-  };
-}
-
-// ====== REGISTER ======
-function handleRegister() {
-  if (!validateStep1()) { backToRegStep1(); return; }
-
-  const em = document.getElementById('regEmail').value.trim();
-  const pw = document.getElementById('regPass').value;
-
-  if (!em) { showNotification('أدخل الإيميل', 'error'); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showNotification('الإيميل غير صحيح', 'error'); return; }
-  if (!pw) { showNotification('أدخل كلمة المرور', 'error'); return; }
-  if (pw.length < 6) { showNotification('كلمة المرور لازم تكون 6 أحرف على الأقل', 'error'); return; }
-
-  const btn = document.querySelector('#registerModal #emailFields .btn-form');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...'; }
-
-  const profileData = getRegProfileData();
-  const fullName = [profileData.name1, profileData.name2, profileData.name3, profileData.name4].filter(Boolean).join(' ');
-
-  auth.createUserWithEmailAndPassword(em, pw)
-    .then(result => {
-      result.user.updateProfile({ displayName: fullName });
-      const profile = {
-        ...profileData,
-        fullName,
-        email: em,
-        isAdmin: false,
-        authProvider: 'email',
-        createdAt: new Date().toLocaleDateString('ar-EG'),
-        createdTimestamp: Date.now()
-      };
-      return db.ref('website/students/' + result.user.uid).set(profile);
-    })
-    .then(() => {
-      closeModal('register');
-      showNotification('أهلاً بك ' + profileData.name1 + '! تم إنشاء حسابك بنجاح 🎉');
-    })
-    .catch(err => {
-      console.error('Registration error:', err);
-      const msgs = {
-        'auth/email-already-in-use': 'الإيميل ده مسجل بالفعل، جرب تسجيل الدخول',
-        'auth/invalid-email': 'الإيميل غير صحيح',
-        'auth/weak-password': 'كلمة المرور ضعيفة — استخدم 6 أحرف أو أكتر',
-        'auth/network-request-failed': 'مشكلة في الاتصال بالانترنت، جرب تاني',
-        'auth/operation-not-allowed': 'تسجيل الدخول بالإيميل غير مفعّل — تواصل مع الأدمن',
-        'PERMISSION_DENIED': 'خطأ في صلاحيات قاعدة البيانات — تواصل مع الأدمن'
-      };
-      // Check for Firebase Database PERMISSION_DENIED
-      const msg = msgs[err.code] || (err.message && err.message.includes('PERMISSION_DENIED') ? 'خطأ في صلاحيات قاعدة البيانات — تواصل مع الأدمن' : 'خطأ: ' + err.message);
-      showNotification(msg, 'error');
-    })
-    .finally(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء الحساب بالإيميل'; }
-    });
-}
-
-function handleGoogleRegister() {
-  if (!validateStep1()) { backToRegStep1(); return; }
-  // احفظ بيانات الخطوة الأولى مؤقتاً
-  window._pendingRegProfile = getRegProfileData();
-  handleGoogleLogin(true);
-}
-
-
-
-
-// ====== LOGOUT ======
-function logout() {
-  auth.signOut().then(() => {
-    currentUser = null;
-    showNotification('تم تسجيل الخروج');
-  });
-}
-
-function updateNavForUser(){
-  if(!currentUser)return;
-  document.getElementById('navBtns').innerHTML=`
-    <span style="color:var(--primary-light);font-weight:700;font-size:.88rem">👋 أهلاً ${currentUser.name1}</span>
-    ${currentUser.isAdmin?'<button class="btn-nav-register" onclick="openAdminPanel()" style="background:linear-gradient(135deg,#FFD93D,#FF6B35);color:#000">👑 لوحة الإدارة</button>':''}
-    <button class="btn-nav-login" onclick="logout()">خروج</button>`;
-}
-
-// ====== SCORES ======
-function renderScores(){
-  const grid=document.getElementById('scoresGrid');
-  const medals=['gold','silver','bronze'],emojis=['🥇','🥈','🥉'];
-  grid.innerHTML=topScores.slice(0,3).map((s,i)=>`
-    <div class="score-card ${medals[i]||''}">
-      <div class="score-rank">${i<3?emojis[i]:i+1}</div>
-      <div class="score-name">${s.name}</div>
-      <div class="score-meta">
-        <span><i class="fas fa-graduation-cap"></i> ${s.grade}</span>
-        <span><i class="fas fa-file-alt"></i> ${s.exam}</span>
-      </div>
-      <div class="score-badge">${s.mark}</div>
-    </div>`).join('');
-}
-
-// ====== REVIEWS ======
-function renderReviews(){
-  document.getElementById('reviewsGrid').innerHTML=reviews.map(r=>`
-    <div class="review-card">
-      <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
-      <p class="review-text">"${r.text}"</p>
-      <div class="review-author">
-        <div class="review-avatar">${r.name[0]}</div>
-        <div><div class="review-name">${r.name}</div><div class="review-grade">${r.grade}</div></div>
-      </div>
-    </div>`).join('');
-  document.getElementById('totalReviews').textContent=reviews.length+pendingReviews.length;
-}
-
-// ====== STARS ======
-function setStars(n){
-  selectedStars=n;
-  document.querySelectorAll('.star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));
-}
-function submitReview(){
-  const name=document.getElementById('reviewName').value.trim();
-  const grade=document.getElementById('reviewGrade').value.trim();
-  const text=document.getElementById('reviewText').value.trim();
-  if(!name||!text){showNotification('اكتب اسمك ورأيك','error');return}
-  const review = {name, grade:grade||'—', text, stars:selectedStars, time:new Date().toLocaleDateString('ar-EG')};
-
-  // حفظ في Firebase
-  db.ref('website/pending_reviews').push(review).then(() => {
-    closeModal('review');showNotification('تم إرسال رأيك وهيظهر بعد المراجعة 🎉');
-  }).catch(() => {
-    pendingReviews.push(review);
-    localStorage.setItem('mk_pending_reviews',JSON.stringify(pendingReviews));
-    closeModal('review');showNotification('تم إرسال رأيك 🎉');
-  });
-}
-
-// ====== ADMIN ======
-function openAdminPanel(){
-  window.location.href = 'Mona.A.2011.2025.html';
-}
-function closeAdminPanel(){document.getElementById('adminPanel').classList.remove('active');document.body.style.overflow=''}
-function showAdminSection(sec,el){
-  document.querySelectorAll('.admin-mob-item').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.admin-mobile-nav .admin-mob-item').forEach(b=>{
-    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+sec+"'"))b.classList.add('active');
-  });
-  document.querySelectorAll('.admin-content-section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
-  document.getElementById('section-'+sec).classList.add('active');
-  if(el)el.classList.add('active');
-}
-
-async function loadAdminData(){
-  try {
-    // تحميل طلاب الموقع (UID-based)
-    const newSnap = await db.ref('website/students').once('value');
-    let newStudents = [];
-    if(newSnap.exists()) newStudents = Object.entries(newSnap.val()).map(([k,v])=>({_key:k,...v}));
-    students = newStudents;
-    document.getElementById('totalStudents').textContent = newStudents.length;
-
-    // تحميل الدرجات
-    const scSnap = await db.ref('website/scores').once('value');
-    if(scSnap.exists()) topScores = Object.entries(scSnap.val()).map(([k,v])=>({_key:k,...v}));
-
-    renderAdminTable(newStudents);
-    renderAdminScores();
-    renderAdminReviews();
-    document.getElementById('totalScores').textContent=topScores.length;
-
-  } catch(err) {
-    console.warn('Firebase admin load error:', err);
-    renderAdminTable(students);
-    renderAdminScores();
-    renderAdminReviews();
-  }
-}
-
-function renderAdminTable(list){
-  document.getElementById('studentsTable').innerHTML=list.map((s,i)=>`
-    <tr>
-      <td>${s.name1||s.name||''} ${s.name2||''} ${s.name3||''} ${s.name4||''}</td>
-      <td>${s.email||'—'}</td>
-      <td>${s.grade||'—'}</td>
-      <td>${s.studentPhone||s.whatsapp||'—'}</td>
-      <td>${s.parentPhone||'—'}</td>
-      <td>${s.authProvider||'email'}</td>
-      <td><button class="action-btn delete" onclick="deleteStudent('${s._key||i}')">حذف</button></td>
-    </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">لا يوجد طلاب</td></tr>';
-}
-function renderAdminScores(){
-  document.getElementById('adminScoresTable').innerHTML=topScores.map((s,i)=>`
-    <tr><td>${i+1}</td><td>${s.name}</td><td>${s.grade}</td><td>${s.exam}</td><td>${s.mark}</td>
-    <td><button class="action-btn delete" onclick="adminDeleteScore('${s._key||i}')">حذف</button></td></tr>`).join('');
-}
-function renderAdminReviews(){
-  const all=[...reviews.map(r=>({...r,approved:true})),...pendingReviews.map(r=>({...r,approved:false}))];
-  document.getElementById('reviewsTable').innerHTML=all.map((r,i)=>`
-    <tr><td>${r.name}</td><td>${r.grade}</td>
-    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.text}</td>
-    <td>${'★'.repeat(r.stars)}</td>
-    <td>${r.approved?'<span class="badge-active">مقبول</span>':'<span style="color:var(--accent);font-size:.78rem;font-weight:700">معلق</span>'}</td>
-    <td>
-      ${!r.approved?`<button class="action-btn approve" onclick="approveReview('${r._key}')">قبول</button> `:''}
-      <button class="action-btn delete" onclick="deleteReview('${r._key}',${r.approved})">حذف</button>
-    </td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">لا توجد آراء</td></tr>';
-}
-
-function adminAddScore(){
-  const n=document.getElementById('adminScoreName').value.trim();
-  const g=document.getElementById('adminScoreGrade').value.trim();
-  const e=document.getElementById('adminScoreExam').value.trim();
-  const m=document.getElementById('adminScoreMark').value.trim();
-  if(!n||!g||!e||!m){showNotification('اكمل بيانات الدرجة','error');return}
-  const score={name:n,grade:g,exam:e,mark:m,time:new Date().toLocaleDateString('ar-EG')};
-  db.ref('website/scores').push(score).then(()=>{
-    showNotification('تم إضافة الطالب لقائمة الشرف 🏆');
-    ['adminScoreName','adminScoreGrade','adminScoreExam','adminScoreMark'].forEach(id=>document.getElementById(id).value='');
-  }).catch(()=>{
-    topScores.unshift(score);if(topScores.length>10)topScores.pop();
-    localStorage.setItem('mk_scores',JSON.stringify(topScores));
-    renderScores();renderAdminScores();
-    showNotification('تم الإضافة محلياً 🏆');
-  });
-}
-function adminDeleteScore(key){
-  if(typeof key === 'string' && key.startsWith('-')){
-    db.ref('website/scores/'+key).remove().then(()=>showNotification('تم الحذف')).catch(()=>showNotification('خطأ','error'));
-  } else {
-    topScores.splice(key,1);localStorage.setItem('mk_scores',JSON.stringify(topScores));
-    renderScores();renderAdminScores();showNotification('تم الحذف');
-  }
-}
-function deleteStudent(key){
-  if(typeof key === 'string' && key.startsWith('-')){
-    db.ref('website/students/'+key).remove().then(()=>{
-      showNotification('تم حذف الطالب');loadAdminData();
-    }).catch(()=>showNotification('خطأ','error'));
-  } else {
-    students.splice(key,1);localStorage.setItem('mk_students',JSON.stringify(students));
-    loadAdminData();showNotification('تم حذف الطالب');
-  }
-}
-function approveReview(key){
-  db.ref('website/pending_reviews/'+key).once('value').then(snap=>{
-    if(!snap.exists())return;
-    const review=snap.val();
-    return db.ref('website/reviews').push(review).then(()=>{
-      return db.ref('website/pending_reviews/'+key).remove();
-    });
-  }).then(()=>{
-    showNotification('تم قبول الرأي ✅');loadAdminData();
-  }).catch(()=>{
-    const i=pendingReviews.findIndex(r=>r._key===key);
-    if(i>-1){reviews.push(pendingReviews[i]);pendingReviews.splice(i,1);}
-    localStorage.setItem('mk_reviews',JSON.stringify(reviews));
-    localStorage.setItem('mk_pending_reviews',JSON.stringify(pendingReviews));
-    renderReviews();loadAdminData();showNotification('تم القبول ✅');
-  });
-}
-function deleteReview(key, approved){
-  const path = approved ? 'website/reviews/'+key : 'website/pending_reviews/'+key;
-  db.ref(path).remove().then(()=>{
-    showNotification('تم حذف الرأي');loadAdminData();
-  }).catch(()=>showNotification('خطأ','error'));
 }
 function adminAddExam(){
   const t=document.getElementById('examTitle').value.trim();
@@ -2091,8 +1400,7 @@ function openExam(url){ openExamPlayer(url); }
 // ✅ real-time listeners تشتغل بعد loadFromFirebase مباشرة
 loadFromFirebase().then(()=>{
   listenToScores();
-  listenToReviews();
-});
+  });
 loadCourses();
 loadExamsV2();
 
