@@ -392,10 +392,21 @@ textarea.form-input{resize:vertical;min-height:90px}
       </div>
     </div>
     <div class="hero-image-wrap">
-      <div class="hero-image-circle">
-        <div class="hero-image-placeholder">
-          <div class="teacher-avatar">👩‍🏫</div>
+      <div class="hero-image-circle" style="overflow:visible;background:none;border:none;box-shadow:none;position:relative">
+        <div style="position:relative;width:100%;height:100%">
+          <!-- خلفية جميلة -->
+          <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 60% 40%,rgba(108,63,197,.5) 0%,rgba(255,107,53,.3) 60%,transparent 100%);filter:blur(20px);transform:scale(1.2)"></div>
+          <div style="position:absolute;inset:-8px;border-radius:50%;border:2px solid transparent;background:linear-gradient(135deg,rgba(108,63,197,.6),rgba(255,107,53,.4)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:destination-out;mask-composite:exclude"></div>
+          <!-- صورة المدرسة -->
+          <img src="mona.jpg" alt="مس منى كامل"
+            style="width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:50%;position:relative;z-index:1;filter:drop-shadow(0 10px 40px rgba(108,63,197,.5))"
+            onerror="this.style.display='none';document.getElementById('heroFallback').style.display='flex'">
+          <div id="heroFallback" style="display:none;width:100%;height:100%;border-radius:50%;background:var(--gradient2);align-items:flex-end;justify-content:center;font-size:8rem;padding-bottom:10px">👩‍🏫</div>
         </div>
+        <!-- حلقات زخرفية -->
+        <div style="position:absolute;inset:-16px;border-radius:50%;border:1px dashed rgba(108,63,197,.3);animation:spin 20s linear infinite;pointer-events:none"></div>
+        <div style="position:absolute;inset:-30px;border-radius:50%;border:1px dashed rgba(255,107,53,.2);animation:spin 30s linear infinite reverse;pointer-events:none"></div>
+        <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
       </div>
       <div class="hero-badge">
         <div class="badge-icon">🏆</div>
@@ -528,7 +539,19 @@ textarea.form-input{resize:vertical;min-height:90px}
   </div>
   <div class="about-grid">
     <div class="about-img-wrap">
-      <div class="about-img"><div class="about-avatar">👩‍🏫</div></div>
+      <div class="about-img" style="background:none;border:none;overflow:visible;position:relative;aspect-ratio:4/5">
+        <!-- خلفية زجاجية جميلة -->
+        <div style="position:absolute;inset:0;border-radius:24px;background:linear-gradient(145deg,rgba(108,63,197,.25) 0%,rgba(255,107,53,.15) 50%,rgba(108,63,197,.1) 100%);backdrop-filter:blur(0px);border:1px solid rgba(108,63,197,.3);overflow:hidden">
+          <!-- دوائر خلفية زخرفية -->
+          <div style="position:absolute;bottom:-30px;left:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.3),transparent);filter:blur(30px)"></div>
+          <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(108,63,197,.4),transparent);filter:blur(25px)"></div>
+          <!-- الصورة -->
+          <img src="Mona.jpg" alt="مس منى كامل"
+            style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block;border-radius:24px;position:relative;z-index:1"
+            onerror="this.style.display='none';document.getElementById('aboutFallback').style.display='flex'">
+          <div id="aboutFallback" style="display:none;width:100%;height:100%;align-items:flex-end;justify-content:center;font-size:10rem;padding-bottom:20px;background:linear-gradient(180deg,rgba(108,63,197,.3),rgba(74,42,138,.8))">👩‍🏫</div>
+        </div>
+      </div>
       <div class="about-overlay"><div class="num">+20</div><div class="lbl">سنوات خبرة</div></div>
     </div>
     <div class="about-info">
@@ -866,7 +889,7 @@ textarea.form-input{resize:vertical;min-height:90px}
           <input type="hidden" id="addVideoCourseKey">
           <div class="admin-form-row">
             <div class="form-group"><label class="form-label">اسم الفيديو</label><input type="text" class="form-input" id="videoNameInput" placeholder="مثال: الدرس الأول - المقدمة"></div>
-            <div class="form-group"><label class="form-label">YouTube ID</label><input type="text" class="form-input" id="videoYtIdInput" placeholder="مثال: dQw4w9WgXcQ"></div>
+            <div class="form-group"><label class="form-label">رابط يوتيوب</label><input type="text" class="form-input" id="videoYtIdInput" placeholder="https://www.youtube.com/watch?v=... أو الـ ID مباشرة"></div>
           </div>
           <button class="btn-form" onclick="adminAddVideo()" style="margin-top:14px"><i class="fas fa-video"></i> إضافة الفيديو</button>
           <button onclick="document.getElementById('addVideoSection').style.display='none'" style="margin-top:14px;margin-right:10px;background:transparent;border:1px solid var(--card-border);color:var(--text-muted);padding:10px 20px;border-radius:10px;cursor:pointer">إلغاء</button>
@@ -989,6 +1012,26 @@ function listenToScores() {
   });
 }
 
+
+// ====== GENERATE STUDENT ID ======
+function generateStudentId() {
+  return Math.floor(1000000000 + Math.random() * 9000000000).toString();
+}
+
+// ====== YOUTUBE ID EXTRACT ======
+function getYTIdMain(url) {
+  url = (url || '').trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+  let m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  m = url.match(/embed\/([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  m = url.match(/shorts\/([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+  return null;
+}
 
 // ====== PARTICLES ======
 (function(){
@@ -1153,6 +1196,7 @@ function handleGoogleLogin(fromRegister) {
               ...p,
               fullName,
               email: user.email,
+              studentId: generateStudentId(),
               isAdmin: false,
               isGoogle: true,
               authProvider: 'google',
@@ -1245,6 +1289,7 @@ function handleGoogleCompleteProfile() {
     studentPhone: sp,
     parentPhone: pp || '',
     stage, grade,
+    studentId: generateStudentId(),
     isAdmin: false,
     isGoogle: true,
     authProvider: 'google',
@@ -1353,10 +1398,12 @@ function handleRegister() {
   auth.createUserWithEmailAndPassword(em, pw)
     .then(result => {
       result.user.updateProfile({ displayName: fullName });
+      const studentId = generateStudentId();
       const profile = {
         ...profileData,
         fullName,
         email: em,
+        studentId,
         isAdmin: false,
         authProvider: 'email',
         createdAt: new Date().toLocaleDateString('ar-EG'),
@@ -1407,8 +1454,10 @@ function logout() {
 
 function updateNavForUser(){
   if(!currentUser)return;
+  const idBadge = currentUser.studentId ? `<span style="background:rgba(108,63,197,.2);border:1px solid rgba(108,63,197,.4);color:var(--primary-light);padding:3px 10px;border-radius:8px;font-size:.78rem;letter-spacing:1px;font-weight:700">🪪 ${currentUser.studentId}</span>` : '';
   document.getElementById('navBtns').innerHTML=`
     <span style="color:var(--primary-light);font-weight:700;font-size:.88rem">👋 أهلاً ${currentUser.name1}</span>
+    ${idBadge}
     ${currentUser.isAdmin?'<button class="btn-nav-register" onclick="openAdminPanel()" style="background:linear-gradient(135deg,#FFD93D,#FF6B35);color:#000">👑 لوحة الإدارة</button>':''}
     <button class="btn-nav-login" onclick="logout()">خروج</button>`;
 }
@@ -1617,8 +1666,16 @@ function showAddVideoForm(courseKey,courseName){
 function adminAddVideo(){
   const courseKey=document.getElementById('addVideoCourseKey').value;
   const name=document.getElementById('videoNameInput').value.trim();
-  const ytId=document.getElementById('videoYtIdInput').value.trim();
-  if(!name||!ytId){showNotification('اكتب اسم الفيديو وID اليوتيوب','error');return;}
+  const raw=document.getElementById('videoYtIdInput').value.trim();
+  if(!name||!raw){showNotification('اكتب اسم الفيديو ورابط اليوتيوب','error');return;}
+  // قبول رابط كامل أو ID مباشر
+  let ytId = raw;
+  if(raw.includes('youtu')) {
+    const patterns = [/[?&]v=([a-zA-Z0-9_-]{11})/,/youtu\.be\/([a-zA-Z0-9_-]{11})/,/\/embed\/([a-zA-Z0-9_-]{11})/,/\/shorts\/([a-zA-Z0-9_-]{11})/];
+    ytId = null;
+    for(const p of patterns){ const m=raw.match(p); if(m){ytId=m[1];break;} }
+  }
+  if(!ytId||!/^[a-zA-Z0-9_-]{11}$/.test(ytId)){showNotification('❌ رابط يوتيوب غير صحيح','error');return;}
   const thumb=`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
   db.ref('website/courses/'+courseKey+'/videos').push({name,ytId,thumb})
     .then(()=>{
@@ -1690,6 +1747,9 @@ function renderPublicCourses() {
           <span class="badge" style="background:rgba(108,63,197,.2);color:var(--primary-light);padding:3px 8px;border-radius:5px;font-size:.72rem">${c.grade}</span>
           <span style="color:var(--text-muted)"><i class="fas fa-video"></i> ${vCount} فيديو</span>
         </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button onclick="event.stopPropagation();sharePublicCourse('${key}')" style="background:rgba(108,63,197,.12);border:1px solid rgba(108,63,197,.3);color:var(--primary-light);padding:5px 12px;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;gap:5px;transition:all .2s" onmouseover="this.style.background='rgba(108,63,197,.25)'" onmouseout="this.style.background='rgba(108,63,197,.12)'"><i class="fas fa-share-alt"></i> مشاركة</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1701,28 +1761,8 @@ function openCourseVideos(key) {
     setTimeout(() => showModal('login'), 800);
     return;
   }
-  const c = allCourses[key];
-  if (!c) return;
-  const videos = c.videos ? Object.entries(c.videos) : [];
-  document.getElementById('videoModalTitle').textContent = '📹 ' + c.name;
-
-  if (!videos.length) {
-    showNotification('الكورس ده مفيش فيديوهات لسه ⏳');
-    return;
-  }
-
-  // Render list
-  document.getElementById('videoListModal').innerHTML = videos.map(([vk, v], i) => `
-    <div class="vl-item ${i===0?'playing':''}" id="vli-${vk}" onclick="playVideo('${v.ytId}','${v.name}','${vk}')">
-      <img class="vl-thumb" src="${v.thumb}" onerror="this.src='https://img.youtube.com/vi/${v.ytId}/default.jpg'">
-      <span class="vl-name">${i+1}. ${v.name}</span>
-    </div>`).join('');
-
-  // Auto-play first
-  const first = videos[0][1];
-  document.getElementById('videoPlayerFrame').src = `https://www.youtube.com/embed/${first.ytId}?autoplay=1&rel=0`;
-
-  document.getElementById('videoPlayerModal').classList.add('open');
+  // فتح صفحة الكورس المنفصلة
+  window.location.href = 'course.html?id=' + key;
 }
 
 function playVideo(ytId, name, vk) {
@@ -1735,6 +1775,8 @@ function playVideo(ytId, name, vk) {
 function closeVideoModal() {
   document.getElementById('videoPlayerFrame').src = '';
   document.getElementById('videoPlayerModal').classList.remove('open');
+  const wrap = document.getElementById('courseExamsWrap');
+  if (wrap) wrap.remove();
 }
 
 // ====== PUBLIC EXAMS ======
@@ -1745,25 +1787,35 @@ function renderPublicExams() {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--text-muted)">لا يوجد امتحانات بعد 📝</div>';
     return;
   }
+  const uid = currentUser ? (currentUser.uid || currentUser._key) : null;
   grid.innerHTML = entries.map(([key, e]) => {
     const course = allCourses[e.courseKey];
-    return `<div class="exam-card" onclick="openExamPlayer('${key}')">
-      <div class="exam-tag">${course?.grade || e.courseKey || '—'}</div>
+    const label = e.type === 'standalone' ? (e.grade || 'عام') : (course?.grade || e.grade || '—');
+    const prevGrade = uid ? Object.values(allGrades || {}).find(g => g.studentUid === uid && g.examKey === key) : null;
+    const pct = prevGrade && prevGrade.total ? Math.round((prevGrade.score/prevGrade.total)*100) : null;
+    const doneHtml = prevGrade ? `<div style="margin-top:10px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:8px;padding:6px 10px;font-size:.78rem;color:#2ECC71;font-weight:700"><i class="fas fa-check-circle"></i> اتعملت — نتيجتك: ${prevGrade.score}/${prevGrade.total} (${pct}%)</div>` : '';
+    return `<div class="exam-card" onclick="openExamPlayer('${key}')" style="${prevGrade ? 'opacity:.7' : ''}">
+      <div class="exam-tag">${label}</div>
       <div class="exam-title">${e.title}</div>
       <div class="exam-meta">
         <i class="fas fa-file-alt" style="color:var(--primary-light)"></i> ${e.questions?.length||0} سؤال
         &nbsp;·&nbsp;
         <i class="fas fa-clock" style="color:var(--accent2)"></i> ${e.timer ? e.timer+' دقيقة' : 'بدون وقت'}
       </div>
-      <div class="exam-arrow"><i class="fas fa-play-circle"></i> ابدأ الامتحان</div>
+      ${doneHtml || '<div class="exam-arrow"><i class="fas fa-play-circle"></i> ابدأ الامتحان</div>'}
     </div>`;
   }).join('');
 }
 
 // ====== EXAM PLAYER ======
 let examState = { exam: null, key: null, answers: {}, submitted: false, timerInterval: null, timeLeft: 0 };
+let allGrades = {};
+db.ref('website/grades').on('value', snap => {
+  allGrades = snap.exists() ? snap.val() : {};
+  renderPublicExams();
+});
 
-function openExamPlayer(key) {
+async function openExamPlayer(key) {
   if (!currentUser) {
     showNotification('سجّل دخولك أولاً 🔐', 'error');
     setTimeout(() => showModal('login'), 800);
@@ -1771,6 +1823,27 @@ function openExamPlayer(key) {
   }
   const exam = allExamsV2[key];
   if (!exam) return;
+
+  // ✅ منع الطالب من حل الامتحان أكتر من مرة
+  const uid = currentUser.uid || currentUser._key;
+  const prevGrade = Object.values(allGrades).find(g => g.studentUid === uid && g.examKey === key);
+  if (prevGrade) {
+    const pct = prevGrade.total ? Math.round((prevGrade.score/prevGrade.total)*100) : 0;
+    document.getElementById('examPlayerContent').innerHTML = `
+      <div style="text-align:center;padding:30px 0">
+        <div style="font-size:3.5rem;margin-bottom:14px">🔒</div>
+        <h2 style="font-size:1.2rem;font-weight:900;margin-bottom:10px">لقد أجريت هذا الامتحان من قبل</h2>
+        <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:20px">الامتحان يُحل مرة واحدة فقط</p>
+        <div style="font-size:2rem;font-weight:900;color:${pct>=50?'#2ECC71':'#E74C3C'};margin-bottom:10px">${prevGrade.score} / ${prevGrade.total}</div>
+        <div style="color:var(--text-muted)">نسبتك: <strong style="color:${pct>=50?'#2ECC71':'#E74C3C'}">${pct}%</strong></div>
+        <button onclick="closeExamModal()" style="margin-top:24px;padding:12px 30px;border-radius:12px;border:none;background:var(--gradient);color:white;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer">
+          <i class="fas fa-times"></i> إغلاق
+        </button>
+      </div>`;
+    document.getElementById('examPlayerModal').style.display = 'flex';
+    return;
+  }
+
   examState = { exam, key, answers: {}, submitted: false, timerInterval: null, timeLeft: exam.timer ? exam.timer * 60 : 0 };
   renderExamPlayer();
   document.getElementById('examPlayerModal').style.display = 'flex';
@@ -1897,11 +1970,25 @@ function submitExam() {
     db.ref('website/grades').push({
       studentUid: currentUser._key || currentUser.uid,
       studentName: name,
+      studentGrade: currentUser.grade || '—',
       examKey: examState.key,
       examTitle: exam.title,
       score, total,
       date: new Date().toLocaleDateString('ar-EG')
     });
+
+    // ✅ إضافة تلقائية لقائمة الشرف لو الطالب جاب 100%
+    if (total > 0 && score === total) {
+      const grade = currentUser.grade || '—';
+      db.ref('website/scores').push({
+        name,
+        grade,
+        exam: exam.title,
+        mark: `${score}/${total}`,
+        time: new Date().toLocaleDateString('ar-EG'),
+        auto: true
+      });
+    }
   }
 
   // Show result
@@ -1929,6 +2016,19 @@ function submitExam() {
 
 function openExam(url){ openExamPlayer(url); }
 
+// ====== SHARE COURSE ======
+function sharePublicCourse(key) {
+  const c = allCourses[key];
+  if (!c) return;
+  const url = window.location.origin + (window.location.pathname.replace('المنصة_المنتظره.html','')) + 'course.html?id=' + key;
+  const shareText = '📚 كورس ' + c.name + ' (' + c.grade + ') على منصة مس منى كامل';
+  if (navigator.share) {
+    navigator.share({ title: c.name, text: shareText, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => showNotification('تم نسخ رابط الكورس 🔗'));
+  }
+}
+
 // ====== INIT ======
 // ✅ real-time listeners تشتغل بعد loadFromFirebase مباشرة
 loadFromFirebase().then(()=>{
@@ -1936,6 +2036,11 @@ loadFromFirebase().then(()=>{
 });
 loadCourses();
 loadExamsV2();
+// Load grades for one-time exam check
+db.ref('website/grades').on('value', snap => {
+  allGrades = snap.exists() ? snap.val() : {};
+  renderPublicExams(); // تحديث حالة الامتحانات
+});
 
 </script>
 

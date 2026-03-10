@@ -76,6 +76,13 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);dir
 .fi{width:100%;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);font-family:'Cairo',sans-serif;font-size:.9rem;transition:all .3s}
 .fi:focus{outline:none;border-color:var(--primary);background:rgba(108,63,197,.08)}
 .fi-ta{resize:vertical;min-height:120px}
+/* IMGBB UPLOAD */
+.img-upload-area{border:2px dashed rgba(108,63,197,.4);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(108,63,197,.04);margin-bottom:10px}
+.img-upload-area:hover{border-color:var(--primary);background:rgba(108,63,197,.1)}
+.img-upload-area input{display:none}
+.img-upload-preview{max-width:100%;max-height:120px;border-radius:8px;margin-top:8px;display:none}
+.upload-progress{font-size:.78rem;color:var(--primary-light);margin-top:6px;display:none}
+
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .btn{padding:10px 20px;border-radius:10px;border:none;font-family:'Cairo',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:7px}
 .btn:hover{transform:translateY(-1px)}
@@ -212,6 +219,7 @@ tr:hover td{background:rgba(108,63,197,.05)}
       <button class="nav-item" onclick="goTo('search',this)"><i class="fas fa-search"></i> البحث الشامل</button>
     </nav>
     <div class="sidebar-bottom">
+      <button class="nav-item" onclick="goTo('settings',this)"><i class="fas fa-cog"></i> الإعدادات</button>
       <button class="btn-back" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> العودة للموقع</button>
       <button class="btn-logout" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
     </div>
@@ -353,6 +361,27 @@ tr:hover td{background:rgba(108,63,197,.05)}
         <div id="searchResults"></div>
       </div>
 
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-title" style="margin-bottom:20px"><i class="fas fa-cog" style="color:var(--primary-light)"></i> الإعدادات</div>
+        <div class="form-card">
+          <h3>🔑 مفتاح رفع الصور (imgbb)</h3>
+          <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:14px">
+            مفتاح imgbb يُستخدم لرفع صور الكورسات. احصل عليه من <a href="https://imgbb.com/login" target="_blank" style="color:var(--primary-light)">imgbb.com</a>
+            <br>يتم حفظه تلقائياً في Firebase عند المسار: <code style="background:rgba(108,63,197,.2);padding:2px 8px;border-radius:4px;font-size:.8rem">website/config/imgbbKey</code>
+          </p>
+          <div class="fg"><label>مفتاح imgbb API Key</label>
+            <input class="fi" id="imgbbKeyInput" placeholder="الصق مفتاح imgbb هنا...">
+          </div>
+          <button class="btn btn-primary" onclick="saveImgbbKey()"><i class="fas fa-save"></i> حفظ المفتاح</button>
+          <script>
+            db.ref("website/config/imgbbKey").once("value").then(s => {
+              if(s.exists()) document.getElementById("imgbbKeyInput").value = s.val();
+            });
+          </script>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /adminApp -->
@@ -373,7 +402,17 @@ tr:hover td{background:rgba(108,63,197,.05)}
         <option>أول ثانوي</option><option>تاني ثانوي</option><option>تالتة ثانوي</option>
       </select>
     </div>
-    <div class="fg"><label>رابط صورة الكورس (URL أو اتركه فاضي)</label><input class="fi" id="cImage" placeholder="https://...jpg"></div>
+    <div class="fg"><label>صورة الكورس</label>
+    <div class="img-upload-area" onclick="document.getElementById('cImageFile').click()">
+      <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--primary-light);margin-bottom:6px;display:block"></i>
+      <span style="font-size:.82rem;color:var(--text-muted)">اضغط لرفع صورة (imgbb) أو الصق رابط بالأسفل</span>
+      <input type="file" id="cImageFile" accept="image/*" onchange="handleCourseImageUpload('cImage','cUploadProgress','cImgPreview',this)">
+      <img id="cImgPreview" class="img-upload-preview">
+    </div>
+    <div class="upload-progress" id="cUploadProgress"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</div>
+    <input class="fi" id="cImage" placeholder="https://...jpg أو سيتم ملؤه تلقائياً بعد الرفع" style="margin-top:6px">
+    <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px">🔑 مفتاح imgbb محفوظ في Firebase عند: <code style="background:rgba(108,63,197,.2);padding:2px 6px;border-radius:4px">website/config/imgbbKey</code></div>
+    </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-primary" style="flex:1" onclick="saveCourse()"><i class="fas fa-save"></i> حفظ الكورس</button>
       <button class="btn btn-secondary" onclick="closeModal('addCourse')">إلغاء</button>
@@ -396,7 +435,16 @@ tr:hover td{background:rgba(108,63,197,.05)}
         <option>أول ثانوي</option><option>تاني ثانوي</option><option>تالتة ثانوي</option>
       </select>
     </div>
-    <div class="fg"><label>رابط صورة الكورس</label><input class="fi" id="ecImage" placeholder="https://...jpg"></div>
+    <div class="fg"><label>صورة الكورس</label>
+    <div class="img-upload-area" onclick="document.getElementById('ecImageFile').click()">
+      <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--primary-light);margin-bottom:6px;display:block"></i>
+      <span style="font-size:.82rem;color:var(--text-muted)">اضغط لتغيير الصورة</span>
+      <input type="file" id="ecImageFile" accept="image/*" onchange="handleCourseImageUpload('ecImage','ecUploadProgress','ecImgPreview',this)">
+      <img id="ecImgPreview" class="img-upload-preview">
+    </div>
+    <div class="upload-progress" id="ecUploadProgress"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</div>
+    <input class="fi" id="ecImage" placeholder="https://...jpg">
+    </div>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-primary" style="flex:1" onclick="updateCourse()"><i class="fas fa-save"></i> حفظ التعديلات</button>
       <button class="btn btn-secondary" onclick="closeModal('editCourse')">إلغاء</button>
@@ -557,7 +605,7 @@ function goTo(page, el) {
   const titles = {
     dashboard:'الرئيسية', courses:'الكورسات', students:'الطلاب',
     exams:'الامتحانات', grades:'درجات الطلاب', scores:'قائمة الشرف',
-    analytics:'التحاليل', search:'البحث الشامل'
+    analytics:'التحاليل', search:'البحث الشامل', settings:'الإعدادات'
   };
   const icons = {
     dashboard:'home', courses:'book', students:'users', exams:'file-alt',
@@ -618,8 +666,7 @@ async function loadAll() {
     allGrades = snap.exists() ? snap.val() : {};
     renderGrades();
   });
-  // Auto Honor List listener
-  listenToAutoHonor();
+  // (Auto honor handled in student-facing submitExam)
 }
 
 function updateStats() {
@@ -663,6 +710,7 @@ function renderCourses() {
           <button class="btn btn-success" style="font-size:.76rem;padding:6px 10px" onclick="openVideos('${key}')"><i class="fas fa-video"></i> الفيديوهات</button>
           <button class="btn btn-warning" style="font-size:.76rem;padding:6px 10px" onclick="editCourse('${key}')"><i class="fas fa-edit"></i> تعديل</button>
           <button class="btn btn-danger" style="font-size:.76rem;padding:6px 10px" onclick="deleteCourse('${key}')"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-secondary" style="font-size:.76rem;padding:6px 10px" onclick="shareCourse('${key}')"><i class="fas fa-share-alt"></i></button>
         </div>
       </div>
     </div>`;
@@ -835,9 +883,22 @@ function toggleBan(key, ban) {
     .then(() => notify(ban ? 'تم الحظر 🚫' : 'تم رفع الحظر ✅'))
     .catch(() => notify('خطأ', 'error'));
 }
-function deleteStudent(key) {
-  if (!confirm('هتحذف الطالب ده نهائياً؟')) return;
-  db.ref('website/students/' + key).remove().then(() => notify('تم الحذف')).catch(() => notify('خطأ', 'error'));
+async function deleteStudent(key) {
+  if (!confirm('هتحذف الطالب ده نهائياً؟ سيتم حذف كل درجاته وبياناته من قاعدة البيانات!')) return;
+  try {
+    // 1. حذف درجات الطالب
+    const gradesSnap = await db.ref('website/grades').orderByChild('studentUid').equalTo(key).once('value');
+    if (gradesSnap.exists()) {
+      const promises = [];
+      gradesSnap.forEach(child => { promises.push(child.ref.remove()); });
+      await Promise.all(promises);
+    }
+    // 2. حذف الطالب من قاعدة البيانات
+    await db.ref('website/students/' + key).remove();
+    notify('تم حذف الطالب وكل بياناته نهائياً ✅');
+  } catch(e) {
+    notify('خطأ أثناء الحذف: ' + e.message, 'error');
+  }
 }
 
 // ====== POPULATE COURSE SELECTS ======
@@ -1049,43 +1110,28 @@ function saveScore() {
 
 function renderScoresAdmin() {
   const entries = Object.entries(allScores);
-  document.getElementById('scoresAdminTable').innerHTML = entries.map(([k,s],i) => `
-    <tr>
-      <td>${i+1}</td><td>${s.name}</td><td>${s.grade}</td><td>${s.exam}</td>
-      <td><strong style="color:var(--accent2)">${s.mark}</strong></td><td>${s.time||'—'}</td>
-      <td><button class="btn btn-danger" style="padding:5px 10px;font-size:.78rem" onclick="deleteScore('${k}')"><i class="fas fa-trash"></i></button></td>
-    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">قائمة الشرف فارغة</td></tr>';
-}
-
-// ====== AUTO HONOR LIST ======
-// يراقب grades ويضيف أي طالب حصل على 100% تلقائياً
-function listenToAutoHonor() {
-  db.ref('website/grades').on('child_added', async snap => {
-    const g = snap.val();
-    if (!g || !g.total || g.total === 0) return;
-    const pct = Math.round((g.score / g.total) * 100);
-    if (pct < 100) return;
-    // تحقق إنه مش موجود بالفعل في قائمة الشرف بنفس الامتحان واسم الطالب
-    const scSnap = await db.ref('website/scores').orderByChild('examKey').equalTo(g.examKey).once('value');
-    if (scSnap.exists()) {
-      let alreadyIn = false;
-      scSnap.forEach(ch => { if (ch.val().studentUid === g.studentUid) alreadyIn = true; });
-      if (alreadyIn) return;
-    }
-    // أضفه تلقائياً
-    db.ref('website/scores').push({
-      name: g.studentName || '—',
-      grade: g.studentGrade || '—',
-      exam: g.examTitle || '—',
-      mark: g.score + '/' + g.total,
-      examKey: g.examKey || '',
-      studentUid: g.studentUid || '',
-      time: g.date || new Date().toLocaleDateString('ar-EG'),
-      auto: true
+  document.getElementById('scoresAdminTable').innerHTML = entries.map(([k,s],i) => {
+    // تحقق من حالة الحظر بمطابقة الاسم
+    const fullName = s.name || '';
+    const isBanned = allStudents.some(st => {
+      const stName = [st.name1,st.name2,st.name3,st.name4].filter(Boolean).join(' ');
+      return stName === fullName && st.banned;
     });
-  });
+    const banBadge = isBanned
+      ? `<span class="badge badge-danger" style="margin-right:6px;font-size:.7rem"><i class="fas fa-ban"></i> تم الحظر</span>`
+      : '';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${s.name} ${banBadge}</td>
+      <td>${s.grade}</td><td>${s.exam}</td>
+      <td><strong style="color:var(--accent2)">${s.mark}</strong></td>
+      <td>${s.time||'—'}</td>
+      <td><button class="btn btn-danger" style="padding:5px 10px;font-size:.78rem" onclick="deleteScore('${k}')"><i class="fas fa-trash"></i></button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">قائمة الشرف فارغة</td></tr>';
 }
 
+// ====== SCORES DELETE ======
 function deleteScore(key) {
   if (!confirm('حذف من قائمة الشرف؟')) return;
   db.ref('website/scores/' + key).remove().then(() => notify('تم الحذف')).catch(() => notify('خطأ', 'error'));
@@ -1194,6 +1240,73 @@ function globalSearch() {
     </div>`;
   }).join('');
 }
+
+// ====== IMGBB IMAGE UPLOAD ======
+async function getImgbbKey() {
+  const snap = await db.ref('website/config/imgbbKey').once('value');
+  return snap.exists() ? snap.val() : null;
+}
+
+async function handleCourseImageUpload(targetInputId, progressId, previewId, fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const progress = document.getElementById(progressId);
+  const preview = document.getElementById(previewId);
+  progress.style.display = 'block';
+  try {
+    const apiKey = await getImgbbKey();
+    if (!apiKey) {
+      notify('مفتاح imgbb غير موجود — أضفه في Firebase عند: website/config/imgbbKey', 'error');
+      progress.style.display = 'none';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result.split(',')[1];
+      const fd = new FormData();
+      fd.append('key', apiKey);
+      fd.append('image', base64);
+      const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById(targetInputId).value = data.data.url;
+        preview.src = data.data.url;
+        preview.style.display = 'block';
+        notify('تم رفع الصورة ✅');
+      } else {
+        notify('خطأ في رفع الصورة: ' + (data.error?.message || 'خطأ غير معروف'), 'error');
+      }
+      progress.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  } catch(e) {
+    notify('خطأ: ' + e.message, 'error');
+    progress.style.display = 'none';
+  }
+}
+
+// ====== SHARE COURSE ======
+function shareCourse(key) {
+  const c = allCourses[key];
+  if (!c) return;
+  const url = window.location.origin + '/course.html?id=' + key;
+  const text = 'كورس: ' + c.name + ' (' + c.grade + ') على منصة مس منى كامل\n' + url;
+  if (navigator.share) {
+    navigator.share({ title: c.name, text: 'كورس ' + c.name, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => notify('تم نسخ رابط الكورس 🔗'));
+  }
+}
+
+// ====== IMGBB KEY SETTINGS ======
+function saveImgbbKey() {
+  const key = document.getElementById('imgbbKeyInput')?.value?.trim();
+  if (!key) { notify('أدخل المفتاح', 'error'); return; }
+  db.ref('website/config/imgbbKey').set(key)
+    .then(() => notify('تم حفظ مفتاح imgbb ✅'))
+    .catch(() => notify('خطأ في الحفظ', 'error'));
+}
+
 
 </script>
 </body>
