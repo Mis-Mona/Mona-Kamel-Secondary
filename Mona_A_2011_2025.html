@@ -374,11 +374,6 @@ tr:hover td{background:rgba(108,63,197,.05)}
             <input class="fi" id="imgbbKeyInput" placeholder="الصق مفتاح imgbb هنا...">
           </div>
           <button class="btn btn-primary" onclick="saveImgbbKey()"><i class="fas fa-save"></i> حفظ المفتاح</button>
-          <script>
-            db.ref("website/config/imgbbKey").once("value").then(s => {
-              if(s.exists()) document.getElementById("imgbbKeyInput").value = s.val();
-            });
-          </script>
         </div>
       </div>
 
@@ -616,6 +611,7 @@ function goTo(page, el) {
   if (page === 'analytics') renderAnalytics();
   if (page === 'grades') renderGrades();
   if (page === 'scores') renderScoresAdmin();
+  if (page === 'settings') loadImgbbKey();
 }
 
 function openSidebar() {
@@ -1299,6 +1295,12 @@ function shareCourse(key) {
 }
 
 // ====== IMGBB KEY SETTINGS ======
+function loadImgbbKey() {
+  db.ref('website/config/imgbbKey').once('value').then(s => {
+    if (s.exists()) document.getElementById('imgbbKeyInput').value = s.val();
+  });
+}
+
 function saveImgbbKey() {
   const key = document.getElementById('imgbbKeyInput')?.value?.trim();
   if (!key) { notify('أدخل المفتاح', 'error'); return; }
