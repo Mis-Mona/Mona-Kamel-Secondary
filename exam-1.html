@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الامتحان - مس منى كامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+:root{
+  --primary:#6C3FC5;--primary-dark:#4A2A8A;--primary-light:#9B6EF0;
+  --accent:#FF6B35;--accent2:#FFD93D;--dark:#0D0D1A;--dark2:#13132A;
+  --card-bg:#1A1A35;--card-border:rgba(108,63,197,0.3);
+  --text:#E8E8F5;--text-muted:#9898C0;--white:#fff;
+  --success:#2ECC71;--danger:#E74C3C;
+  --gradient:linear-gradient(135deg,#6C3FC5 0%,#FF6B35 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);direction:rtl;min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--dark2)}::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}
+
+/* TOPBAR */
+.topbar{background:rgba(13,13,26,.97);border-bottom:1px solid var(--card-border);padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+.back-btn{display:flex;align-items:center;gap:8px;background:rgba(108,63,197,.15);border:1px solid rgba(108,63,197,.3);color:var(--text);padding:8px 16px;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:.85rem;text-decoration:none;transition:all .3s;white-space:nowrap}
+.back-btn:hover{background:rgba(108,63,197,.3)}
+.topbar-title{font-weight:900;font-size:1rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.share-btn{display:flex;align-items:center;gap:8px;background:var(--gradient);border:none;color:white;padding:8px 18px;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:.85rem;transition:all .3s;white-space:nowrap}
+.share-btn:hover{opacity:.85;transform:translateY(-1px)}
+
+/* MAIN */
+.exam-page-wrap{max-width:700px;margin:0 auto;padding:28px 20px 60px}
+
+/* AUTH WALL */
+#authWall{display:none;position:fixed;inset:0;background:rgba(13,13,26,.96);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+#authWall.show{display:flex}
+.auth-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:24px;padding:44px 36px;text-align:center;max-width:400px;width:92%}
+.auth-box h2{font-size:1.4rem;font-weight:900;margin-bottom:10px}
+.auth-box p{color:var(--text-muted);margin-bottom:24px;font-size:.9rem;line-height:1.7}
+.auth-box .btn{padding:12px 28px;border-radius:12px;border:none;background:var(--gradient);color:white;font-family:'Cairo',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
+.auth-box .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,63,197,.4)}
+
+/* LOADING */
+.loading-screen{display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:16px}
+.spinner{width:48px;height:48px;border:4px solid rgba(108,63,197,.2);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EXAM HEADER */
+.exam-header-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:24px;margin-bottom:24px;text-align:center;position:relative;overflow:hidden}
+.exam-header-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient)}
+.exam-header-card h1{font-size:1.3rem;font-weight:900;margin-bottom:8px}
+.exam-header-card .meta{color:var(--text-muted);font-size:.88rem;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+
+/* TIMER */
+.exam-timer-bar{background:rgba(108,63,197,.15);border:1px solid rgba(108,63,197,.3);border-radius:12px;padding:12px 20px;text-align:center;font-size:1.2rem;font-weight:800;margin-bottom:22px;color:var(--primary-light);display:flex;align-items:center;justify-content:center;gap:10px}
+.exam-timer-bar.urgent{border-color:rgba(231,76,60,.5);background:rgba(231,76,60,.1);color:#E74C3C;animation:pulse-timer .5s ease-in-out infinite alternate}
+@keyframes pulse-timer{from{opacity:1}to{opacity:.7}}
+
+/* QUESTION CARD */
+.q-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px;margin-bottom:16px;border-right:3px solid var(--primary);transition:border-color .3s}
+.q-card.answered{border-right-color:var(--success)}
+.q-num{font-size:.78rem;color:var(--primary-light);font-weight:700;margin-bottom:8px}
+.q-text{font-size:.95rem;font-weight:700;margin-bottom:14px;line-height:1.6}
+.tf-btns{display:flex;gap:10px}
+.tf-btn,.mcq-btn{
+  padding:11px 14px;border-radius:10px;
+  border:1.5px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);
+  color:var(--text);font-family:'Cairo',sans-serif;
+  font-weight:700;cursor:pointer;transition:all .2s;
+  font-size:.9rem;
+}
+.tf-btn{flex:1;text-align:center}
+.mcq-btn{width:100%;text-align:right;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.tf-btn:hover,.mcq-btn:hover{border-color:rgba(108,63,197,.5);background:rgba(108,63,197,.1)}
+.tf-btn.selected,.mcq-btn.selected{background:rgba(108,63,197,.3);border-color:var(--primary);color:white}
+
+/* SUBMIT BTN */
+.submit-btn{width:100%;padding:15px;border-radius:14px;border:none;background:var(--gradient);color:white;font-family:'Cairo',sans-serif;font-weight:900;font-size:1.05rem;cursor:pointer;margin-top:10px;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 24px rgba(108,63,197,.3)}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(108,63,197,.4)}
+
+/* RESULT */
+.result-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:32px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden}
+.result-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient)}
+.result-score{font-size:3rem;font-weight:900;margin:16px 0}
+.result-pct{font-size:1.1rem;color:var(--text-muted);margin-bottom:20px}
+.result-answers{display:flex;flex-direction:column;gap:8px;max-width:320px;margin:0 auto 24px}
+.ans-row{display:flex;justify-content:space-between;font-size:.82rem;padding:8px 12px;border-radius:8px}
+.ans-row.correct{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)}
+.ans-row.wrong{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3)}
+.back-home-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;border:none;background:var(--gradient);color:white;font-family:'Cairo',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .3s;text-decoration:none}
+.back-home-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,63,197,.4)}
+
+/* NOTIF */
+.notif{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:12px 22px;display:flex;align-items:center;gap:10px;z-index:5000;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.notif.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.notif.success{border-color:rgba(46,204,113,.4)}.notif.success i{color:#2ECC71}
+.notif.error{border-color:rgba(231,76,60,.4)}.notif.error i{color:#E74C3C}
+
+/* PROGRESS BAR */
+.progress-wrap{background:rgba(255,255,255,.06);border-radius:8px;height:6px;margin-bottom:22px;overflow:hidden}
+.progress-bar{height:100%;background:var(--gradient);border-radius:8px;transition:width .4s ease}
+
+@media(max-width:480px){
+  .exam-page-wrap{padding:16px 12px 60px}
+  .topbar{padding:10px 12px;gap:8px}
+  .share-btn span{display:none}
+  .back-btn span{display:none}
+  .topbar-title{font-size:.88rem}
+  .exam-header-card h1{font-size:1.1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="notif" id="notif"><i class="fas fa-check-circle"></i><span id="notifMsg"></span></div>
+
+<!-- AUTH WALL -->
+<div id="authWall">
+  <div class="auth-box">
+    <div style="font-size:3rem;margin-bottom:14px">🔐</div>
+    <h2>سجّل دخولك أولاً</h2>
+    <p>لازم تكون مسجل دخولك عشان تقدر تحل الامتحانات وتشوف نتيجتك</p>
+    <button class="btn" onclick="goHome()">
+      <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+    </button>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="المنصة_المنتظره.html" class="back-btn">
+    <i class="fas fa-arrow-right"></i> <span>رجوع</span>
+  </a>
+  <div class="topbar-title" id="topbarTitle"><i class="fas fa-file-alt" style="color:var(--primary-light)"></i> جاري التحميل...</div>
+  <button class="share-btn" onclick="shareExam()">
+    <i class="fas fa-share-alt"></i><span>مشاركة</span>
+  </button>
+</div>
+
+<!-- LOADING -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner"></div>
+  <p style="color:var(--text-muted)">جاري تحميل الامتحان...</p>
+</div>
+
+<!-- EXAM CONTENT -->
+<div id="examPage" style="display:none">
+  <div class="exam-page-wrap">
+    <div class="exam-header-card" id="examHeaderCard"></div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div id="timerContainer"></div>
+    <div id="questionsContainer"></div>
+    <button class="submit-btn" id="submitBtn" onclick="submitExam()">
+      <i class="fas fa-paper-plane"></i> تسليم الامتحان
+    </button>
+  </div>
+</div>
+
+<!-- RESULT PAGE -->
+<div id="resultPage" style="display:none">
+  <div class="exam-page-wrap">
+    <div class="result-card" id="resultCard"></div>
+    <div style="text-align:center">
+      <a href="المنصة_المنتظره.html" class="back-home-btn">
+        <i class="fas fa-home"></i> العودة للرئيسية
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== FIREBASE ======
+const firebaseConfig = {
+  apiKey: "AIzaSyBalgsZ2MmHFkF7bvAGky0MImzTVgqXTy8",
+  authDomain: "monakamel-academy.firebaseapp.com",
+  databaseURL: "https://monakamel-academy-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "monakamel-academy",
+  storageBucket: "monakamel-academy.firebasestorage.app",
+  messagingSenderId: "1012338556086",
+  appId: "1:1012338556086:web:1a0ea89ce0bf59268f3a17"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+
+// ====== STATE ======
+let currentUser = null;
+let examData = null;
+let examKey = null;
+let answers = {};
+let timerInterval = null;
+let timeLeft = 0;
+let submitted = false;
+
+// ====== HELPERS ======
+function notify(msg, type='success') {
+  const el = document.getElementById('notif');
+  el.querySelector('i').className = type==='success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+  document.getElementById('notifMsg').textContent = msg;
+  el.className = 'notif ' + type + ' show';
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function goHome() {
+  window.location.href = 'المنصة_المنتظره.html';
+}
+
+function fmtTime(s) {
+  return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+
+// ====== GET EXAM ID ======
+const urlParams = new URLSearchParams(window.location.search);
+examKey = urlParams.get('id');
+if (!examKey) { window.location.href = 'المنصة_المنتظره.html'; }
+
+// ====== AUTH ======
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    document.getElementById('authWall').classList.add('show');
+    document.getElementById('loadingScreen').style.display = 'none';
+    return;
+  }
+  try {
+    const snap = await db.ref('website/students/' + user.uid).once('value');
+    if (snap.exists()) {
+      const data = snap.val();
+      if (data.banned) {
+        document.getElementById('authWall').innerHTML = '<div class="auth-box"><div style="font-size:3rem;margin-bottom:14px">🚫</div><h2>الحساب محظور</h2><p style="color:var(--text-muted)">تم حظر حسابك. تواصل مع الإدارة.</p><button class="btn" onclick="auth.signOut().then(()=>goHome())"><i class="fas fa-sign-out-alt"></i> خروج</button></div>';
+        document.getElementById('authWall').classList.add('show');
+        return;
+      }
+      currentUser = { uid: user.uid, _key: user.uid, ...data };
+    } else {
+      currentUser = { uid: user.uid, _key: user.uid, name1: user.displayName || user.email };
+    }
+  } catch(e) {
+    currentUser = { uid: user.uid, _key: user.uid, name1: user.displayName || user.email };
+  }
+  loadExam();
+});
+
+// ====== LOAD EXAM ======
+async function loadExam() {
+  try {
+    const snap = await db.ref('website/exams_v2/' + examKey).once('value');
+    if (!snap.exists()) {
+      document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;color:var(--text-muted)"><div style="font-size:3rem;margin-bottom:16px">😕</div><p style="font-size:1.1rem;font-weight:700">الامتحان غير موجود</p><a href="المنصة_المنتظره.html" style="color:var(--primary-light);margin-top:14px;display:inline-block;font-weight:700">← العودة للرئيسية</a></div>';
+      return;
+    }
+    examData = snap.val();
+    document.title = examData.title + ' - مس منى كامل';
+    document.getElementById('topbarTitle').innerHTML = `<i class="fas fa-file-alt" style="color:var(--primary-light)"></i> ${examData.title}`;
+
+    // Check if already done
+    const uid = currentUser.uid || currentUser._key;
+    const gradesSnap = await db.ref('website/grades').orderByChild('studentUid').equalTo(uid).once('value');
+    if (gradesSnap.exists()) {
+      const grades = Object.values(gradesSnap.val());
+      const prev = grades.find(g => g.examKey === examKey);
+      if (prev) {
+        showAlreadyDone(prev);
+        document.getElementById('loadingScreen').style.display = 'none';
+        return;
+      }
+    }
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    renderExam();
+
+  } catch(e) {
+    document.getElementById('loadingScreen').innerHTML = `<div style="text-align:center;color:var(--text-muted)"><i class="fas fa-exclamation-circle" style="font-size:2rem;color:#E74C3C;margin-bottom:12px;display:block"></i><p>خطأ في التحميل: ${e.message}</p><a href="المنصة_المنتظره.html" style="color:var(--primary-light);margin-top:12px;display:inline-block">← رجوع</a></div>`;
+  }
+}
+
+// ====== ALREADY DONE ======
+function showAlreadyDone(prev) {
+  const pct = prev.total ? Math.round((prev.score/prev.total)*100) : 0;
+  const passed = pct >= 50;
+  document.getElementById('resultPage').style.display = 'block';
+  document.getElementById('resultCard').innerHTML = `
+    <div style="font-size:3rem;margin-bottom:12px">🔒</div>
+    <h2 style="font-size:1.2rem;font-weight:900;margin-bottom:8px">لقد أجريت هذا الامتحان من قبل</h2>
+    <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:20px">الامتحان يُحل مرة واحدة فقط</p>
+    <div class="result-score" style="color:${passed?'var(--success)':'var(--danger)'}">${prev.score} / ${prev.total}</div>
+    <div class="result-pct">نسبتك: <strong style="color:${passed?'var(--success)':'var(--danger)'}">${pct}%</strong></div>
+    <div style="font-size:1.5rem">${passed ? '🎉 ناجح' : '😔 حاول تاني'}</div>`;
+}
+
+// ====== RENDER EXAM ======
+function renderExam() {
+  const questions = examData.questions || [];
+  const qCount = questions.length;
+  timeLeft = examData.timer ? examData.timer * 60 : 0;
+
+  // Header
+  document.getElementById('examHeaderCard').innerHTML = `
+    <div style="font-size:2rem;margin-bottom:10px">📝</div>
+    <h1>${examData.title}</h1>
+    <div class="meta">
+      <span><i class="fas fa-file-alt" style="color:var(--primary-light)"></i> ${qCount} سؤال</span>
+      ${examData.timer ? `<span><i class="fas fa-clock" style="color:var(--accent2)"></i> ${examData.timer} دقيقة</span>` : '<span><i class="fas fa-infinity" style="color:var(--success)"></i> بدون وقت</span>'}
+      ${examData.grade ? `<span><i class="fas fa-graduation-cap" style="color:var(--accent)"></i> ${examData.grade}</span>` : ''}
+    </div>`;
+
+  // Timer
+  if (examData.timer) {
+    document.getElementById('timerContainer').innerHTML = `
+      <div class="exam-timer-bar" id="timerBar">
+        <i class="fas fa-clock"></i> <span id="timerDisplay">${fmtTime(timeLeft)}</span>
+      </div>`;
+    startTimer();
+  }
+
+  // Questions
+  document.getElementById('questionsContainer').innerHTML = questions.map((q, qi) => {
+    if (q.type === 'tf') {
+      return `<div class="q-card" id="qcard-${qi}">
+        <div class="q-num">سؤال ${qi+1} من ${qCount}</div>
+        <div class="q-text">${q.text}</div>
+        <div class="tf-btns">
+          <button class="tf-btn" id="tf-${qi}-true" onclick="answerTF(${qi},true)">✅ صح</button>
+          <button class="tf-btn" id="tf-${qi}-false" onclick="answerTF(${qi},false)">❌ خطأ</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="q-card" id="qcard-${qi}">
+      <div class="q-num">سؤال ${qi+1} من ${qCount}</div>
+      <div class="q-text">${q.text}</div>
+      <div>
+        ${(q.options||[]).map(o => `
+          <button class="mcq-btn" id="mcq-${qi}-${o.letter}" onclick="answerMCQ(${qi},'${o.letter}')">
+            <span>${o.text}</span><span style="color:var(--text-muted);font-weight:900">${o.letter}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('examPage').style.display = 'block';
+  updateProgress();
+}
+
+// ====== TIMER ======
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const el = document.getElementById('timerDisplay');
+    const bar = document.getElementById('timerBar');
+    if (el) el.textContent = fmtTime(timeLeft);
+    if (bar && timeLeft <= 60) bar.classList.add('urgent');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitExam(true); }
+  }, 1000);
+}
+
+// ====== ANSWERS ======
+function answerTF(qi, val) {
+  if (submitted) return;
+  answers[qi] = val;
+  ['true','false'].forEach(v => {
+    const btn = document.getElementById(`tf-${qi}-${v}`);
+    if (!btn) return;
+    const match = (v === 'true') === val;
+    btn.classList.toggle('selected', match);
+  });
+  document.getElementById('qcard-' + qi)?.classList.add('answered');
+  updateProgress();
+}
+
+function answerMCQ(qi, letter) {
+  if (submitted) return;
+  answers[qi] = letter;
+  const q = examData.questions[qi];
+  (q.options||[]).forEach(o => {
+    const btn = document.getElementById(`mcq-${qi}-${o.letter}`);
+    if (btn) btn.classList.toggle('selected', o.letter === letter);
+  });
+  document.getElementById('qcard-' + qi)?.classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = (examData.questions||[]).length;
+  const done = Object.keys(answers).length;
+  const pct = total ? (done/total)*100 : 0;
+  const bar = document.getElementById('progressBar');
+  if (bar) bar.style.width = pct + '%';
+}
+
+// ====== SUBMIT ======
+async function submitExam(forced = false) {
+  if (submitted) return;
+  const questions = examData.questions || [];
+  const unanswered = questions.filter((_, qi) => answers[qi] === undefined).length;
+  if (!forced && unanswered > 0 && timeLeft > 0) {
+    if (!confirm(`لسه فيه ${unanswered} سؤال مش مجاوب، هتسلم؟`)) {
+      if (examData.timer) startTimer();
+      return;
+    }
+  }
+  if (timerInterval) clearInterval(timerInterval);
+  submitted = true;
+
+  let score = 0;
+  questions.forEach((q, qi) => {
+    const ans = answers[qi];
+    if (q.type === 'tf' && ans === q.answer) score++;
+    if (q.type === 'mcq' && ans === q.answer) score++;
+  });
+  const total = questions.length;
+  const pct = total ? Math.round(score/total*100) : 0;
+  const passed = pct >= 50;
+
+  // Save to Firebase
+  if (currentUser) {
+    const name = [currentUser.name1,currentUser.name2,currentUser.name3,currentUser.name4].filter(Boolean).join(' ') || currentUser.name || currentUser.email || '—';
+    await db.ref('website/grades').push({
+      studentUid: currentUser._key || currentUser.uid,
+      studentName: name,
+      studentGrade: currentUser.grade || '—',
+      examKey,
+      examTitle: examData.title,
+      score, total,
+      date: new Date().toLocaleDateString('ar-EG')
+    });
+    // Add to honor board if 100%
+    if (total > 0 && score === total) {
+      db.ref('website/scores').push({
+        name, grade: currentUser.grade || '—',
+        exam: examData.title, mark: `${score}/${total}`,
+        time: new Date().toLocaleDateString('ar-EG'), auto: true
+      });
+    }
+  }
+
+  // Show result
+  document.getElementById('examPage').style.display = 'none';
+  document.getElementById('resultPage').style.display = 'block';
+  document.getElementById('resultCard').innerHTML = `
+    <div style="font-size:3.5rem;margin-bottom:12px">${passed?'🎉':'😔'}</div>
+    <h2 style="font-size:1.3rem;font-weight:900;margin-bottom:8px">${passed?'مبروك! ناجح 🎉':'حاول تاني 💪'}</h2>
+    <div class="result-score" style="color:${passed?'var(--success)':'var(--danger)'}">${score} / ${total}</div>
+    <div class="result-pct">نسبتك: <strong style="color:${passed?'var(--success)':'var(--danger)'}">${pct}%</strong></div>
+    <div class="result-answers">
+      ${questions.map((q,qi) => {
+        const correct = answers[qi] === q.answer;
+        return `<div class="ans-row ${correct?'correct':'wrong'}">
+          <span>سؤال ${qi+1}</span>
+          <span>${correct?'✅ صح':'❌ غلط'}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ====== SHARE ======
+function shareExam() {
+  const url = window.location.href;
+  const text = examData ? '📝 امتحان ' + examData.title + ' على منصة مس منى كامل — جرب نفسك!' : 'منصة مس منى كامل';
+  if (navigator.share) {
+    navigator.share({ title: examData?.title || 'الامتحان', text, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => notify('تم نسخ رابط الامتحان 🔗'));
+  }
+}
+</script>
+</body>
+</html>
