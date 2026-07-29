@@ -132,7 +132,7 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);dir
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <a href="المنصة_المنتظره.html" class="back-btn">
+  <a href="index.html" class="back-btn">
     <i class="fas fa-arrow-right"></i> <span>رجوع</span>
   </a>
   <div class="topbar-title" id="topbarTitle"><i class="fas fa-file-alt" style="color:var(--primary-light)"></i> جاري التحميل...</div>
@@ -165,7 +165,7 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);dir
   <div class="exam-page-wrap">
     <div class="result-card" id="resultCard"></div>
     <div style="text-align:center">
-      <a href="المنصة_المنتظره.html" class="back-home-btn">
+      <a href="index.html" class="back-home-btn">
         <i class="fas fa-home"></i> العودة للرئيسية
       </a>
     </div>
@@ -206,7 +206,7 @@ function notify(msg, type='success') {
 }
 
 function goHome() {
-  window.location.href = 'المنصة_المنتظره.html';
+  window.location.href = 'index.html';
 }
 
 function fmtTime(s) {
@@ -216,7 +216,7 @@ function fmtTime(s) {
 // ====== GET EXAM ID ======
 const urlParams = new URLSearchParams(window.location.search);
 examKey = urlParams.get('id');
-if (!examKey) { window.location.href = 'المنصة_المنتظره.html'; }
+if (!examKey) { window.location.href = 'index.html'; }
 
 // ====== AUTH ======
 auth.onAuthStateChanged(async user => {
@@ -235,8 +235,14 @@ auth.onAuthStateChanged(async user => {
         return;
       }
       currentUser = { uid: user.uid, _key: user.uid, ...data };
+    } else if (user.email === 'mrsmonakamel6@gmail.com' || user.email === 'admin@monakamel.com') {
+      currentUser = { uid: user.uid, _key: user.uid, name1: 'الأدمن', isAdmin: true };
     } else {
-      currentUser = { uid: user.uid, _key: user.uid, name1: user.displayName || user.email };
+      // مفيش بيانات طالب لليوزر ده (اتحذف من قاعدة البيانات مثلاً) — منمنعوش يحل الامتحان
+      document.getElementById('authWall').innerHTML = '<div class="auth-box"><div style="font-size:3rem;margin-bottom:14px">⚠️</div><h2>الحساب غير مكتمل</h2><p style="color:var(--text-muted)">سجّل حساب جديد من الصفحة الرئيسية.</p><button class="btn" onclick="auth.signOut().then(()=>goHome())"><i class="fas fa-sign-out-alt"></i> رجوع للرئيسية</button></div>';
+      document.getElementById('authWall').classList.add('show');
+      document.getElementById('loadingScreen').style.display = 'none';
+      return;
     }
   } catch(e) {
     currentUser = { uid: user.uid, _key: user.uid, name1: user.displayName || user.email };
@@ -249,10 +255,17 @@ async function loadExam() {
   try {
     const snap = await db.ref('website/exams_v2/' + examKey).once('value');
     if (!snap.exists()) {
-      document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;color:var(--text-muted)"><div style="font-size:3rem;margin-bottom:16px">😕</div><p style="font-size:1.1rem;font-weight:700">الامتحان غير موجود</p><a href="المنصة_المنتظره.html" style="color:var(--primary-light);margin-top:14px;display:inline-block;font-weight:700">← العودة للرئيسية</a></div>';
+      document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;color:var(--text-muted)"><div style="font-size:3rem;margin-bottom:16px">😕</div><p style="font-size:1.1rem;font-weight:700">الامتحان غير موجود</p><a href="index.html" style="color:var(--primary-light);margin-top:14px;display:inline-block;font-weight:700">← العودة للرئيسية</a></div>';
       return;
     }
     examData = snap.val();
+    // ⚠️ أمان: بنشيل حقل answer من كل سؤال قبل ما يتخزن/يتعرض عند الطالب،
+    // عشان ميقدرش يشوف الإجابات الصح من الـ Console وهو بيحل الامتحان.
+    // التصحيح الحقيقي بيحصل من نسخة كاملة تتجاب من Firebase وقت التسليم بس (submitExam).
+    examData.questions = (examData.questions || []).map(q => {
+      const { answer, ...rest } = q;
+      return rest;
+    });
     document.title = examData.title + ' - مس منى كامل';
     document.getElementById('topbarTitle').innerHTML = `<i class="fas fa-file-alt" style="color:var(--primary-light)"></i> ${examData.title}`;
 
@@ -273,7 +286,7 @@ async function loadExam() {
     renderExam();
 
   } catch(e) {
-    document.getElementById('loadingScreen').innerHTML = `<div style="text-align:center;color:var(--text-muted)"><i class="fas fa-exclamation-circle" style="font-size:2rem;color:#E74C3C;margin-bottom:12px;display:block"></i><p>خطأ في التحميل: ${e.message}</p><a href="المنصة_المنتظره.html" style="color:var(--primary-light);margin-top:12px;display:inline-block">← رجوع</a></div>`;
+    document.getElementById('loadingScreen').innerHTML = `<div style="text-align:center;color:var(--text-muted)"><i class="fas fa-exclamation-circle" style="font-size:2rem;color:#E74C3C;margin-bottom:12px;display:block"></i><p>خطأ في التحميل: ${e.message}</p><a href="index.html" style="color:var(--primary-light);margin-top:12px;display:inline-block">← رجوع</a></div>`;
   }
 }
 
@@ -404,13 +417,26 @@ async function submitExam(forced = false) {
   if (timerInterval) clearInterval(timerInterval);
   submitted = true;
 
+  // ⚠️ أمان: نجيب الأسئلة بإجاباتها الحقيقية من Firebase دلوقتي بس (لحظة التسليم)
+  // بدل ما نعتمد على النسخة المخزنة في المتصفح (اللي متشال منها الإجابات).
+  let gradedQuestions = questions;
+  try {
+    const freshSnap = await db.ref('website/exams_v2/' + examKey + '/questions').once('value');
+    if (freshSnap.exists()) gradedQuestions = freshSnap.val();
+  } catch (e) {
+    notify('تعذر تسليم الامتحان، حاول تاني', 'error');
+    submitted = false;
+    if (examData.timer) startTimer();
+    return;
+  }
+
   let score = 0;
-  questions.forEach((q, qi) => {
+  gradedQuestions.forEach((q, qi) => {
     const ans = answers[qi];
     if (q.type === 'tf' && ans === q.answer) score++;
     if (q.type === 'mcq' && ans === q.answer) score++;
   });
-  const total = questions.length;
+  const total = gradedQuestions.length;
   const pct = total ? Math.round(score/total*100) : 0;
   const passed = pct >= 50;
 
@@ -445,7 +471,7 @@ async function submitExam(forced = false) {
     <div class="result-score" style="color:${passed?'var(--success)':'var(--danger)'}">${score} / ${total}</div>
     <div class="result-pct">نسبتك: <strong style="color:${passed?'var(--success)':'var(--danger)'}">${pct}%</strong></div>
     <div class="result-answers">
-      ${questions.map((q,qi) => {
+      ${gradedQuestions.map((q,qi) => {
         const correct = answers[qi] === q.answer;
         return `<div class="ans-row ${correct?'correct':'wrong'}">
           <span>سؤال ${qi+1}</span>

@@ -202,40 +202,6 @@ footer{background:#080812;padding:60px 30px 30px;border-top:1px solid rgba(108,6
 .modal-switch{text-align:center;margin-top:18px;font-size:.88rem;color:var(--text-muted)}
 .modal-switch a{color:var(--primary-light);font-weight:700;cursor:pointer;text-decoration:none}
 textarea.form-input{resize:vertical;min-height:90px}
-.admin-panel{display:none;position:fixed;inset:0;background:var(--dark);z-index:3000;overflow-y:auto;flex-direction:column}
-.admin-panel.active{display:flex}
-.admin-header{background:var(--dark2);border-bottom:1px solid var(--card-border);padding:16px 30px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.admin-header h2{font-size:1.25rem;font-weight:900;display:flex;align-items:center;gap:10px}
-.admin-header h2 span{color:var(--accent)}
-.admin-body{display:flex;flex:1}
-.admin-sidebar{width:230px;background:var(--dark2);border-left:1px solid var(--card-border);padding:18px;display:flex;flex-direction:column;gap:8px;position:sticky;top:68px;height:calc(100vh - 68px);overflow-y:auto}
-.sidebar-item{padding:12px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:700;font-size:.88rem;color:var(--text-muted);transition:all .3s}
-.sidebar-item:hover,.sidebar-item.active{background:rgba(108,63,197,.15);color:var(--text)}
-.sidebar-item.active{color:var(--primary-light)}
-.sidebar-item i{width:16px}
-.admin-main{flex:1;padding:28px;overflow-y:auto}
-.admin-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;margin-bottom:28px}
-.admin-stat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:22px}
-.admin-stat-card .icon{font-size:1.8rem;margin-bottom:10px}
-.admin-stat-card .val{font-size:1.8rem;font-weight:900}
-.admin-stat-card .lbl{font-size:.83rem;color:var(--text-muted)}
-.admin-section-title{font-size:1.15rem;font-weight:800;margin-bottom:18px}
-.data-table{width:100%;border-collapse:collapse;background:var(--card-bg);border-radius:16px;overflow:hidden}
-.data-table th{background:rgba(108,63,197,.2);padding:13px 14px;text-align:right;font-size:.83rem;font-weight:700;color:var(--text-muted)}
-.data-table td{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88rem}
-.data-table tr:hover td{background:rgba(108,63,197,.05)}
-.badge-active{background:rgba(46,204,113,.15);color:#2ECC71;padding:4px 10px;border-radius:6px;font-size:.78rem;font-weight:700}
-.action-btn{padding:5px 12px;border-radius:8px;border:none;font-family:'Cairo',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .3s}
-.action-btn.approve{background:rgba(46,204,113,.15);color:#2ECC71}
-.action-btn.delete{background:rgba(231,76,60,.15);color:#E74C3C}
-.action-btn:hover{opacity:.8}
-.admin-content-section{display:none}
-.admin-content-section.active{display:block}
-.admin-form-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:26px;margin-top:18px}
-.admin-form-card h3{font-size:1.05rem;font-weight:800;margin-bottom:18px}
-.admin-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.close-admin{padding:8px 18px;border-radius:10px;border:1px solid rgba(231,76,60,.4);color:#E74C3C;background:rgba(231,76,60,.1);font-family:'Cairo',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .3s}
-.close-admin:hover{background:rgba(231,76,60,.2)}
 .notification{position:fixed;top:88px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:13px 22px;display:flex;align-items:center;gap:10px;z-index:5000;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .notification.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .notification.success{border-color:rgba(46,204,113,.4)}
@@ -305,10 +271,7 @@ textarea.form-input{resize:vertical;min-height:90px}
   /* Scores */
   .scores-grid{grid-template-columns:repeat(2,1fr);gap:14px}
 
-  /* Admin */
-  .admin-sidebar{width:180px}
   .form-row{grid-template-columns:1fr}
-  .admin-form-row{grid-template-columns:1fr}
 
   /* Sections padding */
   .courses-section{padding:60px 20px}
@@ -395,20 +358,6 @@ textarea.form-input{resize:vertical;min-height:90px}
   .phone-input-wrap{flex-direction:row}
   .phone-flag{min-width:90px;font-size:.78rem;padding:10px 6px}
 
-  /* Admin */
-  .admin-sidebar{display:none}
-  .admin-mobile-nav{display:flex!important}
-  .admin-main{padding:12px}
-  .admin-stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
-  .admin-stat-card{padding:14px}
-  .admin-stat-card .icon{font-size:1.4rem}
-  .admin-stat-card .val{font-size:1.4rem}
-  .admin-form-row{grid-template-columns:1fr}
-  .data-table{font-size:.75rem}
-  .data-table th,.data-table td{padding:9px 7px}
-  .admin-header{padding:11px 14px}
-  .admin-header h2{font-size:.95rem}
-
   /* Notification */
   .notification{width:90%;left:5%;right:5%;transform:translateY(-20px);white-space:normal}
   .notification.show{transform:translateY(0)}
@@ -425,17 +374,9 @@ textarea.form-input{resize:vertical;min-height:90px}
   .btn-primary,.btn-secondary{font-size:.84rem;padding:11px 16px}
   .hero-stat .num{font-size:1.3rem}
   .channels-grid{grid-template-columns:1fr;gap:8px}
-  .admin-stats-grid{grid-template-columns:1fr}
   .scores-grid{grid-template-columns:1fr}
   .modal{margin:4px;padding:18px 12px}
 }
-
-/* Admin mobile bottom nav */
-.admin-mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--dark2);border-top:1px solid var(--card-border);z-index:200;padding:8px 0}
-.admin-mobile-nav .mob-items{display:flex;justify-content:space-around}
-.admin-mob-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:10px;color:var(--text-muted);font-size:.7rem;font-weight:700;transition:all .3s;background:none;border:none;font-family:'Cairo',sans-serif}
-.admin-mob-item i{font-size:1.1rem}
-.admin-mob-item.active,.admin-mob-item:hover{color:var(--primary-light)}
 /* Firebuzz embed */
 .firebuzz-section{padding:60px 30px;max-width:1200px;margin:0 auto}
 .firebuzz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:40px}
@@ -944,114 +885,8 @@ textarea.form-input{resize:vertical;min-height:90px}
 </div>
 
 <!-- ADMIN PANEL -->
-<div class="admin-panel" id="adminPanel">
-  <div class="admin-header">
-    <h2><i class="fas fa-shield-alt" style="color:var(--accent)"></i> لوحة <span>الإدارة</span></h2>
-    <button class="close-admin" onclick="closeAdminPanel()"><i class="fas fa-times"></i> إغلاق</button>
-  </div>
-  <div class="admin-body">
-    <div class="admin-sidebar">
-      <div class="sidebar-item active" onclick="showAdminSection('dashboard',this)"><i class="fas fa-home"></i> الرئيسية</div>
-      <div class="sidebar-item" onclick="showAdminSection('students',this)"><i class="fas fa-users"></i> الطلاب</div>
-      <div class="sidebar-item" onclick="showAdminSection('scores',this)"><i class="fas fa-trophy"></i> الدرجات</div>
-      <div class="sidebar-item" onclick="showAdminSection('courses',this)"><i class="fas fa-book"></i> الكورسات</div>
-      <div class="sidebar-item" onclick="showAdminSection('exams',this)"><i class="fas fa-file-alt"></i> الامتحانات</div>
-    </div>
-    <div class="admin-main">
-      <div class="admin-content-section active" id="section-dashboard">
-        <p class="admin-section-title">📊 الإحصائيات العامة</p>
-        <div class="admin-stats-grid">
-          <div class="admin-stat-card"><div class="icon">👥</div><div class="val" id="totalStudents">0</div><div class="lbl">إجمالي الطلاب</div></div>
-          <div class="admin-stat-card"><div class="icon">🏆</div><div class="val" id="totalScores">10</div><div class="lbl">أعلى الدرجات</div></div>
-          <div class="admin-stat-card"><div class="icon">📝</div><div class="val">—</div><div class="lbl">الامتحانات</div></div>
-        </div>
-      </div>
-      <div class="admin-content-section" id="section-students">
-        <p class="admin-section-title">👥 إدارة الطلاب</p>
-        <div style="overflow-x:auto">
-          <table class="data-table"><thead><tr><th>الاسم الرباعي</th><th>الإيميل</th><th>الصف</th><th>واتساب الطالب</th><th>واتساب ولي الأمر</th><th>طريقة التسجيل</th><th>إجراء</th></tr></thead><tbody id="studentsTable"></tbody></table>
-        </div>
-      </div>
-      <div class="admin-content-section" id="section-scores">
-        <p class="admin-section-title">🏆 إضافة درجة نهائية</p>
-        <div class="admin-form-card">
-          <h3>إضافة طالب لقائمة الشرف</h3>
-          <div class="admin-form-row">
-            <div class="form-group"><label class="form-label">اسم الطالب</label><input type="text" class="form-input" id="adminScoreName" placeholder="اسم الطالب"></div>
-            <div class="form-group"><label class="form-label">الصف الدراسي</label><input type="text" class="form-input" id="adminScoreGrade" placeholder="مثال: تالتة ثانوي"></div>
-          </div>
-          <div class="admin-form-row">
-            <div class="form-group"><label class="form-label">اسم الامتحان</label><input type="text" class="form-input" id="adminScoreExam" placeholder="مثال: امتحان الفصل الأول"></div>
-            <div class="form-group"><label class="form-label">الدرجة</label><input type="text" class="form-input" id="adminScoreMark" placeholder="مثال: 30/30"></div>
-          </div>
-          <button class="btn-form" onclick="adminAddScore()" style="margin-top:14px"><i class="fas fa-plus"></i> إضافة للقائمة</button>
-        </div>
-        <div style="margin-top:22px">
-          <p class="admin-section-title">القائمة الحالية</p>
-          <div style="overflow-x:auto">
-            <table class="data-table"><thead><tr><th>#</th><th>الاسم</th><th>الصف</th><th>الامتحان</th><th>الدرجة</th><th>حذف</th></tr></thead><tbody id="adminScoresTable"></tbody></table>
-          </div>
-        </div>
-      </div>
-      <div class="admin-content-section" id="section-courses">
-        <p class="admin-section-title">📚 إدارة الكورسات</p>
-        <div class="admin-form-card">
-          <h3>إضافة كورس جديد</h3>
-          <div class="admin-form-row">
-            <div class="form-group"><label class="form-label">اسم الكورس</label><input type="text" class="form-input" id="courseNameInput" placeholder="مثال: كورس الثانوية العامة"></div>
-            <div class="form-group"><label class="form-label">الصف الدراسي</label><input type="text" class="form-input" id="courseGradeInput" placeholder="مثال: تالتة ثانوي"></div>
-          </div>
-          <div class="form-group"><label class="form-label">رابط صورة الغلاف (اختياري)</label><input type="url" class="form-input" id="courseImageInput" placeholder="https://..."></div>
-          <button class="btn-form" onclick="adminAddCourse()" style="margin-top:14px"><i class="fas fa-plus"></i> إضافة الكورس</button>
-        </div>
-        <div style="margin-top:22px">
-          <p class="admin-section-title">الكورسات الحالية</p>
-          <div style="overflow-x:auto">
-            <table class="data-table"><thead><tr><th>اسم الكورس</th><th>الصف</th><th>عدد الفيديوهات</th><th>إضافة فيديو</th><th>حذف</th></tr></thead><tbody id="adminCoursesTable"></tbody></table>
-          </div>
-        </div>
-        <!-- نموذج إضافة فيديو -->
-        <div class="admin-form-card" id="addVideoSection" style="display:none;margin-top:18px">
-          <h3 id="addVideoTitle">إضافة فيديو للكورس</h3>
-          <input type="hidden" id="addVideoCourseKey">
-          <div class="admin-form-row">
-            <div class="form-group"><label class="form-label">اسم الفيديو</label><input type="text" class="form-input" id="videoNameInput" placeholder="مثال: الدرس الأول - المقدمة"></div>
-            <div class="form-group"><label class="form-label">رابط يوتيوب</label><input type="text" class="form-input" id="videoYtIdInput" placeholder="https://www.youtube.com/watch?v=... أو الـ ID مباشرة"></div>
-          </div>
-          <button class="btn-form" onclick="adminAddVideo()" style="margin-top:14px"><i class="fas fa-video"></i> إضافة الفيديو (يوتيوب)</button>
-          <div style="margin-top:22px;padding-top:18px;border-top:1px dashed var(--card-border)">
-            <label class="form-label">أو أضف فيديو من تليجرام (Telegram File ID)</label>
-            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-              <input type="text" class="form-input" id="videoTgFileIdInput" placeholder="الصق الـ File ID هنا" style="flex:1;min-width:200px">
-              <button class="btn-form" style="background:transparent;border:1.5px solid var(--primary);width:auto;padding:10px 16px" onclick="loadTelegramUpdates()"><i class="fab fa-telegram"></i> جلب آخر الفيديوهات</button>
-            </div>
-            <div id="tgUpdatesList" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div>
-            <button class="btn-form" onclick="adminAddTelegramVideo()" style="margin-top:12px"><i class="fas fa-video"></i> إضافة الفيديو (تليجرام)</button>
-          </div>
-          <button onclick="document.getElementById('addVideoSection').style.display='none'" style="margin-top:14px;margin-right:10px;background:transparent;border:1px solid var(--card-border);color:var(--text-muted);padding:10px 20px;border-radius:10px;cursor:pointer">إلغاء</button>
-        </div>
-      </div>
-      <div class="admin-content-section" id="section-exams">
-        <p class="admin-section-title">📝 إدارة الامتحانات</p>
-        <div class="admin-form-card">
-          <h3>إنشاء امتحان جديد</h3>
-          <div class="admin-form-row">
-            <div class="form-group"><label class="form-label">اسم الامتحان</label><input type="text" class="form-input" id="examTitle" placeholder="اسم الامتحان"></div>
-            <div class="form-group"><label class="form-label">الصف المستهدف</label><input type="text" class="form-input" id="examTarget" placeholder="مثال: تالتة ثانوي"></div>
-          </div>
-          <div class="form-group"><label class="form-label">رابط الامتحان (اختياري)</label><input type="url" class="form-input" id="examLink" placeholder="https://..."></div>
-          <button class="btn-form" onclick="adminAddExam()" style="margin-top:14px"><i class="fas fa-plus"></i> إضافة الامتحان</button>
-        </div>
-        <div style="margin-top:22px">
-          <p class="admin-section-title">الامتحانات الحالية</p>
-          <div style="overflow-x:auto">
-            <table class="data-table"><thead><tr><th>اسم الامتحان</th><th>الصف</th><th>عدد الأسئلة</th><th>حذف</th></tr></thead><tbody id="adminExamsTable"></tbody></table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- (لوحة الإدارة القديمة اتشالت من هنا - الإدارة الحقيقية بقت كلها في Mona_A_2011_2025.html) -->
+
 
 <script>
 // ====== COUNTRIES ======
@@ -1125,16 +960,10 @@ async function loadFromFirebase() {
     topScores = JSON.parse(localStorage.getItem('mk_scores') || JSON.stringify(DEFAULT_SCORES));
     renderScores();
   }
-  // تحميل الطلاب في try/catch مستقل - لو فشل ما يأثرش على باقي الصفحة
-  try {
-    const studentsSnap = await db.ref('website/students').once('value');
-    if (studentsSnap.exists()) {
-      students = Object.entries(studentsSnap.val()).map(([key, val]) => ({ _key: key, ...val }));
-    }
-  } catch(err) {
-    console.warn('Firebase students error:', err.message);
-    students = JSON.parse(localStorage.getItem('mk_students') || '[]');
-  }
+  // ملاحظة أمان: شيلنا من هنا تحميل جدول website/students كامل على الصفحة
+  // العامة (index.html) — كان بيتحمّل لأي زائر حتى بدون تسجيل دخول ومكانش
+  // بيتعرض في أي مكان أصلاً. لوحة الأدمن الحقيقية (Mona_A_2011_2025.html)
+  // بتحمّل بيانات الطلاب بنفسها بعد التأكد إن المستخدم أدمن.
 }
 
 // Real-time listener للدرجات
@@ -1251,6 +1080,7 @@ auth.onAuthStateChanged(user => {
         }
         currentUser = { uid: user.uid, _key: user.uid, ...data };
         updateNavForUser();
+        loadMyGrades(user.uid);
       } else {
         // مستخدم جوجل سجل دخول بدون بيانات كاملة — اطلب منه يكمل
         if (user.providerData && user.providerData[0] && user.providerData[0].providerId === 'google.com') {
@@ -1265,9 +1095,10 @@ auth.onAuthStateChanged(user => {
           buildGCPhoneSelects();
           document.getElementById('googleCompleteModal').classList.add('active');
         } else {
-          // حالة غير متوقعة — سجّل الخروج
+          // حالة غير متوقعة (الحساب اتحذف من قاعدة البيانات مثلاً) — سجّل الخروج
           auth.signOut();
           currentUser = null;
+          showNotification('الحساب ده مش موجود، تواصل مع الإدارة', 'error');
         }
       }
     }).catch(() => {
@@ -1276,9 +1107,19 @@ auth.onAuthStateChanged(user => {
     });
   } else {
     currentUser = null;
+    allGrades = {};
+    renderPublicExams();
     document.getElementById('navBtns').innerHTML = '<button class="btn-nav-login" onclick="showModal(\'login\')">تسجيل الدخول</button><button class="btn-nav-register" onclick="showModal(\'register\')">إنشاء حساب</button>';
   }
 });
+
+// بنجيب درجات الطالب الحالي بس (مش كل الطلاب) — Query مفلترة بالـ uid
+function loadMyGrades(uid) {
+  db.ref('website/grades').orderByChild('studentUid').equalTo(uid).once('value').then(snap => {
+    allGrades = snap.exists() ? snap.val() : {};
+    renderPublicExams();
+  }).catch(() => { allGrades = {}; });
+}
 
 // ====== LOGIN ======
 function handleLogin() {
@@ -1637,250 +1478,10 @@ function renderScores(){
 function openAdminPanel(){
   window.location.href = 'Mona_A_2011_2025.html';
 }
-function closeAdminPanel(){document.getElementById('adminPanel').classList.remove('active');document.body.style.overflow=''}
-function showAdminSection(sec,el){
-  document.querySelectorAll('.admin-mob-item').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.admin-mobile-nav .admin-mob-item').forEach(b=>{
-    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+sec+"'"))b.classList.add('active');
-  });
-  document.querySelectorAll('.admin-content-section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
-  document.getElementById('section-'+sec).classList.add('active');
-  if(el)el.classList.add('active');
-}
-
-async function loadAdminData(){
-  try {
-    // تحميل طلاب الموقع (UID-based)
-    const newSnap = await db.ref('website/students').once('value');
-    let newStudents = [];
-    if(newSnap.exists()) newStudents = Object.entries(newSnap.val()).map(([k,v])=>({_key:k,...v}));
-    students = newStudents;
-    document.getElementById('totalStudents').textContent = newStudents.length;
-
-    // تحميل الدرجات
-    const scSnap = await db.ref('website/scores').once('value');
-    if(scSnap.exists()) topScores = Object.entries(scSnap.val()).map(([k,v])=>({_key:k,...v}));
-
-    renderAdminTable(newStudents);
-    renderAdminScores();
-    document.getElementById('totalScores').textContent=topScores.length;
-
-  } catch(err) {
-    console.warn('Firebase admin load error:', err);
-    renderAdminTable(students);
-    renderAdminScores();
-  }
-}
-
-function renderAdminTable(list){
-  document.getElementById('studentsTable').innerHTML=list.map((s,i)=>`
-    <tr>
-      <td>${s.name1||s.name||''} ${s.name2||''} ${s.name3||''} ${s.name4||''}</td>
-      <td>${s.email||'—'}</td>
-      <td>${s.grade||'—'}</td>
-      <td>${s.studentPhone||s.whatsapp||'—'}</td>
-      <td>${s.parentPhone||'—'}</td>
-      <td>${s.authProvider||'email'}</td>
-      <td><button class="action-btn delete" onclick="deleteStudent('${s._key||i}')">حذف</button></td>
-    </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">لا يوجد طلاب</td></tr>';
-}
-function renderAdminScores(){
-  document.getElementById('adminScoresTable').innerHTML=topScores.map((s,i)=>`
-    <tr><td>${i+1}</td><td>${s.name}</td><td>${s.grade}</td><td>${s.exam}</td><td>${s.mark}</td>
-    <td><button class="action-btn delete" onclick="adminDeleteScore('${s._key||i}')">حذف</button></td></tr>`).join('');
-}
-
-function adminAddScore(){
-  const n=document.getElementById('adminScoreName').value.trim();
-  const g=document.getElementById('adminScoreGrade').value.trim();
-  const e=document.getElementById('adminScoreExam').value.trim();
-  const m=document.getElementById('adminScoreMark').value.trim();
-  if(!n||!g||!e||!m){showNotification('اكمل بيانات الدرجة','error');return}
-  const score={name:n,grade:g,exam:e,mark:m,time:new Date().toLocaleDateString('ar-EG')};
-  db.ref('website/scores').push(score).then(()=>{
-    showNotification('تم إضافة الطالب لقائمة الشرف 🏆');
-    ['adminScoreName','adminScoreGrade','adminScoreExam','adminScoreMark'].forEach(id=>document.getElementById(id).value='');
-  }).catch(()=>{
-    topScores.unshift(score);if(topScores.length>10)topScores.pop();
-    localStorage.setItem('mk_scores',JSON.stringify(topScores));
-    renderScores();renderAdminScores();
-    showNotification('تم الإضافة محلياً 🏆');
-  });
-}
-function adminDeleteScore(key){
-  if(typeof key === 'string' && key.startsWith('-')){
-    db.ref('website/scores/'+key).remove().then(()=>showNotification('تم الحذف')).catch(()=>showNotification('خطأ','error'));
-  } else {
-    topScores.splice(key,1);localStorage.setItem('mk_scores',JSON.stringify(topScores));
-    renderScores();renderAdminScores();showNotification('تم الحذف');
-  }
-}
-function deleteStudent(key){
-  if(typeof key === 'string' && key.startsWith('-')){
-    db.ref('website/students/'+key).remove().then(()=>{
-      showNotification('تم حذف الطالب');loadAdminData();
-    }).catch(()=>showNotification('خطأ','error'));
-  } else {
-    students.splice(key,1);localStorage.setItem('mk_students',JSON.stringify(students));
-    loadAdminData();showNotification('تم حذف الطالب');
-  }
-}
-function adminAddExam(){
-  const t=document.getElementById('examTitle').value.trim();
-  const target=document.getElementById('examTarget')?document.getElementById('examTarget').value.trim():'';
-  const l=document.getElementById('examLink').value.trim();
-  if(!t){showNotification('اكتب اسم الامتحان','error');return}
-  // ✅ مسار موحد: exams_v2 هو المسار اللي الموقع بيقرأ منه
-  const examData={
-    title:t,
-    grade:target||'عام',
-    link:l||'#',
-    active:true,
-    questions:[],
-    timer:0,
-    createdAt:new Date().toLocaleDateString('ar-EG')
-  };
-  db.ref('website/exams_v2').push(examData)
-    .then(()=>{
-      showNotification('تم إضافة الامتحان 📝');
-      document.getElementById('examTitle').value='';
-      if(document.getElementById('examTarget'))document.getElementById('examTarget').value='';
-      document.getElementById('examLink').value='';
-      renderAdminExamsList();
-    })
-    .catch(err=>{showNotification('خطأ: '+err.message,'error');});
-}
-
-function renderAdminExamsList(){
-  const tbody=document.getElementById('adminExamsTable');
-  if(!tbody)return;
-  const entries=Object.entries(allExamsV2);
-  if(!entries.length){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">لا يوجد امتحانات بعد</td></tr>';return;}
-  tbody.innerHTML=entries.map(([key,e])=>`
-    <tr>
-      <td>${e.title}</td>
-      <td>${e.grade||'—'}</td>
-      <td>${e.questions?e.questions.length:0} سؤال</td>
-      <td><button class="action-btn delete" onclick="adminDeleteExam('${key}')">حذف</button></td>
-    </tr>`).join('');
-}
-
-function adminDeleteExam(key){
-  if(!confirm('هل تريد حذف هذا الامتحان؟'))return;
-  db.ref('website/exams_v2/'+key).remove()
-    .then(()=>showNotification('تم الحذف'))
-    .catch(()=>showNotification('خطأ في الحذف','error'));
-}
-
-// ====== ADMIN COURSES MANAGEMENT ======
-function adminAddCourse(){
-  const name=document.getElementById('courseNameInput').value.trim();
-  const grade=document.getElementById('courseGradeInput').value.trim();
-  const image=document.getElementById('courseImageInput').value.trim();
-  if(!name){showNotification('اكتب اسم الكورس','error');return;}
-  if(!grade){showNotification('اكتب الصف الدراسي','error');return;}
-  const courseData={name,grade,image:image||'',videos:{},createdAt:new Date().toLocaleDateString('ar-EG')};
-  db.ref('website/courses').push(courseData)
-    .then(()=>{
-      showNotification('تم إضافة الكورس 📚');
-      document.getElementById('courseNameInput').value='';
-      document.getElementById('courseGradeInput').value='';
-      document.getElementById('courseImageInput').value='';
-    })
-    .catch(err=>showNotification('خطأ: '+err.message,'error'));
-}
-
-function renderAdminCoursesList(){
-  const tbody=document.getElementById('adminCoursesTable');
-  if(!tbody)return;
-  const entries=Object.entries(allCourses);
-  if(!entries.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted)">لا يوجد كورسات بعد</td></tr>';return;}
-  tbody.innerHTML=entries.map(([key,c])=>{
-    const vCount=c.videos?Object.keys(c.videos).length:0;
-    return `<tr>
-      <td>${c.name}</td>
-      <td>${c.grade}</td>
-      <td>${vCount} فيديو</td>
-      <td><button class="action-btn" onclick="showAddVideoForm('${key}','${c.name}')" style="background:rgba(108,63,197,.2);color:var(--primary-light)">+ فيديو</button></td>
-      <td><button class="action-btn delete" onclick="adminDeleteCourse('${key}')">حذف</button></td>
-    </tr>`;
-  }).join('');
-}
-
-function showAddVideoForm(courseKey,courseName){
-  document.getElementById('addVideoCourseKey').value=courseKey;
-  document.getElementById('addVideoTitle').textContent='إضافة فيديو لـ: '+courseName;
-  document.getElementById('videoNameInput').value='';
-  document.getElementById('videoYtIdInput').value='';
-  document.getElementById('addVideoSection').style.display='block';
-  document.getElementById('addVideoSection').scrollIntoView({behavior:'smooth'});
-}
-
-function adminAddVideo(){
-  const courseKey=document.getElementById('addVideoCourseKey').value;
-  const name=document.getElementById('videoNameInput').value.trim();
-  const raw=document.getElementById('videoYtIdInput').value.trim();
-  if(!name||!raw){showNotification('اكتب اسم الفيديو ورابط اليوتيوب','error');return;}
-  // قبول رابط كامل أو ID مباشر
-  let ytId = raw;
-  if(raw.includes('youtu')) {
-    const patterns = [/[?&]v=([a-zA-Z0-9_-]{11})/,/youtu\.be\/([a-zA-Z0-9_-]{11})/,/\/embed\/([a-zA-Z0-9_-]{11})/,/\/shorts\/([a-zA-Z0-9_-]{11})/];
-    ytId = null;
-    for(const p of patterns){ const m=raw.match(p); if(m){ytId=m[1];break;} }
-  }
-  if(!ytId||!/^[a-zA-Z0-9_-]{11}$/.test(ytId)){showNotification('❌ رابط يوتيوب غير صحيح','error');return;}
-  const thumb=`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
-  db.ref('website/courses/'+courseKey+'/videos').push({name,ytId,thumb})
-    .then(()=>{
-      showNotification('تم إضافة الفيديو 🎬');
-      document.getElementById('videoNameInput').value='';
-      document.getElementById('videoYtIdInput').value='';
-    })
-    .catch(err=>showNotification('خطأ: '+err.message,'error'));
-}
-
-function adminAddTelegramVideo(){
-  const courseKey=document.getElementById('addVideoCourseKey').value;
-  const name=document.getElementById('videoNameInput').value.trim();
-  const fileId=document.getElementById('videoTgFileIdInput').value.trim();
-  if(!name||!fileId){showNotification('اكتب اسم الفيديو والـ File ID','error');return;}
-  db.ref('website/courses/'+courseKey+'/videos').push({name,type:'telegram',fileId})
-    .then(()=>{
-      showNotification('تم إضافة الفيديو 🎬');
-      document.getElementById('videoNameInput').value='';
-      document.getElementById('videoTgFileIdInput').value='';
-    })
-    .catch(err=>showNotification('خطأ: '+err.message,'error'));
-}
-
-// عدّل ده بنفس رابط الـ Worker المستخدم في course.html
-const WORKER_URL = 'https://curly-frost-fc30.aboadawi9.workers.dev';
-async function loadTelegramUpdates(){
-  const box=document.getElementById('tgUpdatesList');
-  box.innerHTML='<div style="color:var(--text-muted);font-size:.82rem">جاري التحميل...</div>';
-  try{
-    const idToken = await auth.currentUser.getIdToken();
-    const res = await fetch(WORKER_URL+'/updates', { headers:{ Authorization:'Bearer '+idToken } });
-    if(!res.ok) throw new Error('فشل الاتصال بالـ Worker');
-    const items = await res.json();
-    if(!items.length){ box.innerHTML='<div style="color:var(--text-muted);font-size:.82rem">مفيش فيديوهات جديدة</div>'; return; }
-    box.innerHTML = items.map(it=>`
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(108,63,197,.08);border:1px solid var(--card-border);border-radius:8px;padding:8px 10px;font-size:.8rem">
-        <span>${it.caption || '(بدون عنوان)'} — ${(it.fileSize/1024/1024).toFixed(1)} ميجا</span>
-        <button style="background:var(--gradient);border:none;color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:Cairo" onclick="document.getElementById('videoTgFileIdInput').value='${it.fileId}';document.getElementById('videoNameInput').value=document.getElementById('videoNameInput').value||'${(it.caption||'').replace(/'/g,"")}'">استخدام</button>
-      </div>`).join('');
-  }catch(e){
-    box.innerHTML='<div style="color:#E74C3C;font-size:.82rem">تعذر الجلب: تأكد إن رابط الـ Worker متظبط</div>';
-  }
-}
-
-function adminDeleteCourse(key){
-  if(!confirm('هل تريد حذف هذا الكورس وكل فيديوهاته؟'))return;
-  db.ref('website/courses/'+key).remove()
-    .then(()=>showNotification('تم الحذف'))
-    .catch(()=>showNotification('خطأ في الحذف','error'));
-}
+// ملاحظة أمان: كل أدوات إدارة الطلاب/الدرجات/الكورسات/الامتحانات/الفيديوهات
+// اتشالت من هنا (كانت شغالة كـ functions عامة في الصفحة العامة، أي زائر
+// يقدر ينفذها من الـ Console بدون ما يكون أدمن). الإدارة الحقيقية بقت كلها
+// جوه Mona_A_2011_2025.html اللي محمية بتسجيل دخول أدمن فعلي.
 
 
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
@@ -1904,15 +1505,23 @@ function loadCourses() {
   db.ref('website/courses').on('value', snap => {
     allCourses = snap.exists() ? snap.val() : {};
     renderPublicCourses();
-    renderAdminCoursesList();
   });
 }
 
 function loadExamsV2() {
   db.ref('website/exams_v2').on('value', snap => {
-    allExamsV2 = snap.exists() ? snap.val() : {};
+    // ⚠️ أمان: الداتا دي بتتحمّل لأي زائر للصفحة الرئيسية حتى قبل تسجيل
+    // الدخول (عشان يشوف عدد الأسئلة/الوقت في الكارت). فبنشيل الإجابات
+    // الصح قبل ما تتخزن في المتصفح، بنفس الطريقة المستخدمة في course.html.
+    const raw = snap.exists() ? snap.val() : {};
+    allExamsV2 = {};
+    Object.entries(raw).forEach(([key, e]) => {
+      allExamsV2[key] = {
+        ...e,
+        questions: (e.questions || []).map(q => { const { answer, ...rest } = q; return rest; })
+      };
+    });
     renderPublicExams();
-    renderAdminExamsList();
   });
 }
 
@@ -2222,25 +1831,12 @@ loadFromFirebase().then(()=>{
 });
 loadCourses();
 loadExamsV2();
-// FIX 2: grades listener واحد بس هنا - وتعريف allGrades جنبه
+// ملاحظة أمان: allGrades بقى بيتحمّل لكل مستخدم لوحده بس (loadMyGrades)،
+// مش كل درجات كل الطلاب لأي زائر للصفحة. تعريفه هنا كـ fallback فاضي
+// للزوار اللي لسه مسجلين دخول (auth.onAuthStateChanged بيحصل بعد كده).
 let allGrades = {};
-db.ref('website/grades').on('value', snap => {
-  allGrades = snap.exists() ? snap.val() : {};
-  renderPublicExams(); // تحديث حالة الامتحانات
-});
 
 </script>
-
-<!-- ADMIN MOBILE NAV -->
-<div class="admin-mobile-nav" id="adminMobileNav">
-  <div class="mob-items">
-    <button class="admin-mob-item active" onclick="showAdminSection('dashboard',this)"><i class="fas fa-home"></i>الرئيسية</button>
-    <button class="admin-mob-item" onclick="showAdminSection('students',this)"><i class="fas fa-users"></i>الطلاب</button>
-    <button class="admin-mob-item" onclick="showAdminSection('scores',this)"><i class="fas fa-trophy"></i>الدرجات</button>
-    <button class="admin-mob-item" onclick="showAdminSection('courses',this)"><i class="fas fa-book"></i>الكورسات</button>
-    <button class="admin-mob-item" onclick="showAdminSection('exams',this)"><i class="fas fa-file-alt"></i>الامتحانات</button>
-  </div>
-</div>
 
 </body>
 </html>

@@ -460,7 +460,17 @@ tr:hover td{background:rgba(108,63,197,.05)}
       <div id="ytPreviewWrap" style="display:none;margin-bottom:10px">
         <img id="ytPreview" style="width:100%;border-radius:8px;max-height:160px;object-fit:cover">
       </div>
-      <button class="btn btn-primary" onclick="addVideo()"><i class="fas fa-plus"></i> إضافة الفيديو</button>
+      <button class="btn btn-primary" onclick="addVideo()"><i class="fas fa-plus"></i> إضافة الفيديو (يوتيوب)</button>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px dashed var(--card-border)">
+        <label style="font-size:.85rem;font-weight:700;display:block;margin-bottom:8px">أو أضف فيديو من تليجرام</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input class="fi" id="vTgFileId" placeholder="الصق الـ File ID هنا" style="flex:1;min-width:200px">
+          <button class="btn" style="background:transparent;border:1.5px solid var(--primary);width:auto;padding:10px 16px" onclick="loadTelegramUpdates()"><i class="fab fa-telegram"></i> جلب آخر الفيديوهات</button>
+        </div>
+        <div id="tgUpdatesList" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div>
+        <button class="btn btn-primary" style="margin-top:10px" onclick="addTelegramVideo()"><i class="fas fa-video"></i> إضافة الفيديو (تليجرام)</button>
+      </div>
     </div>
     <div class="video-list" id="videosList"></div>
   </div>
@@ -501,7 +511,7 @@ tr:hover td{background:rgba(108,63,197,.05)}
     <div class="fg">
       <label>⏱️ وقت الامتحان (اختياري):</label>
       <div style="display:flex;gap:10px;align-items:center">
-        <input class="fi" id="examTimer" type="number" placeholder="اتركه فاضي لو مفيش وقت" style="flex:1">
+        <input class="fi" id="examTimer" type="number" min="0" placeholder="اتركه فاضي لو مفيش وقت" style="flex:1">
         <span style="color:var(--text-muted);white-space:nowrap;font-size:.85rem">دقيقة</span>
       </div>
     </div>
@@ -741,9 +751,25 @@ function updateCourse() {
     .then(() => { notify('تم التعديل ✅'); closeModal('editCourse'); })
     .catch(() => notify('خطأ', 'error'));
 }
-function deleteCourse(key) {
-  if (!confirm('هتحذف الكورس ده وكل فيديوهاته؟')) return;
-  db.ref('website/courses/' + key).remove().then(() => notify('تم الحذف')).catch(() => notify('خطأ', 'error'));
+async function deleteCourse(key) {
+  const linkedExams = Object.entries(allExams).filter(([, e]) => e.courseKey === key);
+  const course = allCourses[key];
+  const courseName = course ? course.name : 'الكورس';
+  const msg = linkedExams.length
+    ? `هتحذف "${courseName}" وكل فيديوهاته، وكمان ${linkedExams.length} امتحان مرتبط بيه. متأكد؟`
+    : `هتحذف "${courseName}" وكل فيديوهاته؟`;
+  if (!confirm(msg)) return;
+
+  try {
+    // امسح الامتحانات المرتبطة بالكورس ده الأول (يمنع بيانات يتيمة في exams_v2)
+    if (linkedExams.length) {
+      await Promise.all(linkedExams.map(([examKey]) => db.ref('website/exams_v2/' + examKey).remove()));
+    }
+    await db.ref('website/courses/' + key).remove();
+    notify(linkedExams.length ? `تم حذف الكورس و${linkedExams.length} امتحان مرتبط ✅` : 'تم الحذف ✅');
+  } catch (e) {
+    notify('خطأ أثناء الحذف: ' + e.message, 'error');
+  }
 }
 
 // ====== VIDEOS ======
@@ -755,6 +781,8 @@ function openVideos(key) {
   document.getElementById('cvCourseKey').value = key;
   document.getElementById('vName').value = '';
   document.getElementById('vUrl').value = '';
+  document.getElementById('vTgFileId').value = '';
+  document.getElementById('tgUpdatesList').innerHTML = '';
   document.getElementById('ytPreviewWrap').style.display = 'none';
   renderVideosList(key);
   openModal('courseVideos');
@@ -807,7 +835,21 @@ function renderVideosList(key) {
   const c = allCourses[key];
   const wrap = document.getElementById('videosList');
   if (!c || !c.videos) { wrap.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">لا يوجد فيديوهات بعد</p>'; return; }
-  wrap.innerHTML = Object.entries(c.videos).map(([vk, v]) => `
+  wrap.innerHTML = Object.entries(c.videos).map(([vk, v]) => {
+    if (v.type === 'telegram') {
+      return `
+    <div class="video-item">
+      <div class="video-thumb" style="display:flex;align-items:center;justify-content:center;background:rgba(108,63,197,.15)"><i class="fab fa-telegram" style="color:var(--primary-light);font-size:1.4rem"></i></div>
+      <div class="video-info">
+        <div class="video-title">${v.name}</div>
+        <div class="video-meta"><i class="fab fa-telegram" style="color:var(--primary-light)"></i> تليجرام — File ID: ${v.fileId.slice(0,18)}...</div>
+      </div>
+      <div class="video-actions">
+        <button class="btn btn-danger" style="padding:6px 10px;font-size:.76rem" onclick="deleteVideo('${key}','${vk}')"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`;
+    }
+    return `
     <div class="video-item">
       <img class="video-thumb" src="${v.thumb}" onerror="this.src='https://img.youtube.com/vi/${v.ytId}/default.jpg'">
       <div class="video-info">
@@ -817,7 +859,8 @@ function renderVideosList(key) {
       <div class="video-actions">
         <button class="btn btn-danger" style="padding:6px 10px;font-size:.76rem" onclick="deleteVideo('${key}','${vk}')"><i class="fas fa-trash"></i></button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function deleteVideo(courseKey, videoKey) {
@@ -825,6 +868,45 @@ function deleteVideo(courseKey, videoKey) {
   db.ref('website/courses/' + courseKey + '/videos/' + videoKey).remove()
     .then(() => { notify('تم الحذف'); renderVideosList(courseKey); })
     .catch(() => notify('خطأ', 'error'));
+}
+
+// ====== TELEGRAM VIDEO UPLOAD (admin only) ======
+// عدّل ده بنفس رابط الـ Worker المستخدم في course.html
+const WORKER_URL = 'https://curly-frost-fc30.aboadawi9.workers.dev';
+
+function addTelegramVideo() {
+  const key = document.getElementById('cvCourseKey').value;
+  const name = document.getElementById('vName').value.trim();
+  const fileId = document.getElementById('vTgFileId').value.trim();
+  if (!name || !fileId) { notify('اكتب اسم الفيديو والـ File ID', 'error'); return; }
+  db.ref('website/courses/' + key + '/videos').push({ name, type: 'telegram', fileId, createdAt: new Date().toLocaleDateString('ar-EG') })
+    .then(() => {
+      notify('تم إضافة الفيديو ✅');
+      document.getElementById('vName').value = '';
+      document.getElementById('vTgFileId').value = '';
+      renderVideosList(key);
+    })
+    .catch(() => notify('خطأ', 'error'));
+}
+
+async function loadTelegramUpdates() {
+  const box = document.getElementById('tgUpdatesList');
+  box.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem">جاري التحميل...</div>';
+  try {
+    // بنستخدم توكن الأدمن الحالي؛ الصفحة دي أصلاً محمية بالإيميل فوق
+    const idToken = await auth.currentUser.getIdToken();
+    const res = await fetch(WORKER_URL + '/updates', { headers: { Authorization: 'Bearer ' + idToken } });
+    if (!res.ok) throw new Error('فشل الاتصال بالـ Worker');
+    const items = await res.json();
+    if (!items.length) { box.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem">مفيش فيديوهات جديدة</div>'; return; }
+    box.innerHTML = items.map(it => `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(108,63,197,.08);border:1px solid var(--card-border);border-radius:8px;padding:8px 10px;font-size:.8rem">
+        <span>${it.caption || '(بدون عنوان)'} — ${(it.fileSize/1024/1024).toFixed(1)} ميجا</span>
+        <button style="background:var(--gradient);border:none;color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:Cairo" onclick="document.getElementById('vTgFileId').value='${it.fileId}';document.getElementById('vName').value=document.getElementById('vName').value||'${(it.caption||'').replace(/'/g,"")}'">استخدام</button>
+      </div>`).join('');
+  } catch (e) {
+    box.innerHTML = '<div style="color:#E74C3C;font-size:.82rem">تعذر الجلب: تأكد إن رابط الـ Worker متظبط</div>';
+  }
 }
 
 // ====== STUDENTS ======
@@ -1000,7 +1082,7 @@ function toggleExamType() {
 function saveExam() {
   const type = document.getElementById('examType').value;
   const title = document.getElementById('examTitle').value.trim();
-  const timer = parseInt(document.getElementById('examTimer').value) || null;
+  const timer = Math.max(0, parseInt(document.getElementById('examTimer').value) || 0) || null;
   const text = document.getElementById('examText').value;
   if (!title) { notify('اكتب عنوان الامتحان', 'error'); return; }
   const questions = parseExamText(text);

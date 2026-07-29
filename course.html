@@ -157,7 +157,7 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);dir
     <div style="font-size:3rem;margin-bottom:14px">🔐</div>
     <h2>سجّل دخولك أولاً</h2>
     <p>لازم تكون مسجل دخولك عشان تقدر تشوف محتوى الكورسات وتحل الامتحانات</p>
-    <button class="btn" onclick="window.location.href='المنصة_المنتظره.html'">
+    <button class="btn" onclick="window.location.href='index.html'">
       <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
     </button>
   </div>
@@ -173,7 +173,7 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);dir
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <a href="المنصة_المنتظره.html" class="back-btn">
+  <a href="index.html" class="back-btn">
     <i class="fas fa-arrow-right"></i> <span>رجوع</span>
   </a>
   <div class="topbar-title" id="topbarTitle"><i class="fas fa-book" style="color:var(--primary-light)"></i> جاري التحميل...</div>
@@ -202,6 +202,7 @@ body{font-family:'Cairo',sans-serif;background:var(--dark);color:var(--text);dir
       <iframe id="videoFrame" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock" style="display:none"></iframe>
       <video id="videoTag" controls controlsList="nodownload" style="display:none;position:absolute;inset:0;width:100%;height:100%;background:#000"></video>
       <div class="player-watermark" id="playerWatermark" style="display:none"></div>
+      <div class="player-watermark" id="playerWatermark2" style="display:none"></div>
     </div>
     <div class="video-info-bar">
       <h2 id="currentVideoName">اختار فيديو من القائمة</h2>
@@ -275,7 +276,7 @@ const urlParams = new URLSearchParams(window.location.search);
 courseKey = urlParams.get('id');
 
 if (!courseKey) {
-  window.location.href = 'المنصة_المنتظره.html';
+  window.location.href = 'index.html';
 }
 
 // ====== AUTH ======
@@ -292,7 +293,7 @@ auth.onAuthStateChanged(async user => {
     if (snap.exists()) {
       const data = snap.val();
       if (data.banned) {
-        document.getElementById('authWall').innerHTML = '<div class="auth-box"><div style="font-size:3rem;margin-bottom:14px">🚫</div><h2>الحساب محظور</h2><p style="color:var(--text-muted)">تم حظر حسابك. تواصل مع الإدارة.</p><button class="btn" onclick="auth.signOut().then(()=>window.location.href=\'المنصة_المنتظره.html\')"><i class="fas fa-sign-out-alt"></i> خروج</button></div>';
+        document.getElementById('authWall').innerHTML = '<div class="auth-box"><div style="font-size:3rem;margin-bottom:14px">🚫</div><h2>الحساب محظور</h2><p style="color:var(--text-muted)">تم حظر حسابك. تواصل مع الإدارة.</p><button class="btn" onclick="auth.signOut().then(()=>window.location.href=\'index.html\')"><i class="fas fa-sign-out-alt"></i> خروج</button></div>';
         document.getElementById('authWall').classList.add('show');
         return;
       }
@@ -301,8 +302,11 @@ auth.onAuthStateChanged(async user => {
     } else if (user.email === 'mrsmonakamel6@gmail.com' || user.email === 'admin@monakamel.com') {
       currentUser = { uid: user.uid, _key: user.uid, name1: 'الأدمن', isAdmin: true };
     } else {
-      // جوجل بدون بيانات مكتملة
-      currentUser = { uid: user.uid, _key: user.uid, name1: user.displayName || user.email };
+      // مفيش بيانات طالب لليوزر ده (اتحذف من قاعدة البيانات مثلاً) — منمنعوش يشوف الكورسات
+      document.getElementById('authWall').innerHTML = '<div class="auth-box"><div style="font-size:3rem;margin-bottom:14px">⚠️</div><h2>الحساب غير مكتمل</h2><p style="color:var(--text-muted)">سجّل حساب جديد من الصفحة الرئيسية.</p><button class="btn" onclick="auth.signOut().then(()=>window.location.href=\'index.html\')"><i class="fas fa-sign-out-alt"></i> رجوع للرئيسية</button></div>';
+      document.getElementById('authWall').classList.add('show');
+      document.getElementById('loadingScreen').style.display = 'none';
+      return;
     }
   } catch(e) {
     currentUser = { uid: user.uid, _key: user.uid, name1: user.displayName || user.email };
@@ -317,7 +321,7 @@ async function loadCourse() {
     const snap = await db.ref('website/courses/' + courseKey).once('value');
     if (!snap.exists()) {
       notify('الكورس غير موجود!', 'error');
-      setTimeout(() => window.location.href = 'المنصة_المنتظره.html', 2000);
+      setTimeout(() => window.location.href = 'index.html', 2000);
       return;
     }
     course = snap.val();
@@ -333,16 +337,27 @@ async function loadCourse() {
 
     // تحميل الامتحانات
     const examSnap = await db.ref('website/exams_v2').orderByChild('courseKey').equalTo(courseKey).once('value');
-    courseExams = examSnap.exists() ? Object.entries(examSnap.val()).map(([k,e]) => ({key:k,...e})) : [];
+    // ⚠️ أمان: بنشيل حقل "answer" من الأسئلة قبل ما نخزنها في المتصفح، عشان الطالب
+    // ميقدرش يشوف الإجابات الصح قبل/أثناء حل الامتحان (عن طريق الـ Console مثلاً).
+    // الإجابات الحقيقية بتترجع من Firebase تاني بس لحظة التسليم (شوف submitExam).
+    courseExams = examSnap.exists() ? Object.entries(examSnap.val()).map(([k,e]) => ({
+      key: k, ...e,
+      questions: (e.questions || []).map(q => { const { answer, ...rest } = q; return rest; })
+    })) : [];
 
     // تحديث tab الامتحانات
     if (courseExams.length) {
       document.getElementById('examsTabBtn').innerHTML = `<i class="fas fa-file-alt"></i> الامتحانات (${courseExams.length})`;
     }
 
-    // تحميل درجات الطالب الحالي
-    const gradesSnap = await db.ref('website/grades').once('value');
-    allGrades = gradesSnap.exists() ? gradesSnap.val() : {};
+    // تحميل درجات الطالب الحالي بس (مش كل الطلاب)
+    const uidForGrades = currentUser ? (currentUser.uid || currentUser._key) : null;
+    if (uidForGrades) {
+      const gradesSnap = await db.ref('website/grades').orderByChild('studentUid').equalTo(uidForGrades).once('value');
+      allGrades = gradesSnap.exists() ? gradesSnap.val() : {};
+    } else {
+      allGrades = {};
+    }
 
     renderVideosList();
     renderExamsList();
@@ -353,7 +368,7 @@ async function loadCourse() {
 
   } catch(e) {
     notify('خطأ في تحميل الكورس: ' + e.message, 'error');
-    document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;color:var(--text-muted)"><i class="fas fa-exclamation-circle" style="font-size:2rem;margin-bottom:12px;display:block;color:#E74C3C"></i><p>خطأ في تحميل الكورس</p><a href="المنصة_المنتظره.html" style="color:var(--primary-light);margin-top:12px;display:inline-block">← رجوع للرئيسية</a></div>';
+    document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;color:var(--text-muted)"><i class="fas fa-exclamation-circle" style="font-size:2rem;margin-bottom:12px;display:block;color:#E74C3C"></i><p>خطأ في تحميل الكورس</p><a href="index.html" style="color:var(--primary-light);margin-top:12px;display:inline-block">← رجوع للرئيسية</a></div>';
   }
 }
 
@@ -406,26 +421,44 @@ function renderExamsList() {
 // ====== WATERMARK (student ID overlay) ======
 let watermarkInterval = null;
 function startWatermark() {
-  const el = document.getElementById('playerWatermark');
-  if (!el || !currentUser) return;
+  const el1 = document.getElementById('playerWatermark');
+  const el2 = document.getElementById('playerWatermark2');
+  if (!el1 || !el2 || !currentUser) return;
   const idText = currentUser.studentId || currentUser.uid || currentUser.email || '—';
   const label = idText + ' • ' + (currentUser.name1 || '');
-  el.textContent = label;
-  el.style.display = 'block';
-  const positions = [
-    {top:'10px',left:'10px'},{top:'10px',right:'10px',left:'auto'},
-    {top:'calc(50% - 10px)',left:'10px'},{top:'calc(50% - 10px)',right:'10px',left:'auto'},
-    {top:'calc(100% - 34px)',left:'10px'},{top:'calc(100% - 34px)',right:'10px',left:'auto'}
-  ];
-  let i = 0;
-  const place = () => {
-    const p = positions[i % positions.length];
-    el.style.top = p.top; el.style.left = p.left || ''; el.style.right = p.right || '';
-    i++;
+  el1.textContent = label;
+  el2.textContent = label;
+  el1.style.display = 'block';
+  el2.style.display = 'block';
+
+  // نسبة عشوائية آمنة تسيب مساحة للنص جوه حدود الفيديو
+  const rand = (min, max) => Math.random() * (max - min) + min;
+
+  const placeOne = (el) => {
+    const top = rand(4, 88);   // % من ارتفاع الشاشة
+    const left = rand(4, 78);  // % من عرض الشاشة
+    el.style.top = top + '%';
+    el.style.left = left + '%';
+    el.style.right = 'auto';
   };
-  place();
+
+  // نخلي الاتنين ياخدوا أماكن مختلفة عن بعض قد الإمكان
+  const placeBoth = () => {
+    placeOne(el1);
+    let tries = 0;
+    do {
+      placeOne(el2);
+      tries++;
+    } while (
+      tries < 5 &&
+      Math.abs(parseFloat(el1.style.top) - parseFloat(el2.style.top)) < 25 &&
+      Math.abs(parseFloat(el1.style.left) - parseFloat(el2.style.left)) < 25
+    );
+  };
+
+  placeBoth();
   if (watermarkInterval) clearInterval(watermarkInterval);
-  watermarkInterval = setInterval(place, 12000);
+  watermarkInterval = setInterval(placeBoth, 3000);
 }
 
 // ====== PLAY VIDEO ======
@@ -455,10 +488,13 @@ async function playVideo(videoKey) {
       });
       if (!res.ok) throw new Error('تعذر تحميل الفيديو');
       const blob = await res.blob();
+      // لو الطالب دوس على فيديو تاني وهو لسه بيحمّل، منستخدمش النتيجة القديمة
+      if (activeVideoKey !== videoKey) { return; }
       currentBlobUrl = URL.createObjectURL(blob);
       vidTag.src = currentBlobUrl;
       vidTag.play();
     } catch (e) {
+      if (activeVideoKey !== videoKey) { return; }
       notify('حصل خطأ في تحميل الفيديو', 'error');
       vidTag.style.display = 'none';
       placeholder.style.display = 'flex';
@@ -525,6 +561,7 @@ async function openExam(examKey) {
     return;
   }
 
+  // ملحوظة: الإجابات اتشالت من examData أصلاً وقت تحميل courseExams (فوق)
   examState = { exam: examData, key: examKey, answers: {}, timerInterval: null, timeLeft: examData.timer ? examData.timer*60 : 0 };
   renderExamPlayer();
   document.getElementById('examOverlay').classList.add('open');
@@ -619,7 +656,7 @@ function answerTF(qi, val) {
   });
 }
 
-function submitExam() {
+async function submitExam() {
   if (examState.timerInterval) clearInterval(examState.timerInterval);
   const { exam } = examState;
   const questions = exam.questions || [];
@@ -630,13 +667,26 @@ function submitExam() {
       return;
     }
   }
+
+  // ⚠️ أمان: نجيب الأسئلة بإجاباتها الحقيقية من Firebase دلوقتي بس (لحظة التسليم)
+  // بدل ما نعتمد على النسخة المخزنة في المتصفح (اللي متشال منها الإجابات).
+  let gradedQuestions = questions;
+  try {
+    const freshSnap = await db.ref('website/exams_v2/' + examState.key + '/questions').once('value');
+    if (freshSnap.exists()) gradedQuestions = freshSnap.val();
+  } catch (e) {
+    notify('تعذر تسليم الامتحان، حاول تاني', 'error');
+    if (exam.timer) startTimer();
+    return;
+  }
+
   let score = 0;
-  questions.forEach((q,qi) => {
+  gradedQuestions.forEach((q,qi) => {
     const ans = examState.answers[qi];
     if (q.type==='tf' && ans===q.answer) score++;
     if (q.type==='mcq' && ans===q.answer) score++;
   });
-  const total = questions.length;
+  const total = gradedQuestions.length;
   const pct = total ? Math.round(score/total*100) : 0;
   const passed = pct >= 50;
 
@@ -669,7 +719,7 @@ function submitExam() {
       <div style="font-size:2.2rem;font-weight:900;color:${passed?'#2ECC71':'#E74C3C'};margin:14px 0">${score} / ${total}</div>
       <div style="color:var(--text-muted);margin-bottom:20px">نسبتك: <strong style="color:${passed?'#2ECC71':'#E74C3C'}">${pct}%</strong></div>
       <div style="display:flex;flex-direction:column;gap:8px;max-width:280px;margin:0 auto">
-        ${questions.map((q,qi) => {
+        ${gradedQuestions.map((q,qi) => {
           const ans = examState.answers[qi];
           const correct = ans === q.answer;
           return `<div style="display:flex;justify-content:space-between;font-size:.8rem;padding:7px 12px;border-radius:7px;background:${correct?'rgba(46,204,113,.1)':'rgba(231,76,60,.1)'};border:1px solid ${correct?'rgba(46,204,113,.3)':'rgba(231,76,60,.3)'}">
@@ -681,11 +731,14 @@ function submitExam() {
       </button>
     </div>`;
 
-  // تحديث قائمة الامتحانات
-  db.ref('website/grades').once('value').then(s => {
-    allGrades = s.exists() ? s.val() : {};
-    renderExamsList();
-  });
+  // تحديث قائمة الامتحانات (درجات الطالب الحالي بس)
+  const uidRefresh = currentUser ? (currentUser.uid || currentUser._key) : null;
+  if (uidRefresh) {
+    db.ref('website/grades').orderByChild('studentUid').equalTo(uidRefresh).once('value').then(s => {
+      allGrades = s.exists() ? s.val() : {};
+      renderExamsList();
+    });
+  }
 }
 </script>
 </body>
