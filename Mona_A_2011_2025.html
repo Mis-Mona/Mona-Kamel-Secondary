@@ -878,7 +878,9 @@ function addTelegramVideo() {
   const key = document.getElementById('cvCourseKey').value;
   const name = document.getElementById('vName').value.trim();
   const fileId = document.getElementById('vTgFileId').value.trim();
-  if (!name || !fileId) { notify('اكتب اسم الفيديو والـ File ID', 'error'); return; }
+  if (!name && !fileId) { notify('اكتب اسم الفيديو، واضغط "استخدام" أو الصق الـ File ID', 'error'); return; }
+  if (!name) { notify('اكتب اسم الفيديو الأول (فوق، فوق زرار يوتيوب) ⬆️', 'error'); return; }
+  if (!fileId) { notify('اضغط "استخدام" على الفيديو، أو الصق الـ File ID يدوي', 'error'); return; }
   db.ref('website/courses/' + key + '/videos').push({ name, type: 'telegram', fileId, createdAt: new Date().toLocaleDateString('ar-EG') })
     .then(() => {
       notify('تم إضافة الفيديو ✅');
